@@ -3,8 +3,10 @@ from aiogram import Bot, Dispatcher, types
 from aiogram.filters import CommandStart
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-# Твой токен от @BotFather
-TOKEN = '8300783229:AAFOhluOfALJCI_ujvYks1gXLH4RfOmM7lk'
+TOKEN = '8300783229:AAFOhluOfALJCI_ujvYks1gXLH4RfOmM7lk'  # ← твой токен
+
+# URL к твоей GitHub Pages (сюда залей index.html)
+GAME_URL = "https://olvos.github.io/DominoPuzzle/"
 
 bot = Bot(token=TOKEN)
 dp = Dispatcher()
@@ -13,23 +15,26 @@ dp = Dispatcher()
 @dp.message(CommandStart())
 async def start_handler(message: types.Message):
     builder = InlineKeyboardBuilder()
-
-    # Твоя рабочая ссылка
-    game_url = "https://olvos.github.io/DominoPuzzle/"
-
     builder.row(types.InlineKeyboardButton(
         text="🧩 Играть в Pips",
-        web_app=types.WebAppInfo(url=game_url)
+        web_app=types.WebAppInfo(url=GAME_URL)
     ))
 
     await message.answer(
-        "Добро пожаловать в Pips! Нажми кнопку, чтобы открыть игру:",
+        "🎲 *PIPS DAILY*\n\n"
+        "Размести все костяшки домино на сетке так, чтобы выполнить условия каждой зоны:\n\n"
+        "• Число → сумма пипсов в зоне равна числу\n"
+        "• `=` → все пипсы в зоне одинаковые\n"
+        "• `≠` → все пипсы в зоне разные\n"
+        "• `>N` / `<N` → каждый пипс больше/меньше N\n\n"
+        "Одно домино может перекрывать *две* зоны — каждая половинка выполняет правило своей зоны.",
+        parse_mode="Markdown",
         reply_markup=builder.as_markup()
     )
 
 
 async def main():
-    print("Бот запущен и ждет игроков...")
+    print("Бот запущен...")
     await dp.start_polling(bot)
 
 
