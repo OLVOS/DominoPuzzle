@@ -1,55 +1,30 @@
-<script>
-    const tg = window.Telegram.WebApp;
-    tg.ready();
-    tg.expand();
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body { background-color: #222; color: white; text-align: center; padding-top: 50px; font-family: sans-serif; }
+        .test-box { border: 2px solid #00ff00; padding: 20px; display: inline-block; }
+    </style>
+</head>
+<body>
+    <div class="test-box">
+        <h1>Pips MVP: РАБОТАЕТ!</h1>
+        <p>Если ты это видишь, значит хостинг настроен.</p>
+        <button onclick="changeColor()">Нажми меня</button>
+    </div>
 
-    const zones = [
-        { id: 'pink_6', target: 6, cells: [[4,5], [4,6]], color: 'zone-pink' },
-        { id: 'blue_9', target: 9, cells: [[2,2], [3,2], [2,3]], color: 'zone-blue' }
-    ];
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.ready();
+        tg.expand();
 
-    // Хранилище для текущих значений в клетках
-    const boardState = {};
-
-    const gridElement = document.getElementById('grid');
-
-    for (let y = 0; y < 8; y++) {
-        for (let x = 0; x < 7; x++) {
-            const cell = document.createElement('div');
-            cell.className = 'cell';
-            const coord = `${x},${y}`;
-
-            zones.forEach(zone => {
-                if (zone.cells.some(c => c[0] === x && c[1] === y)) {
-                    cell.classList.add(zone.color);
-                }
-            });
-
-            // Клик по клетке меняет число от 0 до 6
-            cell.onclick = () => {
-                let currentVal = boardState[coord] || 0;
-                currentVal = (currentVal + 1) % 7;
-                boardState[coord] = currentVal;
-                cell.innerText = currentVal || '';
-                checkProgress();
-            };
-
-            gridElement.appendChild(cell);
+        function changeColor() {
+            document.body.style.backgroundColor = 'blue';
+            // Проверка связи с Telegram
+            tg.MainButton.setText("ПОБЕДА").show();
         }
-    }
-
-    function checkProgress() {
-        zones.forEach(zone => {
-            let sum = 0;
-            zone.cells.forEach(c => {
-                sum += (boardState[`${c[0]},${c[1]}`] || 0);
-            });
-
-            // Если сумма совпала, можно подсветить зону или вывести лог
-            if (sum === zone.target) {
-                console.log(`Зона ${zone.id} собрана!`);
-                // Здесь можно добавить смену цвета на более яркий
-            }
-        });
-    }
-</script>
+    </script>
+</body>
+</html>
