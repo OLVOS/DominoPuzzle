@@ -5,115 +5,131 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        :root { --cell-size: 45px; }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #faf9f6; margin: 0; display: flex; flex-direction: column; align-items: center; touch-action: manipulation; }
-        .header { margin: 20px 0; font-weight: bold; color: #333; }
+        :root { --cell-size: 42px; }
+        body { font-family: sans-serif; background: #faf9f6; margin: 0; display: flex; flex-direction: column; align-items: center; user-select: none; }
 
-        /* Сетка */
-        .grid { display: grid; grid-template-columns: repeat(7, var(--cell-size)); grid-template-rows: repeat(8, var(--cell-size)); gap: 4px; background: #eee; padding: 10px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
-        .cell { width: var(--cell-size); height: var(--cell-size); background: white; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: bold; color: #444; transition: all 0.2s; position: relative; }
+        /* Сетка и слои */
+        .game-container { position: relative; margin-top: 20px; }
+        .grid { display: grid; grid-template-columns: repeat(7, var(--cell-size)); grid-template-rows: repeat(8, var(--cell-size)); gap: 2px; background: #ddd; border: 2px solid #ccc; }
+        .cell { width: var(--cell-size); height: var(--cell-size); background: white; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; font-weight: bold; position: relative; z-index: 1; }
 
         /* Зоны */
-        .zone-pink { background: #ffdae9; border: 2px solid #f48fb1; }
-        .zone-blue { background: #d1d9e6; border: 2px solid #9fa8da; }
-        .target-label { position: absolute; top: -8px; right: -8px; background: #e91e63; color: white; font-size: 10px; width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 2; }
+        .zone-pink { background: #ffdae9; }
+        .zone-blue { background: #d1d9e6; }
+
+        /* Лейблы (условия) поверх всего */
+        .target-label { position: absolute; width: 20px; height: 20px; background: #e91e63; color: white; border-radius: 50%;
+                        font-size: 12px; display: flex; align-items: center; justify-content: center; z-index: 10; pointer-events: none; }
         .blue-label { background: #3f51b5; }
 
-        /* Костяшки внизу */
-        .hand { margin-top: 25px; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; padding: 10px; max-width: 350px; }
-        .pip-btn { padding: 8px 12px; background: white; border: 2px solid #ddd; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: bold; }
-        .pip-btn.selected { border-color: #007bff; background: #e7f1ff; }
+        /* Костяшки в руке */
+        .hand { margin-top: 20px; display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; padding: 10px; }
+        .domino { display: flex; border: 2px solid #444; border-radius: 4px; cursor: pointer; background: white; overflow: hidden; }
+        .domino.selected { border-color: #007bff; box-shadow: 0 0 10px rgba(0,123,255,0.5); transform: scale(1.1); }
+        .domino div { width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; font-weight: bold; border-right: 1px solid #444; }
+        .domino div:last-child { border-right: none; }
 
-        .status { margin-top: 15px; font-size: 14px; color: #666; }
+        .controls { margin-top: 15px; }
+        .btn { padding: 10px 20px; border-radius: 8px; border: none; background: #007bff; color: white; font-weight: bold; }
     </style>
 </head>
 <body>
-    <div class="header">PIPS DAILY</div>
-
-    <div class="grid" id="grid"></div>
-
-    <div class="status" id="status">Выберите число из списка ниже</div>
+    <div class="game-container">
+        <div class="grid" id="grid"></div>
+        </div>
 
     <div class="hand" id="hand"></div>
+
+    <div class="controls">
+        <button class="btn" onclick="location.reload()">Сбросить</button>
+    </div>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.ready();
-        tg.expand();
 
         const config = {
             zones: [
-                { id: 'pink_6', target: 6, cells: [[4,5], [4,6]], color: 'zone-pink', labelClass: '' },
-                { id: 'blue_9', target: 9, cells: [[2,2], [3,2], [2,3]], color: 'zone-blue', labelClass: 'blue-label' }
+                { id: 'pink_6', target: 6, cells: [[4,5], [4,6]], color: 'zone-pink', lPos: [4.5, 5] },
+                { id: 'blue_9', target: 9, cells: [[2,2], [3,2], [2,3]], color: 'zone-blue', lPos: [2.5, 2] }
             ],
-            pips: [1, 5, 3, 3, 2, 4, 0, 6] // упростим пока до одиночных чисел
+            // Настоящие костяшки из твоего скриншота (пары)
+            pips: [[1,5], [3,3], [0,1], [4,2], [6,0]]
         };
 
-        const state = {
-            board: {}, // "x,y": value
-            selectedNumber: null
-        };
+        let selectedPipIndex = null;
+        const board = {}; // Состояние поля
 
-        // Рендер руки
-        const handEl = document.getElementById('hand');
-        config.pips.forEach(num => {
-            const btn = document.createElement('button');
-            btn.className = 'pip-btn';
-            btn.innerText = num;
-            btn.onclick = () => {
-                document.querySelectorAll('.pip-btn').forEach(b => b.classList.remove('selected'));
-                btn.classList.add('selected');
-                state.selectedNumber = num;
-            };
-            handEl.appendChild(btn);
-        });
-
-        // Рендер сетки
+        // Создаем сетку
         const gridEl = document.getElementById('grid');
         for (let y = 0; y < 8; y++) {
             for (let x = 0; x < 7; x++) {
                 const cell = document.createElement('div');
                 cell.className = 'cell';
-                const coord = `${x},${y}`;
+                cell.id = `c-${x}-${y}`;
 
                 const zone = config.zones.find(z => z.cells.some(c => c[0] === x && c[1] === y));
-                if (zone) {
-                    cell.classList.add(zone.color);
-                    // Добавляем метку цели на первую клетку зоны
-                    if (zone.cells[0][0] === x && zone.cells[0][1] === y) {
-                        const label = document.createElement('div');
-                        label.className = 'target-label ' + zone.labelClass;
-                        label.innerText = zone.target;
-                        cell.appendChild(label);
-                    }
-                }
+                if (zone) cell.classList.add(zone.color);
 
-                cell.onclick = () => {
-                    if (state.selectedNumber !== null) {
-                        state.board[coord] = state.selectedNumber;
-                        cell.innerText = state.selectedNumber;
-                        checkZones();
-                    }
-                };
-
+                cell.onclick = () => placeDomino(x, y);
                 gridEl.appendChild(cell);
             }
         }
 
-        function checkZones() {
-            let allOk = true;
-            config.zones.forEach(zone => {
-                const currentSum = zone.cells.reduce((sum, c) => sum + (state.board[`${c[0]},${c[1]}`] || 0), 0);
-                if (currentSum === zone.target) {
-                    // Можно добавить анимацию успеха для зоны
-                } else {
-                    allOk = false;
-                }
+        // Рисуем лейблы сумм
+        config.zones.forEach(z => {
+            const label = document.createElement('div');
+            label.className = `target-label ${z.id.includes('blue') ? 'blue-label' : ''}`;
+            label.innerText = z.target;
+            label.style.left = (z.lPos[0] * 44) + 'px'; // 44 = size + gap
+            label.style.top = (z.lPos[1] * 44) + 'px';
+            document.querySelector('.game-container').appendChild(label);
+        });
+
+        // Рисуем костяшки в руке
+        const handEl = document.getElementById('hand');
+        config.pips.forEach((pair, index) => {
+            const d = document.createElement('div');
+            d.className = 'domino';
+            d.innerHTML = `<div>${pair[0]}</div><div>${pair[1]}</div>`;
+            d.onclick = () => {
+                document.querySelectorAll('.domino').forEach(el => el.classList.remove('selected'));
+                d.classList.add('selected');
+                selectedPipIndex = index;
+            };
+            handEl.appendChild(d);
+        });
+
+        function placeDomino(x, y) {
+            if (selectedPipIndex === null) return;
+
+            const pair = config.pips[selectedPipIndex];
+
+            // Логика: ставим горизонтально (x и x+1)
+            if (x < 6) {
+                const c1 = document.getElementById(`c-${x}-${y}`);
+                const c2 = document.getElementById(`c-${x+1}-${y}`);
+
+                c1.innerText = pair[0];
+                c2.innerText = pair[1];
+
+                board[`${x},${y}`] = pair[0];
+                board[`${x+1},${y}`] = pair[1];
+
+                checkWin();
+            }
+        }
+
+        function checkWin() {
+            let win = true;
+            config.zones.forEach(z => {
+                const sum = z.cells.reduce((s, c) => s + (board[`${c[0]},${c[1]}`] || 0), 0);
+                if (sum !== z.target) win = false;
             });
 
-            if (allOk) {
-                document.getElementById('status').innerText = "🎉 ПОБЕДА! Все суммы сошлись!";
-                tg.MainButton.setText("ОТПРАВИТЬ РЕЗУЛЬТАТ").show();
+            if (win) {
+                tg.showAlert("Победа! Вы решили Pips!");
+                tg.MainButton.setText("ЗАВЕРШИТЬ").show();
             }
         }
     </script>
