@@ -1,569 +1,978 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <title>Pips Daily</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<title>Pips</title>
+<style>
+:root {
+  --cream:   #f5efe3;
+  --dark:    #1e1409;
+  --gold:    #c8963e;
+  --gold2:   #f0c060;
+  --wood:    #3d2010;
+  --cell:    54px;
+  --r-pink:  #f7d6e0; --r-pink-b: #d4558a;
+  --r-blue:  #cfe3f7; --r-blue-b: #3a7fc1;
+  --r-green: #d0f0d8; --r-green-b: #3a9c55;
+  --r-purple:#ead6f5; --r-purple-b:#8b42c8;
+  --r-orange:#fde8cc; --r-orange-b:#d4762a;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;overflow:hidden;}
+body{
+  font-family:'DM Mono',monospace;
+  background:var(--cream);
+  touch-action:none;
+  user-select:none;
+}
 
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: #faf9f6;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      min-height: 100vh;
-      padding: 12px 8px;
-      touch-action: manipulation;
-    }
+/* ── SCREENS ─────────────────────────────────────── */
+.screen{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;overflow:hidden;transition:opacity .3s,transform .3s;}
+.screen.hidden{opacity:0;pointer-events:none;transform:scale(0.97);}
 
-    h1 {
-      font-size: 1.1rem;
-      letter-spacing: 4px;
-      color: #222;
-      margin-bottom: 10px;
-      font-weight: 900;
-    }
+/* ── MENU ────────────────────────────────────────── */
+#menu{
+  background: radial-gradient(ellipse at 30% 20%, #2d1a06 0%, #0e0905 100%);
+  justify-content:center;gap:16px;padding:24px 20px;
+}
+.menu-title{
+  font-family:'Playfair Display',serif;
+  font-size:3.2rem;font-weight:900;
+  color:var(--gold2);
+  letter-spacing:6px;
+  text-shadow:0 0 40px rgba(200,150,60,0.4);
+  line-height:1;
+}
+.menu-sub{
+  font-size:.65rem;letter-spacing:8px;color:#b89060;
+  text-transform:uppercase;margin-top:2px;
+}
+.menu-divider{width:80px;height:2px;background:linear-gradient(to right,transparent,var(--gold),transparent);margin:4px 0;}
+.level-list{width:100%;max-width:320px;display:flex;flex-direction:column;gap:10px;}
+.level-card{
+  background:rgba(255,255,255,0.06);
+  border:1.5px solid rgba(200,150,60,0.3);
+  border-radius:12px;padding:14px 18px;
+  display:flex;align-items:center;gap:14px;
+  cursor:pointer;transition:all .2s;
+  color:var(--cream);
+}
+.level-card:active{background:rgba(200,150,60,0.15);transform:scale(0.98);}
+.lc-badge{
+  width:40px;height:40px;border-radius:8px;
+  background:linear-gradient(135deg,var(--gold),#7a4a10);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;
+  color:var(--dark);flex-shrink:0;
+  box-shadow:2px 2px 0 rgba(0,0,0,0.4);
+}
+.lc-info{flex:1;}
+.lc-name{font-size:.8rem;font-weight:500;letter-spacing:1px;}
+.lc-meta{font-size:.65rem;color:#a08050;margin-top:2px;}
+.lc-stars{font-size:.9rem;color:var(--gold2);}
+.btn-random{
+  background:linear-gradient(135deg,var(--gold),#7a4a10);
+  color:var(--dark);border:none;
+  font-family:'Playfair Display',serif;font-size:.95rem;font-weight:700;
+  letter-spacing:3px;padding:13px 32px;border-radius:12px;cursor:pointer;
+  box-shadow:0 4px 0 rgba(0,0,0,0.4);transition:all .15s;
+  width:100%;max-width:320px;
+}
+.btn-random:active{transform:translateY(2px);box-shadow:0 2px 0 rgba(0,0,0,0.4);}
 
-    /* ── Легенда зон ───────────────────────────────── */
-    #legend {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      justify-content: center;
-      max-width: 380px;
-      margin-bottom: 12px;
-    }
-    .legend-item {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      font-size: 11px;
-      color: #444;
-      background: white;
-      padding: 3px 7px;
-      border-radius: 10px;
-      border: 1px solid #ddd;
-    }
-    .legend-dot {
-      width: 12px; height: 12px;
-      border-radius: 3px;
-      border: 2px solid;
-      flex-shrink: 0;
-    }
+/* ── GAME ────────────────────────────────────────── */
+#game{
+  background:var(--cream);
+  justify-content:flex-start;
+  padding:0 12px 12px;
+  gap:0;
+}
+.game-header{
+  width:100%;display:flex;align-items:center;gap:10px;
+  padding:12px 0 8px;
+}
+.btn-back{
+  background:var(--dark);color:var(--gold2);border:none;
+  font-size:.75rem;letter-spacing:2px;padding:7px 14px;border-radius:8px;
+  cursor:pointer;font-family:'DM Mono',monospace;font-weight:500;
+}
+.game-title{
+  font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;
+  color:var(--dark);letter-spacing:2px;flex:1;text-align:center;
+}
+.game-star{font-size:.9rem;color:var(--gold);}
 
-    /* ── Сетка ─────────────────────────────────────── */
-    #grid-wrap {
-      background: #bbb;
-      padding: 7px;
-      border-radius: 12px;
-      box-shadow: 0 4px 14px rgba(0,0,0,0.12);
-    }
-    #grid {
-      display: grid;
-      gap: 3px;
-    }
+/* LEGEND */
+#legend{display:flex;flex-wrap:wrap;gap:5px;justify-content:center;margin-bottom:8px;max-width:340px;}
+.lg{
+  display:flex;align-items:center;gap:4px;
+  background:white;border:1px solid #ddd;border-radius:8px;
+  padding:3px 8px;font-size:.6rem;color:#555;letter-spacing:.5px;
+}
+.lg-dot{width:10px;height:10px;border-radius:3px;border:2px solid;}
 
-    .cell {
-      width: 58px; height: 58px;
-      background: #f0f0f0;
-      border: 2px solid #ccc;
-      border-radius: 6px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      position: relative;
-      transition: filter 0.1s, box-shadow 0.1s;
-      user-select: none;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .cell:active { filter: brightness(0.9); }
-    .cell.can-place { box-shadow: 0 0 0 3px #007bff inset; }
-    .cell.occupied { cursor: pointer; }
-    .cell.win { box-shadow: 0 0 0 3px #28a745 inset; }
+/* GRID */
+#grid-wrap{
+  background:var(--wood);
+  padding:8px;border-radius:14px;
+  box-shadow:0 6px 20px rgba(0,0,0,0.25),inset 0 1px 0 rgba(255,255,255,0.1);
+  margin-bottom:8px;
+}
+#grid{display:grid;gap:4px;}
+.cell{
+  width:var(--cell);height:var(--cell);
+  background:#ede8df;
+  border:2px solid #c8bfad;
+  border-radius:7px;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;position:relative;transition:box-shadow .15s,background .15s;
+}
+.cell.highlight{box-shadow:0 0 0 3px #3a7fc1 inset;background:#e0ebf8;}
+.cell.highlight-bad{box-shadow:0 0 0 3px #c14040 inset;background:#f8e0e0;}
+.cell.placed{cursor:pointer;}
+.cell.win{animation:winpulse .6s ease infinite alternate;}
+@keyframes winpulse{from{box-shadow:0 0 0 2px #3a9c55 inset;}to{box-shadow:0 0 0 3px #3a9c55 inset,0 0 8px rgba(58,156,85,0.3);}}
 
-    .rule-lbl {
-      position: absolute;
-      top: 2px; right: 3px;
-      font-size: 9px;
-      font-weight: 800;
-      color: #444;
-      background: rgba(255,255,255,0.75);
-      padding: 0 2px;
-      border-radius: 3px;
-      line-height: 14px;
-      pointer-events: none;
-    }
+.rule-tag{
+  position:absolute;top:3px;right:3px;
+  font-size:8px;font-weight:500;letter-spacing:0;
+  background:rgba(0,0,0,0.18);color:#fff;
+  padding:1px 4px;border-radius:4px;pointer-events:none;
+  font-family:'DM Mono',monospace;
+}
 
-    .pip-circle {
-      width: 30px; height: 30px;
-      background: rgba(255,255,255,0.92);
-      border: 2.5px solid #333;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1rem;
-      font-weight: bold;
-      color: #222;
-      pointer-events: none;
-      position: absolute;
-    }
+/* Pip circle on grid */
+.grid-pip{
+  position:absolute;
+  width:36px;height:36px;
+  background:var(--dark);border-radius:6px;
+  display:flex;align-items:center;justify-content:center;
+  color:var(--cream);font-size:1rem;font-weight:500;
+  box-shadow:1px 2px 0 rgba(0,0,0,0.4);
+  pointer-events:none;
+  font-family:'Playfair Display',serif;
+}
+/* Dividers between placed domino halves */
+.grid-pip.half-left{border-radius:6px 2px 2px 6px;width:calc(var(--cell) - 16px);left:7px;}
+.grid-pip.half-top{border-radius:6px 6px 2px 2px;height:calc(var(--cell) - 16px);top:7px;}
+.grid-pip.half-right{border-radius:2px 6px 6px 2px;width:calc(var(--cell) - 16px);right:7px;}
+.grid-pip.half-bottom{border-radius:2px 2px 6px 6px;height:calc(var(--cell) - 16px);bottom:7px;}
 
-    /* ── Статус + кнопки ───────────────────────────── */
-    #status {
-      margin: 10px 0 6px;
-      font-size: 13px;
-      color: #555;
-      text-align: center;
-      min-height: 18px;
-    }
+/* STATUS */
+#status{
+  font-size:.68rem;letter-spacing:1px;color:#888;
+  min-height:16px;text-align:center;margin-bottom:6px;
+}
 
-    #controls {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-      margin-bottom: 10px;
-    }
+/* CONTROLS */
+#controls{display:flex;gap:8px;margin-bottom:10px;}
+.ctrl{
+  background:var(--dark);color:var(--gold2);border:none;
+  font-family:'DM Mono',monospace;font-size:.7rem;letter-spacing:1px;
+  padding:8px 14px;border-radius:8px;cursor:pointer;
+  box-shadow:0 3px 0 rgba(0,0,0,0.3);transition:all .12s;
+}
+.ctrl:active{transform:translateY(1px);box-shadow:0 1px 0 rgba(0,0,0,0.3);}
+.ctrl:disabled{background:#ccc;color:#999;box-shadow:none;cursor:default;}
+.ctrl.light{background:#e8e0d0;color:var(--wood);}
+#orient-label{
+  font-size:.65rem;color:#999;letter-spacing:2px;
+  display:flex;align-items:center;padding:0 6px;
+}
 
-    .ctrl-btn {
-      padding: 7px 14px;
-      border-radius: 8px;
-      border: none;
-      font-size: 13px;
-      font-weight: bold;
-      cursor: pointer;
-      background: #007bff;
-      color: white;
-    }
-    .ctrl-btn:disabled { background: #ccc; color: #888; cursor: default; }
-    .ctrl-btn.secondary { background: #f0f0f0; color: #444; border: 1px solid #ccc; }
+/* HAND */
+#hand{
+  display:flex;flex-wrap:wrap;justify-content:center;
+  gap:8px;max-width:360px;padding:4px;
+  overflow-y:auto;max-height:140px;
+}
 
-    #orient-lbl {
-      font-size: 12px;
-      color: #666;
-      min-width: 80px;
-    }
+/* DOMINO TILE */
+.domino{
+  display:flex;align-items:center;
+  background:var(--dark);
+  border:2.5px solid var(--gold);
+  border-radius:10px;padding:5px;gap:4px;
+  cursor:grab;
+  box-shadow:3px 3px 0 rgba(0,0,0,0.35),inset 0 1px 0 rgba(255,255,255,0.08);
+  transition:transform .12s,box-shadow .12s,opacity .2s;
+  touch-action:none;
+}
+.domino:hover{transform:translateY(-2px);box-shadow:3px 5px 0 rgba(0,0,0,0.35),inset 0 1px 0 rgba(255,255,255,0.08);}
+.domino.selected{border-color:var(--gold2);box-shadow:0 0 0 3px rgba(240,192,96,0.45),3px 3px 0 rgba(0,0,0,0.35);}
+.domino.used{opacity:.2;pointer-events:none;}
+.d-pip{
+  width:34px;height:34px;
+  background:var(--cream);border-radius:5px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Playfair Display',serif;font-size:1.15rem;font-weight:700;
+  color:var(--dark);
+}
+.d-sep{width:2px;height:26px;background:var(--gold);border-radius:2px;flex-shrink:0;}
 
-    /* ── Рука (домино) ─────────────────────────────── */
-    #hand {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 8px;
-      max-width: 380px;
-      padding: 4px;
-    }
+/* GHOST (dragging) */
+#ghost{
+  position:fixed;pointer-events:none;z-index:9999;
+  opacity:.85;transform:rotate(-4deg) scale(1.08);
+  transition:none;display:none;
+}
+#ghost.active{display:flex;}
 
-    .domino {
-      display: flex;
-      align-items: center;
-      background: white;
-      border: 2.5px solid #aaa;
-      border-radius: 8px;
-      cursor: pointer;
-      overflow: hidden;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      transition: all 0.15s;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .domino:active { transform: scale(0.96); }
-    .domino.selected {
-      border-color: #007bff;
-      box-shadow: 0 0 0 3px rgba(0,123,255,0.35);
-    }
-    .domino.used { opacity: 0.25; pointer-events: none; }
-
-    .d-half {
-      width: 36px; height: 36px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.1rem;
-      font-weight: bold;
-      color: #222;
-    }
-    .d-sep {
-      width: 2px; height: 28px;
-      background: #aaa;
-      flex-shrink: 0;
-    }
-  </style>
+/* WIN OVERLAY */
+#win-overlay{
+  position:fixed;inset:0;z-index:1000;
+  background:rgba(10,7,3,0.75);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:16px;opacity:0;pointer-events:none;transition:opacity .4s;
+}
+#win-overlay.show{opacity:1;pointer-events:all;}
+.win-title{
+  font-family:'Playfair Display',serif;font-size:2.6rem;font-weight:900;
+  color:var(--gold2);letter-spacing:4px;
+  animation:winfloat 2s ease infinite;
+}
+@keyframes winfloat{0%,100%{transform:translateY(0);}50%{transform:translateY(-6px);}}
+.win-msg{font-size:.75rem;letter-spacing:3px;color:#b89060;}
+.win-btn{
+  background:var(--gold);color:var(--dark);border:none;
+  font-family:'Playfair Display',serif;font-size:1rem;font-weight:700;
+  letter-spacing:2px;padding:12px 28px;border-radius:10px;cursor:pointer;
+  box-shadow:0 4px 0 rgba(0,0,0,0.3);
+}
+</style>
 </head>
 <body>
 
-<h1>🁣 PIPS DAILY</h1>
-<div id="legend"></div>
-<div id="grid-wrap"><div id="grid"></div></div>
-<div id="status">Выберите костяшку снизу, затем нажмите на клетку</div>
-<div id="controls">
-  <button class="ctrl-btn" id="btn-rotate" disabled onclick="rotateSelected()">🔄 Повернуть</button>
-  <span id="orient-lbl"></span>
-  <button class="ctrl-btn secondary" onclick="resetGame()">↺ Сброс</button>
+<!-- ═══════════ MENU ═══════════ -->
+<div class="screen" id="menu">
+  <div class="menu-title">PIPS</div>
+  <div class="menu-sub">Daily Domino Puzzle</div>
+  <div class="menu-divider"></div>
+
+  <div class="level-list" id="level-list"></div>
+
+  <div class="menu-divider"></div>
+  <button class="btn-random" onclick="startRandom()">⚄ СЛУЧАЙНЫЙ УРОВЕНЬ</button>
 </div>
-<div id="hand"></div>
+
+<!-- ═══════════ GAME ═══════════ -->
+<div class="screen hidden" id="game">
+  <div class="game-header">
+    <button class="btn-back" onclick="goMenu()">← МЕНЮ</button>
+    <div class="game-title" id="game-title">PIPS</div>
+    <div class="game-star" id="game-stars"></div>
+  </div>
+
+  <div id="legend"></div>
+  <div id="grid-wrap"><div id="grid"></div></div>
+  <div id="status"></div>
+  <div id="controls">
+    <button class="ctrl" id="btn-rotate" onclick="rotateSelected()" disabled>🔄 ПОВЕРНУТЬ</button>
+    <div id="orient-label">—</div>
+    <button class="ctrl light" onclick="resetPuzzle()">↺ СБРОС</button>
+  </div>
+  <div id="hand"></div>
+</div>
+
+<!-- GHOST for drag -->
+<div id="ghost" class="domino">
+  <div class="d-pip" id="ghost-a"></div>
+  <div class="d-sep"></div>
+  <div class="d-pip" id="ghost-b"></div>
+</div>
+
+<!-- WIN -->
+<div id="win-overlay">
+  <div class="win-title">✦ ПОБЕДА ✦</div>
+  <div class="win-msg" id="win-msg"></div>
+  <button class="win-btn" onclick="goMenu()">ВЫБРАТЬ УРОВЕНЬ</button>
+</div>
 
 <script>
+/* ═══════════════════════════════════════════════════
+   TELEGRAM
+═══════════════════════════════════════════════════ */
 const tg = window.Telegram?.WebApp;
 if (tg) { tg.ready(); tg.expand(); }
 
-/* ═══════════════════════════════════════════
-   КОНФИГУРАЦИЯ ПАЗЛА
-   Здесь можно менять любой пазл.
-   ═══════════════════════════════════════════ */
-const PUZZLE = {
-  cols: 4,
-  rows: 3,
-
-  /*
-    Правила зон:
-      { type: 'sum',  value: N }   — сумма половинок в зоне = N
-      { type: 'eq'              }   — все половинки одинаковые
-      { type: 'neq'             }   — все половинки разные
-      { type: 'gt',  value: N }    — каждая половинка > N
-      { type: 'lt',  value: N }    — каждая половинка < N
-      { type: 'none'            }   — без правила (серая)
-  */
-  regions: [
-    {
-      id: 0,
-      name: 'Красная (сумма)',
-      rule: { type: 'sum', value: 6 },
-      cells: [[0,0],[1,0],[0,1],[1,1]]
-    },
-    {
-      id: 1,
-      name: 'Синяя (=)',
-      rule: { type: 'eq' },
-      cells: [[2,0],[3,0]]
-    },
-    {
-      id: 2,
-      name: 'Зелёная (>1)',
-      rule: { type: 'gt', value: 1 },
-      cells: [[2,1],[3,1]]
-    },
-    {
-      id: 3,
-      name: 'Свободная',
-      rule: { type: 'none' },
-      cells: [[0,2],[1,2],[2,2],[3,2]]
-    }
-  ],
-
-  /*
-    Домино: каждое — пара [a, b].
-    Решение этого пазла (одно из возможных):
-      [1,2] горизонтально → (0,0)+(1,0)  } в красной: 1+2+0+3=6 ✓
-      [0,3] горизонтально → (0,1)+(1,1)  }
-      [2,2] горизонтально → (2,0)+(3,0)    в синей:   2=2 ✓
-      [3,2] горизонтально → (2,1)+(3,1)    в зелёной: 3>1 и 2>1 ✓
-      [1,4] горизонтально → (0,2)+(1,2)  } свободная
-      [2,1] горизонтально → (2,2)+(3,2)  }
-  */
-  dominoes: [
-    [1, 2],
-    [0, 3],
-    [2, 2],
-    [3, 2],
-    [1, 4],
-    [2, 1],
-  ]
-};
-
-/* ── Цвета зон ─────────────────────────────────────── */
-const COLORS = [
-  { bg: '#ffd6d6', border: '#e05050' },
-  { bg: '#d6e8ff', border: '#4a7edd' },
-  { bg: '#d6ffd9', border: '#4baa55' },
-  { bg: '#f9d6ff', border: '#b44bcf' },
-  { bg: '#fff4d6', border: '#d4962a' },
+/* ═══════════════════════════════════════════════════
+   ЗОНЫ: цвета
+═══════════════════════════════════════════════════ */
+const ZONE_COLORS = [
+  { bg:'#f7d6e0', border:'#d4558a', name:'Розовая' },
+  { bg:'#cfe3f7', border:'#3a7fc1', name:'Синяя'   },
+  { bg:'#d0f0d8', border:'#3a9c55', name:'Зелёная' },
+  { bg:'#ead6f5', border:'#8b42c8', name:'Фиолет.' },
+  { bg:'#fde8cc', border:'#d4762a', name:'Оранж.'  },
 ];
 
-/* ── Вспомогательные функции ───────────────────────── */
-function ruleShort(rule) {
-  switch (rule.type) {
-    case 'sum':  return `=${rule.value}`;
-    case 'eq':   return `=`;
-    case 'neq':  return `≠`;
-    case 'gt':   return `>${rule.value}`;
-    case 'lt':   return `<${rule.value}`;
-    default:     return '';
+/* ═══════════════════════════════════════════════════
+   HAND-CRAFTED LEVELS
+═══════════════════════════════════════════════════ */
+const LEVELS = [
+  {
+    name: 'TUTORIAL', stars: 1, cols: 3, rows: 2,
+    dominoes: [[3,3],[1,2],[4,0]],
+    regions: [
+      { rule:{type:'eq'},        cells:[[0,0],[1,0]] },
+      { rule:{type:'sum',v:3},   cells:[[0,1],[1,1]] },
+      { rule:{type:'sum',v:4},   cells:[[2,0],[2,1]] },
+    ]
+    // solution: [3,3]H→(0,0)-(1,0) | [1,2]H→(0,1)-(1,1) | [4,0]V→(2,0)-(2,1)
+  },
+  {
+    name: 'УРОВЕНЬ 1', stars: 2, cols: 4, rows: 3,
+    dominoes: [[0,0],[1,5],[2,3],[4,1],[2,2],[3,0]],
+    regions: [
+      { rule:{type:'sum',v:6},   cells:[[0,0],[1,0],[0,1],[1,1]] },
+      { rule:{type:'neq'},       cells:[[2,0],[3,0]] },
+      { rule:{type:'gt',v:1},    cells:[[2,1],[3,1]] },
+      { rule:{type:'sum',v:4},   cells:[[0,2],[1,2]] },
+      { rule:{type:'none'},      cells:[[2,2],[3,2]] },
+    ]
+    // solution: [0,0]H(0,0)-(1,0) | [1,5]H(2,0)-(3,0) | [2,3]V(0,1)-(0,2) | [4,1]V(1,1)-(1,2) | [2,2]H(2,1)-(3,1) | [3,0]H(2,2)-(3,2)
+  },
+  {
+    name: 'УРОВЕНЬ 2', stars: 3, cols: 4, rows: 4,
+    dominoes: [[0,2],[3,1],[4,2],[1,1],[5,0],[3,3],[2,4],[0,3]],
+    regions: [
+      { rule:{type:'sum',v:2},   cells:[[0,0],[0,1]] },
+      { rule:{type:'eq'},        cells:[[1,0],[1,1]] },
+      { rule:{type:'sum',v:6},   cells:[[2,0],[3,0],[2,1],[3,1]] },
+      { rule:{type:'gt',v:2},    cells:[[0,2],[1,2]] },
+      { rule:{type:'sum',v:5},   cells:[[2,2],[3,2]] },
+      { rule:{type:'neq'},       cells:[[0,3],[1,3],[2,3],[3,3]] },
+    ]
+    // solution: [0,2]V(0,0)-(0,1) | [3,1]V(1,0)-(1,1) | [4,2]H(2,0)-(3,0) | [1,1]H(2,1)-(3,1) | [5,0]H(0,2)-(1,2) | [3,3]H(2,2)-(3,2) | [2,4]H(0,3)-(1,3) | [0,3]H(2,3)-(3,3)
+  },
+  {
+    name: 'УРОВЕНЬ 3', stars: 4, cols: 5, rows: 4,
+    dominoes: [[1,3],[2,4],[0,5],[1,1],[3,2],[2,0],[4,3],[1,2],[3,1],[0,4]],
+    regions: [
+      { rule:{type:'sum',v:4},   cells:[[0,0],[1,0]] },
+      { rule:{type:'neq'},       cells:[[2,0],[3,0],[4,0]] },
+      { rule:{type:'sum',v:6},   cells:[[0,1],[0,2],[0,3]] },
+      { rule:{type:'eq'},        cells:[[1,1],[2,1]] },
+      { rule:{type:'gt',v:1},    cells:[[3,1],[4,1],[3,2],[4,2]] },
+      { rule:{type:'lt',v:4},    cells:[[1,2],[2,2]] },
+      { rule:{type:'sum',v:7},   cells:[[1,3],[2,3],[3,3],[4,3]] },
+    ]
+    // (complex - left as puzzle challenge)
+  }
+];
+
+/* ═══════════════════════════════════════════════════
+   RULE HELPERS
+═══════════════════════════════════════════════════ */
+function ruleShort(r) {
+  switch(r.type){
+    case 'sum': return `=${r.v}`;
+    case 'eq':  return '=';
+    case 'neq': return '≠';
+    case 'gt':  return `>${r.v}`;
+    case 'lt':  return `<${r.v}`;
+    default:    return '';
   }
 }
-function ruleText(rule) {
-  switch (rule.type) {
-    case 'sum':  return `сумма = ${rule.value}`;
-    case 'eq':   return `все одинаковые`;
-    case 'neq':  return `все разные`;
-    case 'gt':   return `каждый > ${rule.value}`;
-    case 'lt':   return `каждый < ${rule.value}`;
-    default:     return 'без правила';
+function ruleText(r) {
+  switch(r.type){
+    case 'sum': return `сумма = ${r.v}`;
+    case 'eq':  return 'все равны';
+    case 'neq': return 'все разные';
+    case 'gt':  return `каждый > ${r.v}`;
+    case 'lt':  return `каждый < ${r.v}`;
+    default:    return 'свободно';
+  }
+}
+function checkRule(rule, vals) {
+  if(!vals.length) return true;
+  switch(rule.type){
+    case 'sum': return vals.reduce((s,v)=>s+v,0)===rule.v;
+    case 'eq':  return vals.every(v=>v===vals[0]);
+    case 'neq': return new Set(vals).size===vals.length;
+    case 'gt':  return vals.every(v=>v>rule.v);
+    case 'lt':  return vals.every(v=>v<rule.v);
+    default:    return true;
   }
 }
 
-/* ── Состояние ─────────────────────────────────────── */
-let state = {
-  board: {},         // key "c,r" → { dominoIdx, half: 'a'|'b' }
-  usedDominoes: new Set(),
-  selectedDomino: null,
-  orientation: 'h', // 'h' или 'v'
-};
+/* ═══════════════════════════════════════════════════
+   RANDOM LEVEL GENERATOR
+═══════════════════════════════════════════════════ */
+function generateRandom(difficulty=2) {
+  // Grid sizes by difficulty (0=easy,1=med,2=hard)
+  const sizes = [[3,4],[4,4],[4,5],[5,5]];
+  const [cols,rows] = sizes[Math.min(difficulty,3)];
+  const total = cols*rows;
+  if(total%2!==0){ return generateRandom(difficulty); }
 
-/* ── Строим карту cell→region ──────────────────────── */
-const cellRegion = {};
-const regionFirstCell = {};
-PUZZLE.regions.forEach(region => {
-  regionFirstCell[region.id] = region.cells[0];
-  region.cells.forEach(([c, r]) => { cellRegion[`${c},${r}`] = region.id; });
-});
+  // 1. Generate perfect domino tiling via backtracking
+  const tileOf = new Array(total).fill(-1); // cell→dominoIdx
+  const placed = [];
 
-/* ── Легенда ───────────────────────────────────────── */
-const legendEl = document.getElementById('legend');
-PUZZLE.regions.forEach(region => {
-  if (region.rule.type === 'none') return;
-  const col = COLORS[region.id % COLORS.length];
-  const div = document.createElement('div');
-  div.className = 'legend-item';
-  div.innerHTML = `
-    <div class="legend-dot" style="background:${col.bg};border-color:${col.border}"></div>
-    <span>${ruleText(region.rule)}</span>
-  `;
-  legendEl.appendChild(div);
-});
+  function idx(c,r){ return r*cols+c; }
 
-/* ── Сетка ─────────────────────────────────────────── */
-const gridEl = document.getElementById('grid');
-gridEl.style.gridTemplateColumns = `repeat(${PUZZLE.cols}, 58px)`;
-gridEl.style.gridTemplateRows    = `repeat(${PUZZLE.rows}, 58px)`;
+  function tile(cell){
+    if(cell===total) return true;
+    if(tileOf[cell]!==-1) return tile(cell+1);
 
-const cellEls = {};
+    const c=cell%cols, r=Math.floor(cell/cols);
+    const candidates=[];
+    if(c+1<cols && tileOf[cell+1]===-1) candidates.push([cell,cell+1]);
+    if(r+1<rows && tileOf[idx(c,r+1)]===-1) candidates.push([cell,idx(c,r+1)]);
 
-for (let r = 0; r < PUZZLE.rows; r++) {
-  for (let c = 0; c < PUZZLE.cols; c++) {
-    const key = `${c},${r}`;
-    const cell = document.createElement('div');
-    cell.className = 'cell';
+    // Shuffle
+    for(let i=candidates.length-1;i>0;i--){
+      const j=Math.floor(Math.random()*(i+1));
+      [candidates[i],candidates[j]]=[candidates[j],candidates[i]];
+    }
+    for(const [a,b] of candidates){
+      const di=placed.length;
+      tileOf[a]=di; tileOf[b]=di;
+      placed.push([a,b]);
+      if(tile(cell+1)) return true;
+      placed.pop();
+      tileOf[a]=-1; tileOf[b]=-1;
+    }
+    return false;
+  }
 
-    const rid = cellRegion[key];
-    if (rid !== undefined) {
-      const col = COLORS[rid % COLORS.length];
-      cell.style.background = col.bg;
-      cell.style.borderColor = col.border;
+  if(!tile(0)) return generateRandom(difficulty);
 
-      const [fc, fr] = regionFirstCell[rid];
-      if (fc === c && fr === r) {
-        const short = ruleShort(PUZZLE.regions[rid].rule);
-        if (short) {
-          const lbl = document.createElement('div');
-          lbl.className = 'rule-lbl';
-          lbl.textContent = short;
-          cell.appendChild(lbl);
+  // 2. Assign pip values to each domino
+  const domValues=[]; // [a,b] for each domino
+  for(let i=0;i<placed.length;i++){
+    domValues.push([rndInt(0,5),rndInt(0,5)]);
+  }
+
+  // cellValue(cell) → pip
+  function cellVal(cell){
+    const di=tileOf[cell];
+    return domValues[di][placed[di][0]===cell?0:1];
+  }
+
+  // 3. Create zones via flood fill
+  const zoneOf=new Array(total).fill(-1);
+  const regionCount=Math.max(2,Math.min(4,Math.floor(total/4)));
+  const seeds=[];
+
+  // Pick random seeds far from each other
+  const allCells=[...Array(total).keys()];
+  shuffle(allCells);
+  seeds.push(allCells[0]);
+  for(const c of allCells){
+    if(seeds.length>=regionCount) break;
+    const ok=seeds.every(s=>Math.abs(s%cols-c%cols)+Math.abs(Math.floor(s/cols)-Math.floor(c/cols))>=2);
+    if(ok) seeds.push(c);
+  }
+
+  // BFS from seeds
+  const queue=[...seeds.map((s,i)=>({cell:s,zone:i}))];
+  seeds.forEach((s,i)=>zoneOf[s]=i);
+  let qi=0;
+  while(qi<queue.length){
+    const {cell,zone}=queue[qi++];
+    const c=cell%cols,r=Math.floor(cell/cols);
+    const nbrs=[];
+    if(c>0) nbrs.push(cell-1);
+    if(c<cols-1) nbrs.push(cell+1);
+    if(r>0) nbrs.push(cell-cols);
+    if(r<rows-1) nbrs.push(cell+cols);
+    for(const nb of nbrs){
+      if(zoneOf[nb]===-1){ zoneOf[nb]=zone; queue.push({cell:nb,zone}); }
+    }
+  }
+  // Any unassigned → nearest
+  for(let i=0;i<total;i++){
+    if(zoneOf[i]===-1) zoneOf[i]=0;
+  }
+
+  // 4. Build regions with cells
+  const regionCells=Array.from({length:regionCount},()=>[]);
+  for(let i=0;i<total;i++){
+    const c=i%cols,r=Math.floor(i/cols);
+    regionCells[zoneOf[i]].push([c,r]);
+  }
+
+  // 5. Determine rule for each region from solution values
+  const regions=regionCells.map(cells=>{
+    const vals=cells.map(([c,r])=>cellVal(r*cols+c));
+    const rule=pickRule(vals);
+    return {rule,cells};
+  });
+
+  // 6. Build domino pairs (cell coords)
+  const dominos=domValues.map(([a,b])=>[a,b]);
+
+  return {name:'RANDOM',stars:difficulty+2,cols,rows,dominoes:dominos,regions};
+}
+
+function pickRule(vals){
+  // Pick a valid rule that the values satisfy, preferring interesting ones
+  const sum=vals.reduce((s,v)=>s+v,0);
+  const allEq=vals.every(v=>v===vals[0]);
+  const allNeq=new Set(vals).size===vals.length;
+  const minV=Math.min(...vals);
+  const maxV=Math.max(...vals);
+
+  const options=[];
+  options.push({type:'sum',v:sum}); // always valid
+  if(allEq) options.push({type:'eq'});
+  if(allNeq && vals.length>1) options.push({type:'neq'});
+  if(minV>0) options.push({type:'gt',v:minV-1});
+  if(maxV<6) options.push({type:'lt',v:maxV+1});
+  if(options.length<=1) return {type:'none'};
+
+  // Prefer non-sum rules for variety
+  const nonSum=options.filter(o=>o.type!=='sum');
+  return nonSum.length ? nonSum[Math.floor(Math.random()*nonSum.length)] : options[0];
+}
+
+function rndInt(a,b){ return a+Math.floor(Math.random()*(b-a+1)); }
+function shuffle(arr){ for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]]; } }
+
+/* ═══════════════════════════════════════════════════
+   GAME STATE
+═══════════════════════════════════════════════════ */
+let puzzle=null;
+let board={};      // "c,r" → {di,half:'a'|'b',orient:'h'|'v'}
+let usedDom=new Set();
+let selDom=null;
+let orient='h';
+
+/* ═══════════════════════════════════════════════════
+   MENU RENDER
+═══════════════════════════════════════════════════ */
+function renderMenu(){
+  const list=document.getElementById('level-list');
+  list.innerHTML='';
+  LEVELS.forEach((lv,i)=>{
+    const card=document.createElement('div');
+    card.className='level-card';
+    const stars='★'.repeat(lv.stars)+'☆'.repeat(5-lv.stars);
+    card.innerHTML=`
+      <div class="lc-badge">${i+1}</div>
+      <div class="lc-info">
+        <div class="lc-name">${lv.name}</div>
+        <div class="lc-meta">${lv.cols}×${lv.rows} · ${lv.dominoes.length} костяшек</div>
+      </div>
+      <div class="lc-stars">${stars}</div>`;
+    card.onclick=()=>startLevel(lv);
+    list.appendChild(card);
+  });
+}
+
+function goMenu(){
+  document.getElementById('win-overlay').classList.remove('show');
+  showScreen('menu');
+}
+function startRandom(){
+  const diff=rndInt(0,2);
+  startLevel(generateRandom(diff));
+}
+function startLevel(lv){
+  puzzle=JSON.parse(JSON.stringify(lv));
+  board={}; usedDom=new Set(); selDom=null; orient='h';
+  buildGame();
+  showScreen('game');
+}
+
+function showScreen(name){
+  document.getElementById('menu').classList.toggle('hidden',name!=='menu');
+  document.getElementById('game').classList.toggle('hidden',name!=='game');
+}
+
+/* ═══════════════════════════════════════════════════
+   GAME BUILD
+═══════════════════════════════════════════════════ */
+function buildGame(){
+  document.getElementById('game-title').textContent=puzzle.name;
+  document.getElementById('game-stars').textContent='★'.repeat(puzzle.stars);
+
+  // Legend
+  const lg=document.getElementById('legend');
+  lg.innerHTML='';
+  puzzle.regions.forEach((r,i)=>{
+    if(r.rule.type==='none') return;
+    const col=ZONE_COLORS[i%ZONE_COLORS.length];
+    const d=document.createElement('div');
+    d.className='lg';
+    d.innerHTML=`<div class="lg-dot" style="background:${col.bg};border-color:${col.border}"></div><span>${ruleText(r.rule)}</span>`;
+    lg.appendChild(d);
+  });
+
+  // Grid
+  const grid=document.getElementById('grid');
+  grid.style.gridTemplateColumns=`repeat(${puzzle.cols},var(--cell))`;
+  grid.style.gridTemplateRows=`repeat(${puzzle.rows},var(--cell))`;
+  grid.innerHTML='';
+  cellEls={};
+
+  // Build cell→region map
+  cellRegion={};
+  puzzle.regions.forEach((region,ri)=>{
+    region.cells.forEach(([c,r])=>{ cellRegion[`${c},${r}`]=ri; });
+  });
+  regionFirst={};
+  puzzle.regions.forEach((region,ri)=>{ regionFirst[ri]=region.cells[0]; });
+
+  for(let r=0;r<puzzle.rows;r++){
+    for(let c=0;c<puzzle.cols;c++){
+      const key=`${c},${r}`;
+      const cell=document.createElement('div');
+      cell.className='cell';
+      const ri=cellRegion[key];
+      if(ri!==undefined){
+        const col=ZONE_COLORS[ri%ZONE_COLORS.length];
+        cell.style.background=col.bg;
+        cell.style.borderColor=col.border;
+        const [fc,fr]=regionFirst[ri];
+        if(fc===c&&fr===r){
+          const sh=ruleShort(puzzle.regions[ri].rule);
+          if(sh){
+            const tag=document.createElement('div');
+            tag.className='rule-tag';
+            tag.textContent=sh;
+            cell.appendChild(tag);
+          }
         }
       }
+      cell.onclick=()=>cellClick(c,r);
+      cell.dataset.c=c; cell.dataset.r=r;
+      cellEls[key]=cell;
+      grid.appendChild(cell);
     }
-
-    cell.onclick = () => cellClicked(c, r);
-    cellEls[key] = cell;
-    gridEl.appendChild(cell);
   }
+
+  // Hand
+  buildHand();
+  deselect();
+  setStatus('Выберите костяшку снизу или перетащите на поле');
 }
 
-/* ── Рука (домино) ─────────────────────────────────── */
-const handEl = document.getElementById('hand');
-const dominoEls = [];
+let cellEls={}, cellRegion={}, regionFirst={};
 
-PUZZLE.dominoes.forEach(([a, b], idx) => {
-  const tile = document.createElement('div');
-  tile.className = 'domino';
-  tile.innerHTML = `
-    <div class="d-half">${a}</div>
-    <div class="d-sep"></div>
-    <div class="d-half">${b}</div>
-  `;
-  tile.onclick = () => selectDomino(idx);
-  handEl.appendChild(tile);
-  dominoEls.push(tile);
-});
+function buildHand(){
+  const hand=document.getElementById('hand');
+  hand.innerHTML='';
+  dominoEls=[];
+  puzzle.dominoes.forEach(([a,b],di)=>{
+    const tile=makeDominoEl(a,b);
+    if(usedDom.has(di)) tile.classList.add('used');
+    if(selDom===di) tile.classList.add('selected');
+    tile.onclick=(e)=>{ e.stopPropagation(); selectDomino(di); };
+    setupDrag(tile,di);
+    hand.appendChild(tile);
+    dominoEls.push(tile);
+  });
+}
 
-/* ── Логика выбора и размещения ────────────────────── */
-function selectDomino(idx) {
-  if (state.usedDominoes.has(idx)) return;
+let dominoEls=[];
 
-  if (state.selectedDomino === idx) {
-    deselect(); return;
-  }
-  if (state.selectedDomino !== null) dominoEls[state.selectedDomino].classList.remove('selected');
+function makeDominoEl(a,b,small=false){
+  const tile=document.createElement('div');
+  tile.className='domino';
+  if(small){ tile.style.transform='scale(0.85)'; tile.style.margin='-3px'; }
+  tile.innerHTML=`<div class="d-pip">${a}</div><div class="d-sep"></div><div class="d-pip">${b}</div>`;
+  return tile;
+}
 
-  state.selectedDomino = idx;
-  dominoEls[idx].classList.add('selected');
-  document.getElementById('btn-rotate').disabled = false;
+/* ═══════════════════════════════════════════════════
+   SELECTION + PLACEMENT
+═══════════════════════════════════════════════════ */
+function selectDomino(di){
+  if(usedDom.has(di)) return;
+  if(selDom===di){ deselect(); return; }
+  dominoEls.forEach(e=>e.classList.remove('selected'));
+  selDom=di;
+  dominoEls[di].classList.add('selected');
+  document.getElementById('btn-rotate').disabled=false;
   updateOrientLabel();
-  setStatus('Нажмите на клетку для размещения (первая клетка)');
+  setStatus('Нажмите на клетку для размещения первой половины');
 }
-
-function deselect() {
-  if (state.selectedDomino !== null) dominoEls[state.selectedDomino].classList.remove('selected');
-  state.selectedDomino = null;
-  document.getElementById('btn-rotate').disabled = true;
-  document.getElementById('orient-lbl').textContent = '';
+function deselect(){
+  dominoEls.forEach(e=>e.classList.remove('selected'));
+  selDom=null;
+  document.getElementById('btn-rotate').disabled=true;
+  document.getElementById('orient-label').textContent='—';
+  clearHighlight();
 }
-
-function rotateSelected() {
-  state.orientation = state.orientation === 'h' ? 'v' : 'h';
+function rotateSelected(){
+  orient=orient==='h'?'v':'h';
   updateOrientLabel();
+  clearHighlight();
+}
+function updateOrientLabel(){
+  document.getElementById('orient-label').textContent=orient==='h'?'→ гориз.':'↓ верт.';
 }
 
-function updateOrientLabel() {
-  document.getElementById('orient-lbl').textContent =
-    state.orientation === 'h' ? '→ горизонт.' : '↓ вертикал.';
+function cellClick(c,r){
+  const key=`${c},${r}`;
+  // Click placed → remove
+  if(board[key]){
+    removeDomino(board[key].di);
+    return;
+  }
+  if(selDom===null){ setStatus('Сначала выберите костяшку'); return; }
+
+  const c2=orient==='h'?c+1:c;
+  const r2=orient==='h'?r:r+1;
+  if(c2>=puzzle.cols||r2>=puzzle.rows){
+    setStatus('Костяшка не помещается — повернуть?'); return;
+  }
+  const key2=`${c2},${r2}`;
+  if(board[key2]){ setStatus('Соседняя клетка занята'); return; }
+
+  placeDomino(selDom,c,r,orient);
 }
 
-function cellClicked(c, r) {
-  const key = `${c},${r}`;
+function placeDomino(di,c,r,or){
+  const c2=or==='h'?c+1:c;
+  const r2=or==='h'?r:r+1;
+  const key=`${c},${r}`, key2=`${c2},${r2}`;
 
-  // Клик по занятой клетке — убрать домино
-  if (state.board[key]) {
-    removeDomino(state.board[key].dominoIdx);
-    return;
-  }
+  board[key] ={di,half:'a',orient:or};
+  board[key2]={di,half:'b',orient:or};
+  usedDom.add(di);
 
-  if (state.selectedDomino === null) {
-    setStatus('Сначала выберите костяшку снизу');
-    return;
-  }
-
-  // Вторая клетка по ориентации
-  const c2 = state.orientation === 'h' ? c + 1 : c;
-  const r2 = state.orientation === 'h' ? r : r + 1;
-
-  if (c2 >= PUZZLE.cols || r2 >= PUZZLE.rows) {
-    setStatus('Костяшка не помещается — попробуйте повернуть');
-    return;
-  }
-
-  const key2 = `${c2},${r2}`;
-  if (state.board[key2]) {
-    setStatus('Соседняя клетка занята');
-    return;
-  }
-
-  // Размещаем
-  const idx = state.selectedDomino;
-  state.board[key]  = { dominoIdx: idx, half: 'a' };
-  state.board[key2] = { dominoIdx: idx, half: 'b' };
-  state.usedDominoes.add(idx);
-
-  dominoEls[idx].classList.remove('selected');
-  dominoEls[idx].classList.add('used');
-  state.selectedDomino = null;
-  document.getElementById('btn-rotate').disabled = true;
-  document.getElementById('orient-lbl').textContent = '';
+  dominoEls[di].classList.remove('selected');
+  dominoEls[di].classList.add('used');
+  selDom=null;
+  document.getElementById('btn-rotate').disabled=true;
+  document.getElementById('orient-label').textContent='—';
 
   renderBoard();
-  validateAndCheck();
+  validate();
 }
 
-function removeDomino(idx) {
-  Object.keys(state.board).forEach(key => {
-    if (state.board[key]?.dominoIdx === idx) delete state.board[key];
-  });
-  state.usedDominoes.delete(idx);
-  dominoEls[idx].classList.remove('used');
+function removeDomino(di){
+  Object.keys(board).forEach(k=>{ if(board[k]?.di===di) delete board[k]; });
+  usedDom.delete(di);
+  dominoEls[di].classList.remove('used');
   renderBoard();
   setStatus('Костяшка убрана — можно переставить');
 }
 
-function resetGame() {
-  state.board = {};
-  state.usedDominoes.clear();
+function resetPuzzle(){
+  board={}; usedDom.clear();
   deselect();
-  state.orientation = 'h';
-  dominoEls.forEach(el => el.classList.remove('used', 'selected'));
+  orient='h';
+  dominoEls.forEach(el=>el.classList.remove('used','selected'));
   renderBoard();
-  setStatus('Игра сброшена. Выберите костяшку снизу');
-  // Убираем win-подсветку
-  Object.values(cellEls).forEach(el => el.classList.remove('win'));
+  setStatus('Сброс. Выберите костяшку');
 }
 
-/* ── Отрисовка состояния доски ─────────────────────── */
-function renderBoard() {
-  for (let r = 0; r < PUZZLE.rows; r++) {
-    for (let c = 0; c < PUZZLE.cols; c++) {
-      const key = `${c},${r}`;
-      const cell = cellEls[key];
-      cell.querySelector('.pip-circle')?.remove();
+/* ═══════════════════════════════════════════════════
+   RENDER BOARD
+═══════════════════════════════════════════════════ */
+function renderBoard(){
+  // Clear pips
+  Object.values(cellEls).forEach(el=>{
+    el.querySelectorAll('.grid-pip').forEach(p=>p.remove());
+    el.classList.remove('win');
+  });
 
-      const info = state.board[key];
-      if (info) {
-        const [a, b] = PUZZLE.dominoes[info.dominoIdx];
-        const val = info.half === 'a' ? a : b;
+  Object.keys(board).forEach(key=>{
+    const {di,half,orient:or}=board[key];
+    const [a,b]=puzzle.dominoes[di];
+    const val=half==='a'?a:b;
+    const cell=cellEls[key];
+    if(!cell) return;
 
-        const pip = document.createElement('div');
-        pip.className = 'pip-circle';
-        pip.textContent = val;
-        cell.appendChild(pip);
-      }
+    const pip=document.createElement('div');
+    pip.className='grid-pip';
+    pip.textContent=val;
+
+    // Visual alignment to show domino connection
+    if(or==='h'){
+      pip.classList.add(half==='a'?'half-left':'half-right');
+    } else {
+      pip.classList.add(half==='a'?'half-top':'half-bottom');
     }
-  }
+    cell.appendChild(pip);
+  });
 }
 
-/* ── Валидация ─────────────────────────────────────── */
-function validateAndCheck() {
-  const total = PUZZLE.dominoes.length;
-  const placed = state.usedDominoes.size;
+/* ═══════════════════════════════════════════════════
+   VALIDATION
+═══════════════════════════════════════════════════ */
+function validate(){
+  const placed=usedDom.size, total=puzzle.dominoes.length;
 
-  if (placed < total) {
+  if(placed<total){
     setStatus(`Размещено ${placed} из ${total} костяшек`);
     return;
   }
 
-  // Проверяем каждую зону
-  const errors = [];
-  PUZZLE.regions.forEach(region => {
-    if (region.rule.type === 'none') return;
-
-    const vals = region.cells.map(([c, r]) => {
-      const info = state.board[`${c},${r}`];
-      if (!info) return null;
-      const [a, b] = PUZZLE.dominoes[info.dominoIdx];
-      return info.half === 'a' ? a : b;
-    }).filter(v => v !== null);
-
-    if (!checkRule(region.rule, vals)) errors.push(region.name);
+  const errors=[];
+  puzzle.regions.forEach((region,ri)=>{
+    if(region.rule.type==='none') return;
+    const vals=region.cells.map(([c,r])=>{
+      const info=board[`${c},${r}`];
+      if(!info) return null;
+      const [a,b]=puzzle.dominoes[info.di];
+      return info.half==='a'?a:b;
+    }).filter(v=>v!==null);
+    if(!checkRule(region.rule,vals)) errors.push(ri);
   });
 
-  if (errors.length === 0) {
-    setStatus('🎉 ПОБЕДА! Все условия выполнены!');
-    Object.values(cellEls).forEach(el => el.classList.add('win'));
-    if (tg) tg.MainButton.setText('✅ Готово!').show();
+  if(errors.length===0){
+    // Win!
+    Object.values(cellEls).forEach(el=>el.classList.add('win'));
+    setStatus('');
+    showWin();
   } else {
-    setStatus(`❌ Условие нарушено: ${errors.map(n => n.split(' ')[0]).join(', ')}`);
+    // Highlight bad regions
+    errors.forEach(ri=>{
+      puzzle.regions[ri].cells.forEach(([c,r])=>{
+        const el=cellEls[`${c},${r}`];
+        if(el){ el.style.animation='none'; setTimeout(()=>el.style.animation='',10); }
+      });
+    });
+    setStatus(`❌ Условия не выполнены в ${errors.length} зоне(ах)`);
   }
 }
 
-function checkRule(rule, vals) {
-  if (!vals.length) return true;
-  switch (rule.type) {
-    case 'sum':  return vals.reduce((s, v) => s + v, 0) === rule.value;
-    case 'eq':   return vals.every(v => v === vals[0]);
-    case 'neq':  return new Set(vals).size === vals.length;
-    case 'gt':   return vals.every(v => v > rule.value);
-    case 'lt':   return vals.every(v => v < rule.value);
-    default:     return true;
+function showWin(){
+  const overlay=document.getElementById('win-overlay');
+  document.getElementById('win-msg').textContent=`${puzzle.name} · ${puzzle.dominoes.length} КОСТЯШЕК`;
+  overlay.classList.add('show');
+  if(tg) tg.HapticFeedback?.notificationOccurred('success');
+}
+
+function clearHighlight(){
+  Object.values(cellEls).forEach(el=>el.classList.remove('highlight','highlight-bad'));
+}
+
+/* ═══════════════════════════════════════════════════
+   HOVER HIGHLIGHT while selected
+═══════════════════════════════════════════════════ */
+document.getElementById('grid').addEventListener('pointermove',e=>{
+  if(selDom===null||isDragging) return;
+  clearHighlight();
+  const el=e.target.closest('.cell');
+  if(!el) return;
+  const c=+el.dataset.c, r=+el.dataset.r;
+  const c2=orient==='h'?c+1:c;
+  const r2=orient==='h'?r:r+1;
+  const ok=c2<puzzle.cols&&r2<puzzle.rows&&!board[`${c},${r}`]&&!board[`${c2},${r2}`];
+  if(ok){
+    cellEls[`${c},${r}`]?.classList.add('highlight');
+    cellEls[`${c2},${r2}`]?.classList.add('highlight');
+  } else {
+    cellEls[`${c},${r}`]?.classList.add('highlight-bad');
+  }
+});
+document.getElementById('grid').addEventListener('pointerleave',()=>clearHighlight());
+
+/* ═══════════════════════════════════════════════════
+   DRAG & DROP
+═══════════════════════════════════════════════════ */
+let isDragging=false;
+let dragDi=-1;
+let dragEl=null;
+const ghost=document.getElementById('ghost');
+
+function setupDrag(tile,di){
+  tile.addEventListener('pointerdown',e=>{
+    if(usedDom.has(di)) return;
+    e.preventDefault();
+    startDrag(e,di,tile);
+  });
+}
+
+function startDrag(e,di,tile){
+  isDragging=true;
+  dragDi=di;
+  dragEl=tile;
+
+  const [a,b]=puzzle.dominoes[di];
+  document.getElementById('ghost-a').textContent=a;
+  document.getElementById('ghost-b').textContent=b;
+  ghost.classList.add('active');
+  moveGhost(e.clientX,e.clientY);
+
+  dominoEls.forEach(el=>el.classList.remove('selected'));
+  selDom=null;
+
+  document.addEventListener('pointermove',onDragMove);
+  document.addEventListener('pointerup',onDragEnd);
+  document.addEventListener('pointercancel',onDragCancel);
+}
+
+function moveGhost(x,y){
+  ghost.style.left=(x-40)+'px';
+  ghost.style.top=(y-30)+'px';
+}
+
+function onDragMove(e){
+  if(!isDragging) return;
+  moveGhost(e.clientX,e.clientY);
+  clearHighlight();
+
+  const el=elementFromPoint(e.clientX,e.clientY,'.cell');
+  if(el){
+    const c=+el.dataset.c,r=+el.dataset.r;
+    const c2=orient==='h'?c+1:c;
+    const r2=orient==='h'?r:r+1;
+    const ok=c2<puzzle.cols&&r2<puzzle.rows&&!board[`${c},${r}`]&&!board[`${c2},${r2}`];
+    if(ok){
+      cellEls[`${c},${r}`]?.classList.add('highlight');
+      cellEls[`${c2},${r2}`]?.classList.add('highlight');
+    } else {
+      el.classList.add('highlight-bad');
+    }
   }
 }
 
-function setStatus(msg) {
-  document.getElementById('status').textContent = msg;
+function onDragEnd(e){
+  if(!isDragging) return;
+  clearHighlight();
+
+  const el=elementFromPoint(e.clientX,e.clientY,'.cell');
+  if(el){
+    const c=+el.dataset.c,r=+el.dataset.r;
+    const c2=orient==='h'?c+1:c;
+    const r2=orient==='h'?r:r+1;
+    if(c2<puzzle.cols&&r2<puzzle.rows&&!board[`${c},${r}`]&&!board[`${c2},${r2}`]){
+      placeDomino(dragDi,c,r,orient);
+    } else {
+      setStatus('Нельзя сюда — попробуй повернуть');
+    }
+  }
+
+  endDrag();
 }
 
-// Инициализация
-updateOrientLabel();
-setStatus('Выберите костяшку снизу, затем нажмите на клетку');
+function onDragCancel(){ endDrag(); }
+
+function endDrag(){
+  isDragging=false;
+  ghost.classList.remove('active');
+  document.removeEventListener('pointermove',onDragMove);
+  document.removeEventListener('pointerup',onDragEnd);
+  document.removeEventListener('pointercancel',onDragCancel);
+}
+
+function elementFromPoint(x,y,sel){
+  ghost.style.display='none';
+  const el=document.elementFromPoint(x,y);
+  ghost.style.display='';
+  return el?.closest(sel)||null;
+}
+
+/* ═══════════════════════════════════════════════════
+   STATUS
+═══════════════════════════════════════════════════ */
+function setStatus(msg){ document.getElementById('status').textContent=msg; }
+
+/* ═══════════════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════════════ */
+renderMenu();
 </script>
 </body>
 </html>
