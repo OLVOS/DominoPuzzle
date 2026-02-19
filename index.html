@@ -284,17 +284,17 @@ const ZC=[{bg:'#f7d6e0',bd:'#c8457a'},{bg:'#cfe3f7',bd:'#2f78c1'},
   {bg:'#d0f0d8',bd:'#2f9c50'},{bg:'#ead6f5',bd:'#7a38c0'},{bg:'#fde8cc',bd:'#c07028'}];
 
 /* ── Rules ── */
-const rS=r=>({sum:`=${r.v}`,eq:'=',neq:'≠',gt:`>${r.v}`,lt:`<${r.v}`,none:''}[r.type]||'');
+const rS=r=>({sum:`=${r.v}`,eq:'=',neq:'≠',gt:`≥${r.v}`,lt:`≤${r.v}`,none:''}[r.type]||'');
 const rT=r=>({sum:`сумма=${r.v}`,eq:'все равны',neq:'все разные',
-  gt:`> ${r.v}`,lt:`< ${r.v}`,none:'свободно'}[r.type]||'');
+  gt:`каждый ≥ ${r.v}`,lt:`каждый ≤ ${r.v}`,none:'свободно'}[r.type]||'');
 function chk(rule,vals){
   if(!vals.length)return true;
   switch(rule.type){
     case'sum':return vals.reduce((s,v)=>s+v,0)===rule.v;
     case'eq': return vals.every(v=>v===vals[0]);
     case'neq':return new Set(vals).size===vals.length;
-    case'gt': return vals.every(v=>v>rule.v);
-    case'lt': return vals.every(v=>v<rule.v);
+    case'gt': return vals.every(v=>v>=rule.v);  // ≥ rule.v
+    case'lt': return vals.every(v=>v<=rule.v);  // ≤ rule.v
     default:  return true;
   }
 }
@@ -495,8 +495,8 @@ function pickRule(vals){
   const opts=[{type:'sum',v:sum}];
   if(vals.length>1&&vals.every(v=>v===vals[0]))opts.push({type:'eq'});
   if(vals.length>1&&new Set(vals).size===vals.length)opts.push({type:'neq'});
-  if(mn>0)opts.push({type:'gt',v:mn-1});
-  if(mx<5)opts.push({type:'lt',v:mx+1});
+  if(mn>=0)opts.push({type:'gt',v:mn});    // ≥ mn — satisfied by solution
+  if(mx<=5)opts.push({type:'lt',v:mx});    // ≤ mx — satisfied by solution
   const ns=opts.filter(o=>o.type!=='sum');
   return ns.length?ns[Math.floor(Math.random()*ns.length)]:opts[0];
 }
@@ -656,7 +656,7 @@ function buildRuleOverlay(){
 function allC(cols,rows){const a=[];for(let r=0;r<rows;r++)for(let c=0;c<cols;c++)a.push([c,r]);return a;}
 
 /* ══ HAND ══ */
-const H_SZ=20; // pip size in hand
+const H_SZ=26; // pip size in hand
 function domSz(oi,pipSz){
   const isV=oi===1||oi===3;
   const pad=Math.max(4,Math.round(pipSz*.18));
@@ -851,26 +851,44 @@ function doRotate(){
     refreshHandTile(selDi);
     updateCtrl();
   } else if(selMode==='grid'){
-    // Try to rotate in place
+    // Try to rotate in place first
     const{c,r,oi:oldOi}=placements[selDi];
     const{dc:odc,dr:odr}=ORI[oldOi];
     const{dc:ndc,dr:ndr}=ORI[newOi];
     const newK2=`${c+ndc},${r+ndr}`;
     const oldK2=`${c+odc},${r+odr}`;
-
-    if(!activeSet.has(newK2)){setSt('Нельзя повернуть — нет места');return;}
-    if(board[newK2]&&board[newK2].di!==selDi){setSt('Нельзя — занято другой фигуркой');return;}
-
-    const di=selDi;
-    const{h1,h2}=halves(newOi);
     const oldK1=`${c},${r}`;
-    delete board[oldK1];delete board[oldK2];
-    board[oldK1]={di,half:h1};board[newK2]={di,half:h2};
-    placements[di]={c,r,oi:newOi};
-    orientIdx=newOi;
-    updateCtrl();
-    renderBoard();
-    validate();
+
+    const canRotateInPlace=activeSet.has(newK2)&&
+      (!board[newK2]||board[newK2].di===selDi);
+
+    if(canRotateInPlace){
+      // Clean rotation on the board
+      const di=selDi;
+      const{h1,h2}=halves(newOi);
+      delete board[oldK1];delete board[oldK2];
+      board[oldK1]={di,half:h1};board[newK2]={di,half:h2};
+      placements[di]={c,r,oi:newOi};
+      orientIdx=newOi;
+      updateCtrl();renderBoard();validate();
+    } else {
+      // Can't rotate in place — lift tile to hand with new orientation
+      // so user can move it to a suitable spot
+      const di=selDi;
+      const{dc,dr}=ORI[oldOi];
+      delete board[oldK1];delete board[oldK2];
+      delete placements[di];usedDom.delete(di);
+      // Apply new orientation
+      orientIdx=newOi;
+      // Switch to hand selection
+      clearSelVisual();
+      selMode='hand';selDi=di;
+      slotEls[di].classList.remove('used');
+      slotEls[di].classList.add('sel');
+      refreshHandTile(di);
+      updateCtrl();renderBoard();
+      setSt('Повёрнуто — нет места на месте. Выбери новую клетку');
+    }
   }
 }
 
@@ -960,7 +978,7 @@ function renderBoard(){
   Object.values(cellEls).forEach(el=>el.classList.remove('win-c'));
 
   const M=3;
-  const gridPip=Math.max(18,Math.min(32,CELL-18));
+  const gridPip=Math.max(22,Math.min(38,CELL-12));
 
   Object.entries(placements).forEach(([di_s,{c,r,oi}])=>{
     const di=+di_s;
