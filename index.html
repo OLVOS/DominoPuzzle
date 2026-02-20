@@ -835,7 +835,7 @@ function toggleSub(id){
   openSub=isOpen?id:null;
   if(isOpen){
     if(id==='tut'&&!panel.children.length)buildTutPanel();
-    if(id==='day'&&!panel.children.length)buildDayPanel();
+    if(id==='day'){panel.innerHTML='';buildDayPanel();}  // always rebuild — date may have changed
     if(id==='rnd'&&!panel.children.length)buildRndPanel();
   }
 }
@@ -1255,24 +1255,35 @@ function endDrag(){isDrag=false;ghost.classList.remove('on');document.removeEven
 /* ══════════════════════════════════════════
    EDITOR
 ══════════════════════════════════════════ */
+/* ══ EDITOR STATE — dynamic zones, paint mode ══ */
 let edCols=6,edRows=4,edActive=new Set(),edZones=[],edSelZone=0,edEditMode='cells',edGeneratedLevel=null;
+// Extended color palette for many zones
+const ED_COLORS=[
+  {bg:'#f7d6e0',bd:'#c8457a'},{bg:'#cfe3f7',bd:'#2f78c1'},{bg:'#d0f0d8',bd:'#2f9c50'},
+  {bg:'#ead6f5',bd:'#7a38c0'},{bg:'#fde8cc',bd:'#c07028'},{bg:'#e0f7f7',bd:'#1a9c9c'},
+  {bg:'#f5f0d0',bd:'#9c8c10'},{bg:'#ffd6d6',bd:'#c04040'},{bg:'#d6f0ff',bd:'#0078b4'},
+  {bg:'#e8ffe0',bd:'#40a020'},
+];
 
 function initEditor(){
   edCols=6;edRows=4;edEditMode='cells';edSelZone=0;edGeneratedLevel=null;
   edActive=new Set(allC(edCols,edRows).map(([c,r])=>`${c},${r}`));
-  edZones=Array.from({length:5},()=>({cells:new Set(),rule:{type:'sum',v:4}}));
+  edZones=[
+    {cells:new Set(),rule:{type:'sum',v:4}},
+    {cells:new Set(),rule:{type:'eq'}},
+    {cells:new Set(),rule:{type:'sum',v:6}},
+  ];
   $('ed-cols-lbl').textContent=edCols;$('ed-rows-lbl').textContent=edRows;
   $('tab-cells').classList.add('active');$('tab-zones').classList.remove('active');
   $('zone-panel').style.display='none';
   renderEdGrid();renderZonePicker();buildSavedPanel();
-  $('ed-status').textContent='Тапай клетки чтобы активировать / деактивировать';
+  $('ed-status').textContent='Тапай клетки · удержание = рисовать';
 }
 
 function edResize(dc,dr){
   edCols=Math.max(2,Math.min(12,edCols+dc));
   edRows=Math.max(2,Math.min(8,edRows+dr));
   $('ed-cols-lbl').textContent=edCols;$('ed-rows-lbl').textContent=edRows;
-  // Trim cells/zones outside new bounds
   const prune=k=>{const[c,r]=k.split(',').map(Number);return c>=edCols||r>=edRows;};
   for(const k of [...edActive])if(prune(k))edActive.delete(k);
   edZones.forEach(z=>{for(const k of [...z.cells])if(prune(k))z.cells.delete(k);});
@@ -1284,9 +1295,11 @@ function edMode(m){
   $('tab-cells').classList.toggle('active',m==='cells');
   $('tab-zones').classList.toggle('active',m==='zones');
   $('zone-panel').style.display=m==='zones'?'':'none';
-  $('ed-status').textContent=m==='cells'?'Тапай клетки чтобы активировать/деактивировать':'Выбери зону → крась клетки';
+  $('ed-status').textContent=m==='cells'?'Тап = вкл/выкл · удержание = рисовать':'Выбери зону → тап/рисуй клетки';
 }
 
+/* Paint mode: track pointer state over grid */
+let edPaintActive=false,edPaintVal=null; // null=toggle, true=add, false=remove
 function renderEdGrid(){
   const edCell=Math.max(26,Math.min(46,Math.floor((window.innerWidth-48)/edCols)));
   const g=$('ed-grid');
@@ -1298,44 +1311,101 @@ function renderEdGrid(){
       const k=`${c},${r}`;
       const el=document.createElement('div');el.className='ed-cell';
       el.style.width=el.style.height=edCell+'px';
+      el.dataset.c=c;el.dataset.r=r;
       const isActive=edActive.has(k);
       const zi=edZones.findIndex(z=>z.cells.has(k));
       if(!isActive){el.classList.add('ec-inactive');}
-      else if(zi>=0){const col=ZC[zi%ZC.length];el.style.background=col.bg;el.style.borderColor=col.bd;el.style.borderStyle='solid';el.style.borderWidth='2px';}
+      else if(zi>=0){const col=ED_COLORS[zi%ED_COLORS.length];el.style.background=col.bg;el.style.borderColor=col.bd;el.style.borderStyle='solid';el.style.borderWidth='2px';}
       else{el.classList.add('ec-free');}
-      el.addEventListener('pointerdown',e=>{e.preventDefault();edCellTap(c,r);},{passive:false});
       g.appendChild(el);
     }
   }
+  // Pointer events on the whole grid for paint mode
+  g.onpointerdown=e=>{
+    e.preventDefault();
+    const el=e.target.closest('.ed-cell');if(!el)return;
+    const c=+el.dataset.c,r=+el.dataset.r,k=`${c},${r}`;
+    edPaintActive=true;
+    if(edEditMode==='cells'){
+      edPaintVal=!edActive.has(k); // paint ON if was OFF, paint OFF if was ON
+    } else {
+      edPaintVal=!edZones[edSelZone].cells.has(k);
+    }
+    edApplyPaint(c,r);
+  };
+  g.onpointermove=e=>{
+    if(!edPaintActive)return;
+    const el=document.elementFromPoint(e.clientX,e.clientY);
+    const cell=el?.closest?.('.ed-cell');if(!cell)return;
+    edApplyPaint(+cell.dataset.c,+cell.dataset.r);
+  };
+  g.onpointerup=g.onpointercancel=()=>{edPaintActive=false;edPaintVal=null;};
+  g.setPointerCapture&&g.addEventListener('pointerdown',e=>g.setPointerCapture(e.pointerId),{passive:true});
 }
 
-let edPainting=false,edPaintState=null;
-function edCellTap(c,r){
+function edApplyPaint(c,r){
   const k=`${c},${r}`;
   if(edEditMode==='cells'){
-    const nowActive=!edActive.has(k);
-    if(nowActive)edActive.add(k);else{edActive.delete(k);edZones.forEach(z=>z.cells.delete(k));}
+    if(edPaintVal){edActive.add(k);}
+    else{edActive.delete(k);edZones.forEach(z=>z.cells.delete(k));}
   } else {
     if(!edActive.has(k))return;
     const z=edZones[edSelZone];
-    if(z.cells.has(k)){z.cells.delete(k);}
-    else{edZones.forEach((oz,i)=>{if(i!==edSelZone)oz.cells.delete(k);});z.cells.add(k);}
+    if(edPaintVal){edZones.forEach((oz,i)=>{if(i!==edSelZone)oz.cells.delete(k);});z.cells.add(k);}
+    else{z.cells.delete(k);}
   }
-  edGeneratedLevel=null;renderEdGrid();
+  // Update just this cell visually (fast, no full re-render)
+  const cell=$('ed-grid').querySelector(`[data-c="${c}"][data-r="${r}"]`);
+  if(cell){
+    cell.className='ed-cell';cell.style.cssText=`width:${cell.style.width};height:${cell.style.height}`;
+    const isActive=edActive.has(k);
+    const zi=edZones.findIndex(z=>z.cells.has(k));
+    if(!isActive){cell.classList.add('ec-inactive');}
+    else if(zi>=0){const col=ED_COLORS[zi%ED_COLORS.length];cell.style.background=col.bg;cell.style.borderColor=col.bd;cell.style.borderStyle='solid';cell.style.borderWidth='2px';}
+    else{cell.classList.add('ec-free');}
+  }
+  edGeneratedLevel=null;
+  if(edEditMode==='zones')renderZonePicker();
 }
 
 function renderZonePicker(){
   const p=$('zone-picker');p.innerHTML='';
-  ZC.forEach((col,i)=>{
+  edZones.forEach((z,i)=>{
+    const col=ED_COLORS[i%ED_COLORS.length];
     const sw=document.createElement('div');sw.className='zp-sw'+(i===edSelZone?' sel':'');
-    sw.style.cssText=`background:${col.bg};border:3px solid ${i===edSelZone?'var(--dark)':col.bd};`;
+    sw.style.cssText=`background:${col.bg};border:3px solid ${i===edSelZone?'var(--dark)':col.bd};position:relative;`;
     sw.onclick=()=>{edSelZone=i;renderZonePicker();renderRuleRow();};
-    // Show cell count badge
-    const cnt=edZones[i].cells.size;
-    if(cnt>0){sw.style.fontSize='.55rem';sw.style.display='flex';sw.style.alignItems='center';sw.style.justifyContent='center';sw.style.fontWeight='700';sw.style.color=col.bd;sw.textContent=cnt;}
+    const cnt=z.cells.size;
+    if(cnt>0){sw.style.display='flex';sw.style.alignItems='center';sw.style.justifyContent='center';sw.style.fontSize='.55rem';sw.style.fontWeight='700';sw.style.color=col.bd;sw.textContent=cnt;}
+    // Delete button (only if >1 zone)
+    if(edZones.length>1){
+      const del=document.createElement('div');
+      del.style.cssText='position:absolute;top:-6px;right:-6px;width:14px;height:14px;background:#c04;color:#fff;border-radius:50%;font-size:.55rem;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:5';
+      del.textContent='×';del.onclick=e=>{e.stopPropagation();deleteZone(i);};
+      sw.appendChild(del);
+    }
     p.appendChild(sw);
   });
+  // Add zone button
+  if(edZones.length<ED_COLORS.length){
+    const add=document.createElement('div');
+    add.className='zp-sw';
+    add.style.cssText='background:rgba(0,0,0,.05);border:2px dashed #ccc;display:flex;align-items:center;justify-content:center;font-size:1.1rem;color:#999;cursor:pointer;';
+    add.textContent='+';
+    add.onclick=addZone;
+    p.appendChild(add);
+  }
   renderRuleRow();
+}
+function addZone(){
+  edZones.push({cells:new Set(),rule:{type:'sum',v:4}});
+  edSelZone=edZones.length-1;
+  renderZonePicker();
+}
+function deleteZone(i){
+  edZones.splice(i,1);
+  if(edSelZone>=edZones.length)edSelZone=edZones.length-1;
+  renderEdGrid();renderZonePicker();
 }
 
 function renderRuleRow(){
@@ -1393,18 +1463,22 @@ function edShare(){
   if(!edGeneratedLevel)return;
   try{
     const enc=btoa(unescape(encodeURIComponent(JSON.stringify(edGeneratedLevel))));
-    const url=location.href.split('?')[0]+'?level='+enc;
-    if(tg?.shareURL){tg.shareURL(url,'Сыграй в мой уровень Pips!');}
-    else if(navigator.share){navigator.share({title:'Мой уровень Pips',url}).catch(()=>{});}
-    else if(navigator.clipboard){navigator.clipboard.writeText(url).then(()=>$('ed-status').textContent='✓ Ссылка скопирована! Открой её в браузере чтобы поиграть');}
-    else{prompt('Скопируй ссылку:',url);}
-  }catch(e){$('ed-status').textContent='Ошибка экспорта';}
+    const url=shareBase()+'?level='+enc;
+    if(navigator.clipboard){
+      navigator.clipboard.writeText(url).then(
+        ()=>$('ed-status').textContent='✓ Ссылка скопирована! Отправь другу — он откроет и сразу попадёт в уровень',
+        ()=>prompt('Скопируй ссылку вручную:',url)
+      );
+    } else {
+      prompt('Скопируй ссылку:',url);
+    }
+  }catch(e){$('ed-status').textContent='Ошибка: '+e.message;}
 }
 function edClear(){
-  edActive=new Set(allC(edCols,edRows).map(([c,r])=>`${c},${r}`));
-  edZones=Array.from({length:5},()=>({cells:new Set(),rule:{type:'sum',v:4}}));
+  edActive=new Set(); // ← empty, not filled
+  edZones=Array.from({length:edZones.length},(_,i)=>({cells:new Set(),rule:edZones[i]?.rule||{type:'sum',v:4}}));
   edGeneratedLevel=null;renderEdGrid();renderZonePicker();
-  $('ed-status').textContent='Очищено.';
+  $('ed-status').textContent='Очищено. Тапай клетки чтобы их добавить.';
 }
 
 /* ── Saved levels panel in editor ── */
@@ -1416,12 +1490,26 @@ function buildSavedPanel(){
     const d=new Date(lv.savedAt||0);
     const ds=`${d.getDate()}.${d.getMonth()+1}`;
     const card=document.createElement('div');card.className='sub-card';
-    card.style.cssText='background:rgba(0,0,0,.04);border:1px solid rgba(0,0,0,.1);margin-bottom:5px;';
-    card.innerHTML=`<div class="sc-badge med" style="font-size:.55rem">✏️</div>
-      <div class="sc-info"><div class="sc-name" style="color:var(--dark)">${lv.saveName||'Уровень'}</div>
+    card.style.cssText='background:rgba(0,0,0,.04);border:1px solid rgba(0,0,0,.1);margin-bottom:5px;gap:6px;';
+    const name=lv.saveName||'Уровень';
+    card.innerHTML=`
+      <div class="sc-badge med" style="font-size:.55rem;flex-shrink:0">✏️</div>
+      <div class="sc-info" style="flex:1;min-width:0"><div class="sc-name" style="color:var(--dark);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${name}</div>
       <div class="sc-meta" style="color:#888">${lv.dominoes?.length||0} костяшек · ${ds}</div></div>
-      <button onclick="event.stopPropagation();deleteSaved(${idx})" style="background:none;border:none;color:#c04;font-size:.8rem;cursor:pointer">✕</button>`;
-    card.onclick=()=>startLevel(lv);p.appendChild(card);
+      <button class="sv-share" style="background:rgba(200,150,60,.15);border:1px solid rgba(200,150,60,.3);border-radius:6px;font-size:.65rem;padding:3px 7px;cursor:pointer;color:var(--dark);flex-shrink:0" title="Скопировать ссылку">🔗</button>
+      <button class="sv-del" style="background:none;border:none;color:#c04;font-size:.9rem;cursor:pointer;padding:0 3px;flex-shrink:0" title="Удалить">✕</button>`;
+    card.querySelector('.sv-share').onclick=e=>{
+      e.stopPropagation();
+      try{
+        const enc=btoa(unescape(encodeURIComponent(JSON.stringify(lv))));
+        const url=shareBase()+'?level='+enc;
+        if(navigator.clipboard)navigator.clipboard.writeText(url).then(()=>$('ed-status').textContent='✓ Ссылка скопирована!');
+        else prompt('Ссылка:',url);
+      }catch(err){$('ed-status').textContent='Ошибка';}
+    };
+    card.querySelector('.sv-del').onclick=e=>{e.stopPropagation();deleteSaved(idx);};
+    card.onclick=()=>startLevel(lv);
+    p.appendChild(card);
   });
 }
 function deleteSaved(idx){
@@ -1491,15 +1579,37 @@ function buildPuzzleWithZones(ac,cols,rows,zones,rng){
   return{cols,rows,activeCells:ac.length===cols*rows?undefined:ac,dominoes:dVals,regions};
 }
 
-/* ══ LOAD FROM URL ══ */
+/* ══ LOAD FROM URL ══
+   Telegram appends #tgWebAppData=... to the hash, so ?level= may appear:
+   a) in location.search (normal browser) → URLSearchParams works
+   b) inside location.hash after the tg data (Telegram WebApp) → need regex in hash
+══════════════════════════════════════════ */
+function getURLLevel(){
+  // Try normal query string first
+  const qs=new URLSearchParams(location.search).get('level');
+  if(qs)return qs;
+  // Try inside hash (Telegram appends #...?level=... or #...&level=...)
+  const h=location.hash||'';
+  const m=h.match(/[?&]level=([A-Za-z0-9+/=_-]+)/);
+  return m?m[1]:null;
+}
 function loadFromURL(){
   try{
-    const p=new URLSearchParams(location.search).get('level');
+    const p=getURLLevel();
     if(!p)return false;
-    const lv=JSON.parse(decodeURIComponent(escape(atob(p))));
-    if(lv&&lv.dominoes&&lv.regions){lv.name=lv.name||'УРОВЕНЬ';startLevel(lv);return true;}
-  }catch(e){}
+    // Support both standard base64 and url-safe base64
+    const b64=p.replace(/-/g,'+').replace(/_/g,'/');
+    const lv=JSON.parse(decodeURIComponent(escape(atob(b64))));
+    if(lv&&lv.dominoes&&lv.regions){
+      lv.name=lv.name||'УРОВЕНЬ';lv.fromURL=true;
+      startLevel(lv);return true;
+    }
+  }catch(e){console.warn('loadFromURL error:',e);}
   return false;
+}
+/* Clean share base: strip Telegram hash and any existing ?level= */
+function shareBase(){
+  return location.protocol+'//'+location.host+location.pathname;
 }
 
 /* ══ INIT ══ */
