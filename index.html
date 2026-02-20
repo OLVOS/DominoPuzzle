@@ -63,9 +63,36 @@ body{font-family:'DM Mono',monospace;background:var(--cream);}
 .lg{display:flex;align-items:center;gap:4px;background:white;border:1px solid #ddd;border-radius:7px;padding:2px 7px;font-size:.58rem;color:#444;font-weight:500;}
 .lg-dot{width:10px;height:10px;border-radius:2px;border:2px solid;flex-shrink:0;}
 
-/* Grid — static, fits screen without scroll */
-#grid-outer{flex-shrink:0;margin-bottom:4px;display:flex;align-items:center;justify-content:center;}
-#grid-wrap{background:var(--wood);padding:7px;border-radius:13px;box-shadow:0 6px 20px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.07);position:relative;display:inline-block;}
+/* Grid — horizontal scroll when too wide, static vertically */
+#grid-outer{flex-shrink:0;margin-bottom:4px;overflow-x:auto;overflow-y:visible;-webkit-overflow-scrolling:touch;width:100%;display:flex;align-items:flex-start;justify-content:center;}
+#grid-wrap{background:var(--wood);padding:7px;border-radius:13px;box-shadow:0 6px 20px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.07);position:relative;display:inline-block;flex-shrink:0;}
+
+/* ══ EDITOR ══ */
+#editor{background:var(--cream);justify-content:flex-start;padding:0 10px 8px;overflow:hidden;}
+.ed-header{width:100%;display:flex;align-items:center;gap:6px;padding:8px 0 4px;flex-shrink:0;}
+.ed-title{font-family:'Playfair Display',serif;font-size:.9rem;font-weight:700;color:var(--dark);letter-spacing:2px;flex:1;text-align:center;}
+.btn-play-ed{background:linear-gradient(135deg,var(--gold),#7a4a10);color:var(--dark);border:none;font-family:'Playfair Display',serif;font-size:.72rem;font-weight:700;letter-spacing:1px;padding:6px 12px;border-radius:8px;cursor:pointer;}
+.ed-size-row{display:flex;align-items:center;gap:6px;margin-bottom:6px;flex-shrink:0;}
+.ed-size-lbl{font-size:.6rem;letter-spacing:1px;color:#888;}
+.ed-dim{font-size:.8rem;font-weight:700;color:var(--dark);min-width:18px;text-align:center;}
+.ed-dim-btn{background:var(--dark);color:var(--gold2);border:none;width:24px;height:24px;border-radius:6px;font-size:.9rem;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;}
+.ed-toolbar{display:flex;gap:4px;margin-bottom:6px;flex-shrink:0;}
+.ed-tab{flex:1;border:none;border-radius:8px;font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:1px;padding:7px;cursor:pointer;background:rgba(0,0,0,.08);color:#888;transition:all .15s;}
+.ed-tab.active{background:var(--dark);color:var(--gold2);}
+#zone-panel{flex-shrink:0;margin-bottom:6px;}
+.zone-picker{display:flex;gap:6px;margin-bottom:6px;justify-content:center;}
+.zp-sw{width:30px;height:30px;border-radius:8px;cursor:pointer;border:3px solid transparent;transition:border-color .1s;}
+.zp-sw.sel{border-color:var(--dark);}
+.rule-row{display:flex;align-items:center;gap:5px;justify-content:center;flex-wrap:wrap;}
+#ed-grid-outer{overflow:auto;-webkit-overflow-scrolling:touch;flex-shrink:0;margin-bottom:6px;display:flex;justify-content:center;}
+#ed-grid-wrap{background:var(--wood);padding:6px;border-radius:12px;display:inline-block;}
+#ed-grid{display:grid;gap:3px;}
+.ed-cell{border-radius:5px;cursor:pointer;transition:background .08s,border .08s;border:2px solid transparent;}
+.ed-cell.ec-inactive{background:rgba(0,0,0,.45);border-color:transparent;}
+.ed-cell.ec-free{background:#e8e2d8;border-color:#c0b8a8;}
+#ed-status{font-size:.6rem;color:#777;text-align:center;min-height:13px;flex-shrink:0;margin-bottom:4px;}
+.ed-actions{display:flex;gap:5px;flex-wrap:wrap;justify-content:center;flex-shrink:0;}
+.btn-regen{background:rgba(200,150,60,.18);color:var(--gold);border:1.5px solid rgba(200,150,60,.4);font-family:'DM Mono',monospace;font-size:.58rem;letter-spacing:1px;padding:5px 10px;border-radius:7px;cursor:pointer;}
 #grid{display:grid;position:relative;z-index:1;}
 .cell{border-radius:6px;cursor:pointer;position:relative;flex-shrink:0;transition:background .08s;}
 .cell.active{background:#e8e2d8;border:2px solid #c0b8a8;}
@@ -154,11 +181,21 @@ body{font-family:'DM Mono',monospace;background:var(--cream);}
 
   <div class="divider"></div>
 
-  <button class="menu-btn primary" onclick="startRandom()">
+  <button class="menu-btn primary" onclick="toggleSub('rnd')">
     <div class="mb-icon">⚄</div>
     <div class="mb-text">
       <span class="mb-title">СЛУЧАЙНЫЙ</span>
-      <span class="mb-sub">генерируется каждый раз</span>
+      <span class="mb-sub">easy / medium / hard</span>
+    </div>
+    <span class="mb-arr" id="rnd-arr">›</span>
+  </button>
+  <div class="sub-panel" id="rnd-panel"></div>
+
+  <button class="menu-btn secondary" onclick="openEditor()">
+    <div class="mb-icon">✏️</div>
+    <div class="mb-text">
+      <span class="mb-title">РЕДАКТОР</span>
+      <span class="mb-sub">создай свой уровень</span>
     </div>
   </button>
 </div>
@@ -171,7 +208,10 @@ body{font-family:'DM Mono',monospace;background:var(--cream);}
       <div class="game-title" id="gtitle">PIPS</div>
       <div class="game-timer" id="timer">00:00</div>
     </div>
-    <div class="game-badge rnd" id="gbadge"></div>
+    <div style="display:flex;align-items:center;gap:5px">
+      <button class="btn-regen" id="btn-regen" onclick="regenRandom()" style="display:none">⟳</button>
+      <div class="game-badge rnd" id="gbadge"></div>
+    </div>
   </div>
   <div id="legend"></div>
   <div id="grid-outer">
@@ -192,7 +232,55 @@ body{font-family:'DM Mono',monospace;background:var(--cream);}
   <div id="hand"></div>
 </div>
 
-<div id="ghost" class="dom-tile"></div>
+<!-- ══ EDITOR ══ -->
+<div class="screen hidden" id="editor">
+  <div class="ed-header">
+    <button class="btn-back" onclick="showScreen('menu')">← МЕНЮ</button>
+    <div class="ed-title">РЕДАКТОР</div>
+    <button class="btn-play-ed" onclick="edPlay()">▶ ИГРАТЬ</button>
+  </div>
+
+  <!-- Grid size -->
+  <div class="ed-size-row" style="justify-content:center">
+    <span class="ed-size-lbl">КОЛОНКИ</span>
+    <button class="ed-dim-btn" onclick="edResize(-1,0)">−</button>
+    <span class="ed-dim" id="ed-cols-lbl">6</span>
+    <button class="ed-dim-btn" onclick="edResize(1,0)">+</button>
+    <span class="ed-size-lbl" style="margin-left:8px">СТРОКИ</span>
+    <button class="ed-dim-btn" onclick="edResize(0,-1)">−</button>
+    <span class="ed-dim" id="ed-rows-lbl">4</span>
+    <button class="ed-dim-btn" onclick="edResize(0,1)">+</button>
+  </div>
+
+  <!-- Mode tabs -->
+  <div class="ed-toolbar">
+    <button class="ed-tab active" id="tab-cells" onclick="edMode('cells')">☐ КЛЕТКИ</button>
+    <button class="ed-tab" id="tab-zones" onclick="edMode('zones')">◈ ЗОНЫ</button>
+  </div>
+
+  <!-- Zone panel -->
+  <div id="zone-panel" style="display:none">
+    <div class="zone-picker" id="zone-picker"></div>
+    <div class="rule-row" id="rule-row"></div>
+  </div>
+
+  <!-- Editor grid -->
+  <div id="ed-grid-outer">
+    <div id="ed-grid-wrap">
+      <div id="ed-grid"></div>
+    </div>
+  </div>
+
+  <div id="ed-status">Тапай клетки чтобы активировать / деактивировать</div>
+
+  <div class="ed-actions">
+    <button class="ctrl" onclick="edGenerate()">⚙ ГЕНЕРИРОВАТЬ</button>
+    <button class="ctrl lite" onclick="edShare()">🔗 ПОДЕЛИТЬСЯ</button>
+    <button class="ctrl lite" onclick="edClear()">↺ ОЧИСТИТЬ</button>
+  </div>
+</div>
+
+
 <div id="win-ov">
   <div class="win-t">✦ ПОБЕДА ✦</div>
   <div class="win-time" id="wtime"></div>
@@ -738,6 +826,7 @@ function toggleSub(id){
   if(isOpen){
     if(id==='tut'&&!panel.children.length)buildTutPanel();
     if(id==='day'&&!panel.children.length)buildDayPanel();
+    if(id==='rnd'&&!panel.children.length)buildRndPanel();
   }
 }
 function buildTutPanel(){
@@ -762,20 +851,37 @@ function buildDayPanel(){
     card.onclick=()=>startLevel(getDailyLevel(diff));p.appendChild(card);
   });
 }
+function buildRndPanel(){
+  const p=$('rnd-panel');
+  DIFFS.forEach(diff=>{
+    const card=document.createElement('div');card.className='sub-card';
+    card.innerHTML=`<div class="sc-badge ${diff}">${DIFF_LABELS[diff][0]}</div>
+      <div class="sc-info"><div class="sc-name">${DIFF_LABELS[diff]}</div>
+      <div class="sc-meta">новый каждый раз</div></div>
+      <span class="sc-stars">${DIFF_STARS[diff]}</span>`;
+    card.onclick=()=>startRandom(diff);p.appendChild(card);
+  });
+}
 function initMenu(){
   const d=new Date();
   const mo=['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'][d.getMonth()];
   $('day-date').textContent=`${d.getDate()} ${mo} · easy / medium / hard`;
 }
 function goMenu(){$('win-ov').classList.remove('on');tReset();showScreen('menu');}
-function startRandom(){
-  const diff=DIFFS[Math.floor(Math.random()*3)];
+function startRandom(diff){
+  diff=diff||(DIFFS[Math.floor(Math.random()*3)]);
   const lv=genPuzzle(diff,()=>Math.random());
-  lv.name='СЛУЧАЙНЫЙ';lv.diff=diff;startLevel(lv);
+  lv.name='СЛУЧАЙНЫЙ';lv.diff=diff;lv.isRandom=true;lv.randomDiff=diff;
+  startLevel(lv);
 }
-function winNext(){
-  $('win-ov').classList.remove('on');startRandom();
+function regenRandom(){
+  const diff=puzzle?.randomDiff||'med';
+  $('win-ov').classList.remove('on');
+  tReset();
+  startRandom(diff);
 }
+function winNext(){$('win-ov').classList.remove('on');startRandom();}
+function openEditor(){initEditor();showScreen('editor');}
 function startLevel(lv){
   puzzle=JSON.parse(JSON.stringify(lv));
   board={};placements={};usedDom=new Set();
@@ -783,8 +889,7 @@ function startLevel(lv){
   tReset();buildGame();showScreen('game');
 }
 function showScreen(n){
-  $('menu').classList.toggle('hidden',n!=='menu');
-  $('game').classList.toggle('hidden',n!=='game');
+  ['menu','game','editor'].forEach(s=>$(s).classList.toggle('hidden',s!==n));
 }
 
 /* ══════════════════════════════════════════
@@ -799,26 +904,28 @@ function tStart(){if(timerOn)return;timerOn=true;timerIv=setInterval(()=>{timerS
 function tStop(){clearInterval(timerIv);timerIv=null;}
 function tReset(){tStop();timerSecs=0;timerOn=false;$('timer').textContent='00:00';}
 
-/* ══ BUILD GAME — fits grid to screen without scroll ══ */
+/* ══ BUILD GAME — fits grid to screen, scroll if needed ══ */
 function buildGame(){
   $('gtitle').textContent=puzzle.name||'PIPS';
   const b=$('gbadge');b.className='game-badge '+(puzzle.diff||'rnd');
   b.textContent=DIFF_LABELS[puzzle.diff]||'RANDOM';
+  // Show regen button only for random levels
+  $('btn-regen').style.display=puzzle.isRandom?'':'none';
 
-  // ── Screen fit: compute CELL so grid fits without scroll ──
-  // Measure actual available space
+  // ── Screen fit: compute CELL to fit height; allow horizontal scroll ──
   const nDom=puzzle.dominoes.length;
-  const handRows=Math.ceil(nDom/5); // ~5 slots per row
-  const handH=Math.min(handRows*76+10, 160); // cap hand area
-  const headerH=46, legendH=puzzle.regions.length>0?30:0;
-  const statusH=18, controlsH=40, padH=24, gridBorder=14;
+  const handRows=Math.ceil(nDom/5);
+  const handH=Math.min(handRows*76+10,160);
+  const headerH=46,legendH=puzzle.regions.length>0?28:0;
+  const statusH=16,controlsH=38,padH=20,gridBorder=14;
   const reservedH=headerH+legendH+statusH+controlsH+handH+padH+gridBorder;
-  const availW=Math.min(window.innerWidth,460)-20-gridBorder;
   const availH=window.innerHeight-reservedH;
+  const availW=Math.min(window.innerWidth,500)-20-gridBorder;
 
-  const cellW=Math.floor((availW+GAP)/puzzle.cols)-GAP;
-  const cellH=availH>0?Math.floor((availH+GAP)/puzzle.rows)-GAP:cellW;
-  CELL=Math.max(30,Math.min(58,Math.min(cellW,cellH)));
+  // Scale by height primarily; allow width to scroll
+  const cellByH=availH>60?Math.floor((availH+GAP)/puzzle.rows)-GAP:40;
+  const cellByW=Math.floor((availW+GAP)/puzzle.cols)-GAP;
+  CELL=Math.max(24,Math.min(58,Math.min(cellByH,cellByW)));
   STEP=CELL+GAP;
 
   activeSet.clear();
@@ -1056,8 +1163,223 @@ function onDU(e){
 }
 function endDrag(){isDrag=false;ghost.classList.remove('on');document.removeEventListener('pointermove',onDM);}
 
+/* ══════════════════════════════════════════
+   EDITOR
+══════════════════════════════════════════ */
+let edCols=6,edRows=4,edActive=new Set(),edZones=[],edSelZone=0,edEditMode='cells',edGeneratedLevel=null;
+
+function initEditor(){
+  edCols=6;edRows=4;edEditMode='cells';edSelZone=0;edGeneratedLevel=null;
+  edActive=new Set(allC(edCols,edRows).map(([c,r])=>`${c},${r}`));
+  edZones=Array.from({length:5},()=>({cells:new Set(),rule:{type:'sum',v:4}}));
+  $('ed-cols-lbl').textContent=edCols;$('ed-rows-lbl').textContent=edRows;
+  $('tab-cells').classList.add('active');$('tab-zones').classList.remove('active');
+  $('zone-panel').style.display='none';
+  renderEdGrid();renderZonePicker();
+  $('ed-status').textContent='Тапай клетки чтобы активировать / деактивировать';
+}
+
+function edResize(dc,dr){
+  edCols=Math.max(2,Math.min(12,edCols+dc));
+  edRows=Math.max(2,Math.min(8,edRows+dr));
+  $('ed-cols-lbl').textContent=edCols;$('ed-rows-lbl').textContent=edRows;
+  // Trim cells/zones outside new bounds
+  const prune=k=>{const[c,r]=k.split(',').map(Number);return c>=edCols||r>=edRows;};
+  for(const k of [...edActive])if(prune(k))edActive.delete(k);
+  edZones.forEach(z=>{for(const k of [...z.cells])if(prune(k))z.cells.delete(k);});
+  edGeneratedLevel=null;renderEdGrid();
+}
+
+function edMode(m){
+  edEditMode=m;
+  $('tab-cells').classList.toggle('active',m==='cells');
+  $('tab-zones').classList.toggle('active',m==='zones');
+  $('zone-panel').style.display=m==='zones'?'':'none';
+  $('ed-status').textContent=m==='cells'?'Тапай клетки чтобы активировать/деактивировать':'Выбери зону → крась клетки';
+}
+
+function renderEdGrid(){
+  const edCell=Math.max(26,Math.min(46,Math.floor((window.innerWidth-48)/edCols)));
+  const g=$('ed-grid');
+  g.style.gridTemplateColumns=`repeat(${edCols},${edCell}px)`;
+  g.style.gridTemplateRows=`repeat(${edRows},${edCell}px)`;
+  g.style.gap='3px';g.innerHTML='';
+  for(let r=0;r<edRows;r++){
+    for(let c=0;c<edCols;c++){
+      const k=`${c},${r}`;
+      const el=document.createElement('div');el.className='ed-cell';
+      el.style.width=el.style.height=edCell+'px';
+      const isActive=edActive.has(k);
+      const zi=edZones.findIndex(z=>z.cells.has(k));
+      if(!isActive){el.classList.add('ec-inactive');}
+      else if(zi>=0){const col=ZC[zi%ZC.length];el.style.background=col.bg;el.style.borderColor=col.bd;el.style.borderStyle='solid';el.style.borderWidth='2px';}
+      else{el.classList.add('ec-free');}
+      el.addEventListener('pointerdown',e=>{e.preventDefault();edCellTap(c,r);},{passive:false});
+      g.appendChild(el);
+    }
+  }
+}
+
+let edPainting=false,edPaintState=null;
+function edCellTap(c,r){
+  const k=`${c},${r}`;
+  if(edEditMode==='cells'){
+    const nowActive=!edActive.has(k);
+    if(nowActive)edActive.add(k);else{edActive.delete(k);edZones.forEach(z=>z.cells.delete(k));}
+  } else {
+    if(!edActive.has(k))return;
+    const z=edZones[edSelZone];
+    if(z.cells.has(k)){z.cells.delete(k);}
+    else{edZones.forEach((oz,i)=>{if(i!==edSelZone)oz.cells.delete(k);});z.cells.add(k);}
+  }
+  edGeneratedLevel=null;renderEdGrid();
+}
+
+function renderZonePicker(){
+  const p=$('zone-picker');p.innerHTML='';
+  ZC.forEach((col,i)=>{
+    const sw=document.createElement('div');sw.className='zp-sw'+(i===edSelZone?' sel':'');
+    sw.style.cssText=`background:${col.bg};border:3px solid ${i===edSelZone?'var(--dark)':col.bd};`;
+    sw.onclick=()=>{edSelZone=i;renderZonePicker();renderRuleRow();};
+    // Show cell count badge
+    const cnt=edZones[i].cells.size;
+    if(cnt>0){sw.style.fontSize='.55rem';sw.style.display='flex';sw.style.alignItems='center';sw.style.justifyContent='center';sw.style.fontWeight='700';sw.style.color=col.bd;sw.textContent=cnt;}
+    p.appendChild(sw);
+  });
+  renderRuleRow();
+}
+
+function renderRuleRow(){
+  const z=edZones[edSelZone];const rr=$('rule-row');rr.innerHTML='';
+  const types=['eq','neq','sum','gt','lt'];
+  const lbls={eq:'= одинак.',neq:'≠ разные',sum:'сумма=N',gt:'сумма>N',lt:'сумма<N'};
+  const typeBtn=document.createElement('button');typeBtn.className='ctrl lite';typeBtn.style.fontSize='.58rem';
+  typeBtn.textContent=lbls[z.rule.type]||'?';
+  typeBtn.onclick=()=>{
+    const idx=types.indexOf(z.rule.type);z.rule.type=types[(idx+1)%types.length];
+    if(!['sum','gt','lt'].includes(z.rule.type)){delete z.rule.v;}
+    else if(z.rule.v===undefined){z.rule.v=4;}
+    renderRuleRow();
+  };
+  rr.appendChild(typeBtn);
+  if(['sum','gt','lt'].includes(z.rule.type)){
+    const m=document.createElement('button');m.className='ed-dim-btn';m.textContent='−';
+    m.onclick=()=>{z.rule.v=Math.max(0,(z.rule.v||0)-1);renderRuleRow();};
+    const vEl=document.createElement('div');vEl.className='opill';vEl.textContent=z.rule.v??0;
+    const pl=document.createElement('button');pl.className='ed-dim-btn';pl.textContent='+';
+    pl.onclick=()=>{z.rule.v=Math.min(60,(z.rule.v||0)+1);renderRuleRow();};
+    rr.appendChild(m);rr.appendChild(vEl);rr.appendChild(pl);
+  }
+}
+
+function edGenerate(){
+  const ac=[...edActive].map(k=>k.split(',').map(Number));
+  if(ac.length<4){$('ed-status').textContent='Нужно минимум 4 активные клетки';return;}
+  if(ac.length%2!==0){$('ed-status').textContent='Число клеток должно быть чётным';return;}
+  const zones=edZones.filter(z=>z.cells.size>=2).map(z=>({cells:[...z.cells].map(k=>k.split(',').map(Number)),rule:{...z.rule}}));
+  const lv=buildPuzzleWithZones(ac,edCols,edRows,zones,()=>Math.random());
+  if(!lv){$('ed-status').textContent='Не удалось разбить на домино — измени форму';return;}
+  lv.name='МОЙ УРОВЕНЬ';lv.diff='rnd';
+  edGeneratedLevel=lv;
+  $('ed-status').textContent=`Готово! ${lv.dominoes.length} костяшек, ${lv.regions.length} зон · нажми ▶ ИГРАТЬ`;
+}
+function edPlay(){
+  if(!edGeneratedLevel)edGenerate();
+  if(edGeneratedLevel){startLevel(edGeneratedLevel);}
+}
+function edShare(){
+  if(!edGeneratedLevel)edGenerate();
+  if(!edGeneratedLevel)return;
+  try{
+    const enc=btoa(unescape(encodeURIComponent(JSON.stringify(edGeneratedLevel))));
+    const url=location.href.split('?')[0]+'?level='+enc;
+    if(navigator.clipboard){navigator.clipboard.writeText(url).then(()=>$('ed-status').textContent='✓ Ссылка скопирована!');}
+    else{prompt('Скопируй ссылку:',url);}
+  }catch(e){$('ed-status').textContent='Ошибка экспорта';}
+}
+function edClear(){
+  edActive=new Set(allC(edCols,edRows).map(([c,r])=>`${c},${r}`));
+  edZones=Array.from({length:5},()=>({cells:new Set(),rule:{type:'sum',v:4}}));
+  edGeneratedLevel=null;renderEdGrid();renderZonePicker();
+  $('ed-status').textContent='Очищено.';
+}
+
+/* ── Build puzzle from editor zones ── */
+function buildPuzzleWithZones(ac,cols,rows,zones,rng){
+  const setA=new Set(ac.map(([c,r])=>`${c},${r}`));
+  const sorted=[...ac].sort((a,b)=>a[1]!==b[1]?a[1]-b[1]:a[0]-b[0]);
+  const tOf={},placed=[];
+  function tile(i){
+    if(i>=sorted.length)return true;
+    const[c,r]=sorted[i];const k=`${c},${r}`;if(tOf[k]!==undefined)return tile(i+1);
+    const dirs=shu([[1,0],[0,1]],rng);
+    for(const[dc,dr]of dirs){
+      const k2=`${c+dc},${r+dr}`;if(!setA.has(k2)||tOf[k2]!==undefined)continue;
+      const di=placed.length;tOf[k]=di;tOf[k2]=di;placed.push([[c,r],[c+dc,r+dr]]);
+      if(tile(i+1))return true;placed.pop();delete tOf[k];delete tOf[k2];
+    }
+    return false;
+  }
+  if(!tile(0))return null;
+  const dVals=placed.map(()=>[0,0]);
+  function setCell(c,r,v){const di=tOf[`${c},${r}`];const[[c0,r0]]=placed[di];dVals[di][(c===c0&&r===r0)?0:1]=v;}
+  function getCell(c,r){const di=tOf[`${c},${r}`];const[[c0,r0]]=placed[di];return dVals[di][(c===c0&&r===r0)?0:1];}
+
+  const regions=[];
+  for(const z of zones){
+    const cells=z.cells.filter(([c,r])=>setA.has(`${c},${r}`));
+    if(cells.length<2)continue;
+    const n=cells.length,rule=z.rule;
+    if(rule.type==='eq'){
+      const v=rInt(1,5,rng);cells.forEach(([c,r])=>setCell(c,r,v));
+      regions.push({rule:{type:'eq'},cells});
+    } else if(rule.type==='neq'){
+      const pool=shu([0,1,2,3,4,5].slice(0,Math.max(n,4)),rng).slice(0,n);
+      cells.forEach(([c,r],i)=>setCell(c,r,pool[i]));
+      regions.push({rule:{type:'neq'},cells});
+    } else if(rule.type==='sum'){
+      const target=rule.v??n*2;let rem=target;
+      cells.forEach(([c,r],i)=>{const left=n-i-1;const v=rInt(Math.max(0,rem-left*5),Math.min(5,rem),rng);setCell(c,r,v);rem-=v;});
+      regions.push({rule:{type:'sum',v:cells.reduce((a,[c,r])=>a+getCell(c,r),0)},cells});
+    } else if(rule.type==='gt'){
+      const thresh=rule.v??0;let target=Math.max(thresh+1,rInt(thresh+1,Math.min(n*5,thresh+n*2+2),rng));
+      let rem=target;
+      cells.forEach(([c,r],i)=>{const left=n-i-1;const v=rInt(Math.max(0,rem-left*5),Math.min(5,rem),rng);setCell(c,r,v);rem-=v;});
+      regions.push({rule:{type:'gt',v:thresh},cells});
+    } else { // lt
+      const thresh=rule.v??n*5;let target=Math.min(thresh-1,rInt(0,thresh-1,rng));
+      let rem=Math.max(0,target);
+      cells.forEach(([c,r],i)=>{const left=n-i-1;const v=rInt(Math.max(0,rem-left*5),Math.min(5,rem),rng);setCell(c,r,v);rem-=v;});
+      regions.push({rule:{type:'lt',v:thresh},cells});
+    }
+  }
+  // Fill unzoned cells randomly
+  const zonedSet=new Set(zones.flatMap(z=>z.cells).map(([c,r])=>`${c},${r}`));
+  placed.forEach(([[c1,r1],[c2,r2]],di)=>{
+    if(!zonedSet.has(`${c1},${r1}`))dVals[di][0]=rInt(0,5,rng);
+    if(!zonedSet.has(`${c2},${r2}`))dVals[di][1]=rInt(0,5,rng);
+  });
+  if(regions.length===0){
+    // No zones - auto-assign like normal generator
+    const autoLv=buildPuzzle(ac,cols,rows,rng);
+    return autoLv;
+  }
+  return{cols,rows,activeCells:ac.length===cols*rows?undefined:ac,dominoes:dVals,regions};
+}
+
+/* ══ LOAD FROM URL ══ */
+function loadFromURL(){
+  try{
+    const p=new URLSearchParams(location.search).get('level');
+    if(!p)return false;
+    const lv=JSON.parse(decodeURIComponent(escape(atob(p))));
+    if(lv&&lv.dominoes&&lv.regions){lv.name=lv.name||'УРОВЕНЬ';startLevel(lv);return true;}
+  }catch(e){}
+  return false;
+}
+
 /* ══ INIT ══ */
-initMenu();
+if(!loadFromURL())initMenu();
 </script>
 </body>
 </html>
