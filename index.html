@@ -1,848 +1,556 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-<title>Pips</title>
-<style>
-:root{--cream:#f5efe3;--dark:#1b1208;--gold:#c8963e;--gold2:#f0c060;--wood:#3b1e0c;}
-*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;user-select:none;}
-html,body{height:100%;overflow:hidden;touch-action:none;}
-body{font-family:'DM Mono',monospace;background:var(--cream);}
-.screen{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;overflow:hidden;transition:opacity .25s,transform .25s;}
-.screen.hidden{opacity:0;pointer-events:none;transform:scale(.97);}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+    <title>Pips: Domino Puzzle & Editor</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --cream: #f5efe3;
+            --dark: #1b1208;
+            --gold: #c8963e;
+            --gold2: #f0c060;
+            --wood: #3b1e0c;
+            --sel-glow: 0 0 15px rgba(240, 192, 96, 0.8);
+        }
 
-/* ══ MENU ══ */
-#menu{background:radial-gradient(ellipse at 30% 20%,#2d1a06,#080503);justify-content:center;gap:0;padding:24px 20px;}
-.menu-title{font-family:'Playfair Display',serif;font-size:3rem;font-weight:900;color:var(--gold2);letter-spacing:6px;text-shadow:0 0 40px rgba(200,150,60,.45);line-height:1;margin-bottom:4px;}
-.menu-sub{font-size:.55rem;letter-spacing:8px;color:#b89060;text-transform:uppercase;margin-bottom:22px;}
-.divider{width:80px;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:16px auto;}
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; user-select: none; }
+        html, body { height: 100%; overflow: hidden; touch-action: none; font-family: 'DM Mono', monospace; background: var(--cream); }
 
-.menu-btn{width:100%;max-width:300px;border:none;border-radius:14px;cursor:pointer;display:flex;align-items:center;gap:14px;padding:14px 18px;transition:all .15s;margin-bottom:10px;}
-.menu-btn:active{transform:scale(.97);}
-.menu-btn.primary{background:linear-gradient(135deg,#c8963e,#7a4a10);box-shadow:0 4px 0 rgba(0,0,0,.4);}
-.menu-btn.secondary{background:rgba(255,255,255,.06);border:1.5px solid rgba(200,150,60,.3);}
-.menu-btn.daily-btn{background:rgba(47,120,193,.12);border:1.5px solid rgba(47,120,193,.35);}
-.mb-icon{font-size:1.5rem;flex-shrink:0;width:34px;text-align:center;}
-.mb-text{text-align:left;flex:1;}
-.mb-title{font-family:'Playfair Display',serif;font-size:.9rem;font-weight:700;color:var(--gold2);letter-spacing:1px;display:block;}
-.menu-btn.secondary .mb-title,.menu-btn.daily-btn .mb-title{color:#d0c090;}
-.mb-sub{font-size:.53rem;letter-spacing:1px;color:#806040;display:block;margin-top:2px;}
-.menu-btn.daily-btn .mb-sub{color:#5a88b5;}
-.mb-arr{font-size:.8rem;color:#806040;transition:transform .2s;}
-.mb-arr.open{transform:rotate(90deg);}
+        .screen { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; overflow: hidden; transition: opacity .25s, transform .25s; }
+        .screen.hidden { opacity: 0; pointer-events: none; transform: scale(.97); }
 
-/* Expandable sub-panels */
-.sub-panel{width:100%;max-width:300px;overflow:hidden;max-height:0;transition:max-height .3s ease;}
-.sub-panel.open{max-height:320px;}
-.sub-card{background:rgba(255,255,255,.04);border:1px solid rgba(200,150,60,.18);border-radius:10px;padding:9px 14px;display:flex;align-items:center;gap:10px;cursor:pointer;color:var(--cream);margin-bottom:6px;transition:background .12s;}
-.sub-card:active{background:rgba(200,150,60,.12);}
-.sc-badge{width:30px;height:30px;border-radius:7px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;font-family:'Playfair Display',serif;color:var(--dark);}
-.sc-badge.easy{background:linear-gradient(135deg,#4caf50,#2d7a30);}
-.sc-badge.med{background:linear-gradient(135deg,#c8963e,#7a4a10);}
-.sc-badge.hard{background:linear-gradient(135deg,#c14040,#7a1818);}
-.sc-info{flex:1;}.sc-name{font-size:.7rem;letter-spacing:.5px;}.sc-meta{font-size:.53rem;color:#a08050;margin-top:1px;}
-.sc-stars{font-size:.7rem;color:var(--gold2);}
+        /* ══ MENU ══ */
+        #menu { background: radial-gradient(ellipse at 30% 20%, #2d1a06, #080503); justify-content: center; padding: 24px 20px; }
+        .menu-title { font-family: 'Playfair Display', serif; font-size: 3.5rem; font-weight: 900; color: var(--gold2); letter-spacing: 6px; text-shadow: 0 0 40px rgba(200, 150, 60, .45); line-height: 1; margin-bottom: 8px; }
+        .menu-sub { font-size: .6rem; letter-spacing: 8px; color: #b89060; text-transform: uppercase; margin-bottom: 30px; }
+        .menu-btn { width: 100%; max-width: 300px; border: none; border-radius: 14px; cursor: pointer; display: flex; align-items: center; gap: 14px; padding: 14px 18px; transition: all .15s; margin-bottom: 10px; color: var(--cream); }
+        .menu-btn:active { transform: scale(.97); }
+        .menu-btn.primary { background: linear-gradient(135deg, #c8963e, #7a4a10); box-shadow: 0 4px 0 rgba(0,0,0,.4); }
+        .menu-btn.editor-btn { background: rgba(200, 150, 60, .15); border: 1.5px solid var(--gold); }
+        .mb-icon { font-size: 1.5rem; width: 34px; text-align: center; }
+        .mb-text { text-align: left; flex: 1; }
+        .mb-title { font-family: 'Playfair Display', serif; font-size: .9rem; font-weight: 700; color: var(--gold2); display: block; }
+        .mb-sub { font-size: .55rem; color: #806040; margin-top: 2px; }
 
-/* ══ GAME ══ */
-#game{background:var(--cream);justify-content:flex-start;padding:0 10px 6px;overflow:hidden;}
-.game-header{width:100%;display:flex;align-items:center;gap:8px;padding:8px 0 4px;flex-shrink:0;}
-.btn-back{background:var(--dark);color:var(--gold2);border:none;font-size:.62rem;letter-spacing:2px;padding:6px 11px;border-radius:7px;cursor:pointer;flex-shrink:0;}
-.gh-center{flex:1;display:flex;flex-direction:column;align-items:center;gap:0;}
-.game-title{font-family:'Playfair Display',serif;font-size:.92rem;font-weight:700;color:var(--dark);letter-spacing:2px;}
-.game-timer{font-size:.82rem;color:var(--gold);letter-spacing:4px;}
-.game-badge{font-size:.58rem;flex-shrink:0;padding:3px 8px;border-radius:6px;font-weight:600;letter-spacing:1px;}
-.game-badge.easy{background:#e8f5e9;color:#2d7a30;}
-.game-badge.med{background:#fff3e0;color:#7a4a10;}
-.game-badge.hard{background:#fce8e8;color:#7a1818;}
-.game-badge.rnd{background:rgba(0,0,0,.07);color:#555;}
+        /* ══ GAMEPLAY ══ */
+        #game, #editor { background: var(--cream); padding: 0 10px 10px; }
+        .header { width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 10px 0; flex-shrink: 0; }
+        .btn-ui { background: var(--dark); color: var(--gold2); border: none; font-size: .65rem; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-family: 'DM Mono'; font-weight: bold; }
 
-#legend{display:flex;flex-wrap:wrap;gap:4px;justify-content:center;margin-bottom:4px;flex-shrink:0;}
-.lg{display:flex;align-items:center;gap:4px;background:white;border:1px solid #ddd;border-radius:7px;padding:2px 7px;font-size:.58rem;color:#444;font-weight:500;}
-.lg-dot{width:10px;height:10px;border-radius:2px;border:2px solid;flex-shrink:0;}
+        #grid-outer { flex: 1; display: flex; align-items: center; justify-content: center; width: 100%; overflow: hidden; }
+        #grid-wrap { background: var(--wood); padding: 8px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); position: relative; }
+        #grid { display: grid; position: relative; z-index: 1; }
 
-/* Grid — static, fits screen without scroll */
-#grid-outer{flex-shrink:0;margin-bottom:4px;display:flex;align-items:center;justify-content:center;}
-#grid-wrap{background:var(--wood);padding:7px;border-radius:13px;box-shadow:0 6px 20px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.07);position:relative;display:inline-block;}
-#grid{display:grid;position:relative;z-index:1;}
-.cell{border-radius:6px;cursor:pointer;position:relative;flex-shrink:0;transition:background .08s;}
-.cell.active{background:#e8e2d8;border:2px solid #c0b8a8;}
-.cell.inactive{background:transparent!important;border:none!important;pointer-events:none;}
-.cell.hl-ok{background:#d0e8f8!important;border-color:#3a80d9!important;}
-.cell.hl-bad{background:#f8d8d8!important;border-color:#c03030!important;}
-.cell.win-c{animation:winpulse .65s ease infinite alternate;}
-@keyframes winpulse{from{box-shadow:0 0 0 2px #3a9c55 inset;}to{box-shadow:0 0 0 3px #3a9c55 inset,0 0 10px rgba(58,156,85,.3);}}
+        .cell { border-radius: 6px; cursor: pointer; transition: background 0.1s; position: relative; }
+        .cell.active { background: #e8e2d8; border: 2px solid #c0b8a8; }
+        .cell.inactive { background: transparent; border: 1px dashed rgba(0,0,0,0.1); }
+        .cell.sel-ed { outline: 3px solid var(--gold2); outline-offset: -3px; box-shadow: var(--sel-glow); z-index: 5; }
 
-#dom-layer{position:absolute;left:7px;top:7px;z-index:8;pointer-events:none;}
-#zone-overlay{position:absolute;left:7px;top:7px;z-index:15;pointer-events:none;}
-.zo{position:absolute;border-radius:5px;border:2px solid;pointer-events:none;background:transparent;transition:background .2s;}
-.zo.err{background:rgba(200,50,50,.2);animation:zpulse 1.2s ease infinite;}
-@keyframes zpulse{0%,100%{opacity:1}50%{opacity:.4}}
-#rule-overlay{position:absolute;left:7px;top:7px;z-index:25;pointer-events:none;}
-.rb{position:absolute;transform:translate(-50%,-50%);font-family:'DM Mono',monospace;font-size:10px;font-weight:700;padding:2px 6px;border-radius:5px;border:2px solid;box-shadow:0 2px 8px rgba(0,0,0,.7);white-space:nowrap;backdrop-filter:blur(4px);}
+        /* ══ DOMINOES ══ */
+        .dom-tile { position: absolute; background: var(--dark); border: 2px solid var(--gold); border-radius: 8px; box-shadow: 3px 4px 0 rgba(0,0,0,0.4); transform-origin: center center; transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), left 0.2s, top 0.2s, border-color 0.2s; z-index: 10; pointer-events: auto; }
+        .dom-tile.gsel { border-color: var(--gold2); box-shadow: var(--sel-glow), 3px 4px 0 rgba(0,0,0,0.4); outline: 2px solid var(--gold2); z-index: 15; }
+        .hand-slot { width: 72px; height: 72px; background: rgba(0,0,0,0.05); border-radius: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; border: 2px solid transparent; flex-shrink: 0; }
+        .hand-slot.sel { border-color: var(--gold2); background: rgba(240, 192, 96, 0.15); box-shadow: var(--sel-glow); }
+        .hand-slot.used { opacity: 0.15; pointer-events: none; }
 
-#status{font-size:.6rem;color:#777;min-height:13px;text-align:center;margin-bottom:4px;flex-shrink:0;padding:0 8px;}
-#controls{display:flex;gap:5px;margin-bottom:5px;flex-wrap:wrap;justify-content:center;flex-shrink:0;align-items:center;}
-.ctrl{background:var(--dark);color:var(--gold2);border:none;font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:1px;padding:6px 12px;border-radius:8px;cursor:pointer;box-shadow:0 3px 0 rgba(0,0,0,.35);transition:all .1s;}
-.ctrl:active{transform:translateY(1px);box-shadow:0 1px 0 rgba(0,0,0,.35);}
-.ctrl:disabled{background:#c0c0c0;color:#888;box-shadow:none;cursor:default;}
-.ctrl.warn{background:#7a1818;}.ctrl.lite{background:#e4dcd0;color:var(--wood);}
-.opill{background:rgba(0,0,0,.1);border-radius:8px;padding:4px 9px;font-size:.85rem;font-weight:700;color:var(--dark);min-width:26px;text-align:center;}
+        /* ══ OVERLAYS ══ */
+        .rb { position: absolute; transform: translate(-50%, -50%); font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 5px; border: 2px solid; z-index: 20; pointer-events: none; background: white; white-space: nowrap; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        #status { font-size: 0.7rem; color: #666; height: 20px; text-align: center; margin-bottom: 5px; }
 
-#hand{display:flex;flex-wrap:wrap;justify-content:center;gap:5px;max-width:420px;padding:2px;flex-shrink:0;}
-.hand-slot{flex-shrink:0;width:72px;height:72px;display:flex;align-items:center;justify-content:center;border-radius:10px;cursor:pointer;border:2px solid transparent;background:rgba(0,0,0,.05);transition:border-color .15s,background .15s;touch-action:none;position:relative;}
-.hand-slot.sel{border-color:var(--gold2);background:rgba(240,192,96,.12);}
-.hand-slot.used{opacity:.18;pointer-events:none;}
-.hand-slot.sel::after{content:'↻';position:absolute;top:-14px;right:2px;font-size:11px;color:var(--gold2);animation:hf 2.5s ease .4s both;pointer-events:none;}
-@keyframes hf{0%{opacity:0}15%{opacity:1}75%{opacity:1}100%{opacity:0}}
+        .tools { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; padding: 10px 0; flex-shrink: 0; }
+        .t-btn { padding: 8px 12px; font-size: 0.65rem; background: var(--dark); color: var(--gold2); border: none; border-radius: 8px; cursor: pointer; font-family: 'DM Mono'; }
+        .t-btn.act { background: var(--gold); color: var(--dark); }
 
-.dom-tile{background:var(--dark);border:2px solid var(--gold);border-radius:7px;box-shadow:2px 3px 0 rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.07);overflow:hidden;flex-shrink:0;}
-.dom-tile.placed{position:absolute;pointer-events:auto;cursor:pointer;transition:border-color .12s,box-shadow .12s;}
-.dom-tile.placed.gsel{border-color:var(--gold2);box-shadow:0 0 0 2.5px rgba(240,192,96,.65),2px 3px 0 rgba(0,0,0,.5);}
-#ghost{position:fixed;z-index:9999;pointer-events:none;visibility:hidden;opacity:.88;transform:rotate(-5deg) scale(1.1);}
-#ghost.on{visibility:visible;}
-.pip-face{background:#f0e8d8;border-radius:4px;position:relative;overflow:hidden;flex-shrink:0;}
-.dom-inner{width:100%;height:100%;display:flex;align-items:center;justify-content:center;}
-.dom-inner.h{flex-direction:row;}.dom-inner.v{flex-direction:column;}
-.dom-sep{background:var(--gold);border-radius:2px;flex-shrink:0;}
-.dom-inner.h .dom-sep{width:2px;align-self:stretch;margin:0 4px;}
-.dom-inner.v .dom-sep{height:2px;align-self:stretch;margin:4px 0;}
-
-.hold-ring{position:absolute;inset:-4px;border-radius:inherit;pointer-events:none;z-index:5;border:3px solid var(--gold2);opacity:0;transform:scale(.7);}
-.hold-ring.go{animation:hs .22s ease-out forwards;}
-@keyframes hs{0%{opacity:0;transform:scale(.7)}60%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(1.15)}}
-
-#win-ov{position:fixed;inset:0;z-index:1000;background:rgba(8,5,2,.85);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;opacity:0;pointer-events:none;transition:opacity .4s;}
-#win-ov.on{opacity:1;pointer-events:all;}
-.win-t{font-family:'Playfair Display',serif;font-size:2.2rem;font-weight:900;color:var(--gold2);letter-spacing:4px;animation:wf 2s ease infinite;}
-@keyframes wf{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
-.win-time{font-size:1.2rem;color:var(--gold);letter-spacing:4px;}
-.win-s{font-size:.58rem;letter-spacing:3px;color:#b89060;text-align:center;}
-.win-row{display:flex;gap:10px;}
-.win-btn{background:var(--gold);color:var(--dark);border:none;font-family:'Playfair Display',serif;font-size:.82rem;font-weight:700;letter-spacing:2px;padding:10px 20px;border-radius:10px;cursor:pointer;box-shadow:0 4px 0 rgba(0,0,0,.3);}
-.win-btn.sec{background:rgba(255,255,255,.08);color:var(--gold2);border:1.5px solid rgba(200,150,60,.3);}
-</style>
+        #win-ov { position: fixed; inset: 0; background: rgba(8,5,2,0.9); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 2000; color: var(--gold2); opacity: 0; pointer-events: none; transition: 0.3s; }
+        #win-ov.on { opacity: 1; pointer-events: all; }
+    </style>
 </head>
 <body>
 
-<!-- ══ MENU ══ -->
 <div class="screen" id="menu">
-  <div class="menu-title">PIPS</div>
-  <div class="menu-sub">Domino Puzzle</div>
-
-  <button class="menu-btn secondary" onclick="toggleSub('tut')">
-    <div class="mb-icon">🎓</div>
-    <div class="mb-text">
-      <span class="mb-title">ОБУЧЕНИЕ</span>
-      <span class="mb-sub">4 уровня · easy → hard</span>
-    </div>
-    <span class="mb-arr" id="tut-arr">›</span>
-  </button>
-  <div class="sub-panel" id="tut-panel"></div>
-
-  <button class="menu-btn daily-btn" onclick="toggleSub('day')">
-    <div class="mb-icon">📅</div>
-    <div class="mb-text">
-      <span class="mb-title">ЕЖЕДНЕВНЫЕ</span>
-      <span class="mb-sub" id="day-date">загрузка...</span>
-    </div>
-    <span class="mb-arr" id="day-arr">›</span>
-  </button>
-  <div class="sub-panel" id="day-panel"></div>
-
-  <div class="divider"></div>
-
-  <button class="menu-btn primary" onclick="startRandom()">
-    <div class="mb-icon">⚄</div>
-    <div class="mb-text">
-      <span class="mb-title">СЛУЧАЙНЫЙ</span>
-      <span class="mb-sub">генерируется каждый раз</span>
-    </div>
-  </button>
+    <div class="menu-title">PIPS</div>
+    <div class="menu-sub">Domino Puzzle</div>
+    <button class="menu-btn primary" onclick="startRandom()">
+        <div class="mb-icon">🎲</div>
+        <div class="mb-text"><span class="mb-title">ИГРАТЬ</span><span class="mb-sub">Случайная генерация</span></div>
+    </button>
+    <button class="menu-btn editor-btn" onclick="openEditor()">
+        <div class="mb-icon">🛠️</div>
+        <div class="mb-text"><span class="mb-title">РЕДАКТОР</span><span class="mb-sub">Создай свой уровень</span></div>
+    </button>
 </div>
 
-<!-- ══ GAME ══ -->
 <div class="screen hidden" id="game">
-  <div class="game-header">
-    <button class="btn-back" onclick="goMenu()">← МЕНЮ</button>
-    <div class="gh-center">
-      <div class="game-title" id="gtitle">PIPS</div>
-      <div class="game-timer" id="timer">00:00</div>
+    <div class="header">
+        <button class="btn-ui" onclick="goMenu()">← МЕНЮ</button>
+        <div id="timer" style="color:var(--gold); letter-spacing: 2px;">00:00</div>
+        <button class="btn-ui" onclick="shareLevel()">ПОДЕЛИТЬСЯ</button>
     </div>
-    <div class="game-badge rnd" id="gbadge"></div>
-  </div>
-  <div id="legend"></div>
-  <div id="grid-outer">
-    <div id="grid-wrap">
-      <div id="grid"></div>
-      <div id="dom-layer"></div>
-      <div id="zone-overlay"></div>
-      <div id="rule-overlay"></div>
+    <div id="grid-outer">
+        <div id="grid-wrap">
+            <div id="grid"></div>
+            <div id="dom-layer" style="position:absolute; inset:0; pointer-events:none;"></div>
+            <div id="rule-layer" style="position:absolute; inset:0; pointer-events:none;"></div>
+        </div>
     </div>
-  </div>
-  <div id="status"></div>
-  <div id="controls">
-    <button class="ctrl" id="btn-rot" onclick="doRotate()" disabled>🔄 ПОВЕРНУТЬ</button>
-    <div class="opill" id="opill">—</div>
-    <button class="ctrl warn" id="btn-lift" onclick="doLift()" style="display:none">↑ В РУКУ</button>
-    <button class="ctrl lite" onclick="resetPuzzle()">↺ СБРОС</button>
-  </div>
-  <div id="hand"></div>
+    <div id="status"></div>
+    <div class="tools">
+        <button class="t-btn" onclick="doRotate()">🔄 ПОВЕРНУТЬ</button>
+        <button class="t-btn" id="btn-lift" onclick="doLift()" style="display:none">↑ В РУКУ</button>
+        <button class="t-btn" onclick="resetPuzzle()">↺ СБРОС</button>
+    </div>
+    <div id="hand" style="display:flex; gap:8px; padding-bottom:10px; width:100%; justify-content:center; flex-wrap:wrap;"></div>
 </div>
 
-<div id="ghost" class="dom-tile"></div>
+<div class="screen hidden" id="editor">
+    <div class="header">
+        <button class="btn-ui" onclick="goMenu()">← МЕНЮ</button>
+        <div style="font-weight:900; color:var(--dark); font-size:0.8rem;">EDITOR MODE</div>
+        <button class="btn-ui" style="background:var(--gold); color:var(--dark)" onclick="testEditor()">ТЕСТ ▶</button>
+    </div>
+    <div id="grid-outer">
+        <div id="editor-grid-wrap" class="grid-wrap">
+            <div id="e-grid" style="display:grid; background:var(--wood); padding:8px; border-radius:12px;"></div>
+        </div>
+    </div>
+    <div class="tools">
+        <button class="t-btn act" id="t-toggle" onclick="setTool('toggle')">КЛЕТКИ ±</button>
+        <button class="t-btn" id="t-rule" onclick="setTool('rule')">ЗОНЫ</button>
+        <div style="width:100%; height:1px; background:rgba(0,0,0,0.1); margin:4px 0;"></div>
+        <button class="t-btn" onclick="applyRule('sum')">SUM</button>
+        <button class="t-btn" onclick="applyRule('eq')">=</button>
+        <button class="t-btn" onclick="applyRule('neq')">≠</button>
+        <button class="t-btn" onclick="applyRule('gt')">&gt;</button>
+        <button class="t-btn" onclick="applyRule('lt')">&lt;</button>
+        <button class="t-btn" style="background:#7a1818" onclick="clearRegions()">RESET ZONES</button>
+    </div>
+</div>
+
 <div id="win-ov">
-  <div class="win-t">✦ ПОБЕДА ✦</div>
-  <div class="win-time" id="wtime"></div>
-  <div class="win-s" id="wsub"></div>
-  <div class="win-row">
-    <button class="win-btn" onclick="goMenu()">← МЕНЮ</button>
-    <button class="win-btn sec" onclick="winNext()">⚄ ЕЩЁ</button>
-  </div>
+    <h1 style="font-family:'Playfair Display'; font-size:2.5rem; margin-bottom:10px;">✦ ПОБЕДА ✦</h1>
+    <div id="win-meta" style="font-size:0.8rem; margin-bottom:20px;"></div>
+    <div style="display:flex; gap:10px;">
+        <button class="btn-ui" style="padding:12px 24px" onclick="goMenu()">МЕНЮ</button>
+        <button class="btn-ui" style="background:var(--gold); color:var(--dark); padding:12px 24px" onclick="shareLevel()">SHARE</button>
+    </div>
 </div>
 
 <script>
-/* ══ TELEGRAM ══ */
-const tg=window.Telegram?.WebApp;
-if(tg){tg.ready();tg.expand();}
-const $=id=>document.getElementById(id);
-const pad=n=>String(n).padStart(2,'0');
-const fmtT=s=>`${pad(Math.floor(s/60))}:${pad(s%60)}`;
+const tg = window.Telegram?.WebApp;
+if (tg) { tg.ready(); tg.expand(); }
 
-/* ══════════════════════════════════════════
-   SEEDED RNG — mulberry32
-   Same seed → same puzzle for all users on same day
-══════════════════════════════════════════ */
-function mkRng(seed){
-  let s=seed>>>0;
-  return()=>{s+=0x6D2B79F5;let t=Math.imul(s^s>>>15,1|s);t^=t+Math.imul(t^t>>>7,61|t);return((t^t>>>14)>>>0)/2**32;};
-}
-function dateSeed(offsetDays=0,diffIdx=0){
-  const d=new Date();d.setDate(d.getDate()+offsetDays);
-  const str=d.toISOString().slice(0,10).replace(/-/g,'');
-  return (parseInt(str,10)*7+diffIdx*137+42)>>>0;
-}
+let puzzle = null;
+let board = {}; // "c,r" -> {di, half}
+let placements = {}; // di -> {c, r, oi}
+let usedDom = new Set();
+let selDi = null, selMode = null, orientIdx = 0;
+let timerIv = null, seconds = 0;
 
-/* ══ PIP DOTS ══ */
-const PIPS={0:[],1:[[1,1]],2:[[0,0],[2,2]],3:[[0,0],[1,1],[2,2]],
-  4:[[0,0],[2,0],[0,2],[2,2]],5:[[0,0],[2,0],[1,1],[0,2],[2,2]],
-  6:[[0,0],[0,1],[0,2],[2,0],[2,1],[2,2]]};
-function makePip(n,sz){
-  const f=document.createElement('div');f.className='pip-face';f.style.width=sz+'px';f.style.height=sz+'px';
-  const r=Math.max(3,sz*.135),step=sz/3;
-  (PIPS[Math.min(6,Math.max(0,n))]||[]).forEach(([gx,gy])=>{
-    const d=document.createElement('div'),cx=gx*step+step/2,cy=gy*step+step/2;
-    d.style.cssText=`position:absolute;border-radius:50%;background:#1b1208;width:${r*2}px;height:${r*2}px;left:${cx-r}px;top:${cy-r}px;box-shadow:0 1px 2px rgba(0,0,0,.25);`;
-    f.appendChild(d);
-  });return f;
-}
-function fillTile(el,a,b,oi,sz,w,h){
-  el.innerHTML='';el.style.width=w+'px';el.style.height=h+'px';
-  const isV=oi===1||oi===3,flip=oi>=2,p1=flip?b:a,p2=flip?a:b;
-  const pd=Math.max(5,Math.round(sz*.22));
-  const inner=document.createElement('div');inner.className='dom-inner '+(isV?'v':'h');inner.style.padding=pd+'px';
-  inner.appendChild(makePip(p1,sz));
-  const sep=document.createElement('div');sep.className='dom-sep';inner.appendChild(sep);
-  inner.appendChild(makePip(p2,sz));el.appendChild(inner);
-}
-
-const ORI=[{l:'→',dc:1,dr:0},{l:'↓',dc:0,dr:1},{l:'←',dc:1,dr:0},{l:'↑',dc:0,dr:1}];
-function sec2(c,r,oi){return[c+ORI[oi].dc,r+ORI[oi].dr];}
-function halves(oi){return oi>=2?{h1:'b',h2:'a'}:{h1:'a',h2:'b'};}
-const ZC=[{bg:'#f7d6e0',bd:'#c8457a'},{bg:'#cfe3f7',bd:'#2f78c1'},{bg:'#d0f0d8',bd:'#2f9c50'},{bg:'#ead6f5',bd:'#7a38c0'},{bg:'#fde8cc',bd:'#c07028'}];
-
-/* ══ RULES ══
-   gt/lt compare TOTAL SUM of pip values in zone (strictly > or <)
-   eq = every value equal  |  neq = all distinct  |  sum = total equals v
-*/
-const rS=r=>({sum:`=${r.v}`,eq:'=',neq:'≠',gt:`>${r.v}`,lt:`<${r.v}`,none:''}[r.type]||'');
-const rT=r=>({sum:`сумма=${r.v}`,eq:'все равны',neq:'все разные',gt:`сумма>${r.v}`,lt:`сумма<${r.v}`,none:''}[r.type]||'');
-function chk(rule,vals){
-  if(!vals.length)return true;
-  const sum=vals.reduce((s,v)=>s+v,0);
-  switch(rule.type){
-    case'sum': return sum===rule.v;
-    case'eq':  return vals.every(v=>v===vals[0]);
-    case'neq': return new Set(vals).size===vals.length;
-    case'gt':  return sum>rule.v;
-    case'lt':  return sum<rule.v;
-    default:   return true;
-  }
-}
-
-/* ══════════════════════════════════════════
-   TUTORIAL — 4 hand-crafted levels (verified)
-══════════════════════════════════════════ */
-const TUTORIAL=[
-  /* 1 EASY — 3×2, 3 dominos
-     [3|3][0]    zones: eq / sum=3 / sum=4
-         [1|2][4]
-  */
-  {name:'УРОК 1',diff:'easy',cols:3,rows:2,
-   dominoes:[[3,3],[1,2],[0,4]],
-   regions:[
-     {rule:{type:'eq'},      cells:[[0,0],[1,0]]},
-     {rule:{type:'sum',v:3}, cells:[[0,1],[1,1]]},
-     {rule:{type:'sum',v:4}, cells:[[2,0],[2,1]]},
-  ]},
-
-  /* 2 MEDIUM — plus-cross 4×4 active=10, 5 dominos
-     . [3|1] .
-     [4|2][0|5]
-     . [2|3] .
-     . [4|1] .
-  */
-  {name:'УРОК 2',diff:'med',cols:4,rows:4,
-   activeCells:[[1,0],[2,0],[0,1],[1,1],[2,1],[3,1],[1,2],[2,2],[1,3],[2,3]],
-   dominoes:[[3,1],[4,2],[0,5],[2,3],[4,1]],
-   regions:[
-     {rule:{type:'sum',v:4},  cells:[[1,0],[2,0]]},
-     {rule:{type:'sum',v:6},  cells:[[0,1],[1,1]]},
-     {rule:{type:'gt',v:4},   cells:[[2,1],[3,1]]},
-     {rule:{type:'neq'},      cells:[[1,2],[2,2]]},
-     {rule:{type:'sum',v:5},  cells:[[1,3],[2,3]]},
-  ]},
-
-  /* 3 MEDIUM — T-shape 6×4 active=12, 6 dominos
-     [2|4][1|5][0|3]
-             [3|2]
-             [4|1]
-             [2|3]
-  */
-  {name:'УРОК 3',diff:'med',cols:6,rows:4,
-   activeCells:[[0,0],[1,0],[2,0],[3,0],[4,0],[5,0],[2,1],[3,1],[2,2],[3,2],[2,3],[3,3]],
-   dominoes:[[2,4],[1,5],[0,3],[3,2],[4,1],[2,3]],
-   regions:[
-     {rule:{type:'sum',v:6},  cells:[[0,0],[1,0]]},
-     {rule:{type:'gt',v:5},   cells:[[2,0],[3,0]]},
-     {rule:{type:'lt',v:4},   cells:[[4,0],[5,0]]},
-     {rule:{type:'sum',v:5},  cells:[[2,1],[3,1]]},
-     {rule:{type:'sum',v:5},  cells:[[2,2],[3,2]]},
-     {rule:{type:'neq'},      cells:[[2,3],[3,3]]},
-  ]},
-
-  /* 4 HARD — hollow ring 5×4 active=14, 7 dominos
-     [2|5][1|3][0]
-     [2] . . . [4]
-     [3] . . . [3]
-     [0|5][2|4][1]
-  */
-  {name:'УРОК 4',diff:'hard',cols:5,rows:4,
-   activeCells:[[0,0],[1,0],[2,0],[3,0],[4,0],[0,1],[4,1],[0,2],[4,2],[0,3],[1,3],[2,3],[3,3],[4,3]],
-   dominoes:[[2,5],[1,3],[0,4],[3,1],[2,4],[0,5],[2,3]],
-   regions:[
-     {rule:{type:'sum',v:7},  cells:[[0,0],[1,0]]},
-     {rule:{type:'neq'},      cells:[[2,0],[3,0]]},
-     {rule:{type:'sum',v:4},  cells:[[4,0],[4,1]]},
-     {rule:{type:'lt',v:5},   cells:[[4,2],[4,3]]},
-     {rule:{type:'gt',v:5},   cells:[[2,3],[3,3]]},
-     {rule:{type:'sum',v:5},  cells:[[0,3],[1,3]]},
-     {rule:{type:'neq'},      cells:[[0,1],[0,2]]},
-  ]},
+const ZC = [
+    {bg:'#f7d6e0', bd:'#c8457a'}, {bg:'#cfe3f7', bd:'#2f78c1'},
+    {bg:'#d0f0d8', bd:'#2f9c50'}, {bg:'#ead6f5', bd:'#7a38c0'},
+    {bg:'#fde8cc', bd:'#c07028'}
 ];
+const ORI = [{dc:1, dr:0}, {dc:0, dr:1}, {dc:-1, dr:0}, {dc:0, dr:-1}];
 
-/* ══════════════════════════════════════════
-   PUZZLE GENERATOR
-   rng: pass mkRng(seed) for daily, ()=>Math.random() for random
-══════════════════════════════════════════ */
-function allC(cols,rows){
-  const a=[];for(let r=0;r<rows;r++)for(let c=0;c<cols;c++)a.push([c,r]);return a;
-}
-function shu(a,rng){
-  for(let i=a.length-1;i>0;i--){const j=Math.floor(rng()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
-  return a;
-}
-function rInt(lo,hi,rng){return lo+Math.floor(rng()*(hi-lo+1));}
-
-/* Difficulty → generator params */
-const DIFF_PARAMS={
-  easy: {minCols:3,maxCols:5,minRows:2,maxRows:3,density:.9},
-  med:  {minCols:5,maxCols:7,minRows:3,maxRows:4,density:.70},
-  hard: {minCols:6,maxCols:9,minRows:3,maxRows:5,density:.60},
-};
-
-function genPuzzle(diff,rng){
-  const p=DIFF_PARAMS[diff]||DIFF_PARAMS.med;
-  for(let attempt=0;attempt<80;attempt++){
-    const cols=rInt(p.minCols,p.maxCols,rng);
-    const rows=rInt(p.minRows,p.maxRows,rng);
-    // Randomly choose shape archetype
-    const roll=rng();
-    let ac;
-    if(rows===1||(roll<.25&&cols>=6)){
-      // Full rectangle (includes thin tubes when rows=1 or 2)
-      ac=allC(cols,rows);
-    } else if(roll<.5){
-      ac=blobShape(cols,rows,p.density,rng);
-    } else {
-      // Structured: L, T, cross, ring — picked by sub-roll
-      ac=structuredShape(cols,rows,rng);
-    }
-    if(!ac||ac.length<4||ac.length%2!==0)continue;
-    const lv=buildPuzzle(ac,cols,rows,rng);
-    if(lv)return lv;
-  }
-  // Fallback to easy rect
-  const ac=allC(4,3);
-  return buildPuzzle(ac,4,3,rng)||TUTORIAL[0];
+/* ══ RNG ══ */
+function mkRng(seed) {
+    let s = seed >>> 0;
+    return () => {
+        s = (s + 0x6D2B79F5) | 0;
+        let t = Math.imul(s ^ s >>> 15, 1 | s);
+        t = t ^ (t + Math.imul(t ^ t >>> 7, 61 | t)) | 0;
+        return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    };
 }
 
-function blobShape(cols,rows,density,rng){
-  let target=Math.floor(cols*rows*density);
-  if(target%2!==0)target--;
-  if(target<4)return null;
-  const active=new Set();const front=[];
-  const sc=Math.floor(cols/2),sr=Math.floor(rows/2);
-  active.add(`${sc},${sr}`);front.push([sc,sr]);
-  while(active.size<target&&front.length){
-    const idx=Math.floor(rng()*Math.min(front.length,5));
-    const[c,r]=front.splice(idx,1)[0];
-    const nbrs=[[c+1,r],[c-1,r],[c,r+1],[c,r-1]].filter(([nc,nr])=>nc>=0&&nc<cols&&nr>=0&&nr<rows&&!active.has(`${nc},${nr}`));
-    shu(nbrs,rng);for(const nb of nbrs){if(active.size>=target)break;active.add(`${nb[0]},${nb[1]}`);front.push(nb);}
-  }
-  const arr=[...active].map(k=>k.split(',').map(Number));
-  if(arr.length%2===1){
-    const sa=new Set(active);
-    for(let i=arr.length-1;i>=0;i--){
-      const[c,r]=arr[i];
-      if([[c+1,r],[c-1,r],[c,r+1],[c,r-1]].filter(([nc,nr])=>sa.has(`${nc},${nr}`)).length<=1)
-        {arr.splice(i,1);sa.delete(`${c},${r}`);break;}
-    }
-  }
-  return arr.length>=4&&arr.length%2===0?arr:null;
-}
+/* ══ CORE RENDER ══ */
+const PIPS = { 0:[], 1:[[1,1]], 2:[[0,0],[2,2]], 3:[[0,0],[1,1],[2,2]], 4:[[0,0],[2,0],[0,2],[2,2]], 5:[[0,0],[2,0],[1,1],[0,2],[2,2]], 6:[[0,0],[0,1],[0,2],[2,0],[2,1],[2,2]] };
 
-function structuredShape(cols,rows,rng){
-  const type=Math.floor(rng()*4);
-  let cells=[];
-  if(type===0){
-    // L-shape: full top row + right column
-    for(let c=0;c<cols;c++)cells.push([c,0]);
-    for(let r=1;r<rows;r++)cells.push([cols-1,r]);
-    if(cells.length%2!==0)cells.pop();
-  } else if(type===1){
-    // T-shape: full top row + center column going down
-    for(let c=0;c<cols;c++)cells.push([c,0]);
-    const mc=Math.floor(cols/2)-((Math.floor(cols/2))%2===0&&cols%2===0?1:0);
-    for(let r=1;r<rows;r++){cells.push([mc,r]);cells.push([mc+1,r]);}
-    if(cells.length%2!==0)cells.pop();
-  } else if(type===2){
-    // Ring: outer shell
-    for(let c=0;c<cols;c++){cells.push([c,0]);if(rows>2)cells.push([c,rows-1]);}
-    for(let r=1;r<rows-1;r++){cells.push([0,r]);if(cols>2)cells.push([cols-1,r]);}
-    if(cells.length%2!==0)cells.pop();
-  } else {
-    // S/Z snake
-    const half=Math.floor(rows/2);
-    for(let r=0;r<half;r++)for(let c=0;c<cols;c++)cells.push([c,r]);
-    const offset=Math.floor(cols/2);
-    for(let r=half;r<rows;r++)for(let c=offset;c<cols;c++)cells.push([c,r]);
-    if(cells.length%2!==0)cells.pop();
-  }
-  // Deduplicate
-  const seen=new Set();cells=cells.filter(([c,r])=>{const k=`${c},${r}`;if(seen.has(k))return false;seen.add(k);return true;});
-  return cells.length>=4?cells:null;
-}
-
-function buildPuzzle(ac,cols,rows,rng){
-  const setA=new Set(ac.map(([c,r])=>`${c},${r}`));
-  const sorted=[...ac].sort((a,b)=>a[1]!==b[1]?a[1]-b[1]:a[0]-b[0]);
-  const tOf={},placed=[];
-  function tile(i){
-    if(i>=sorted.length)return true;
-    const[c,r]=sorted[i];const k=`${c},${r}`;if(tOf[k]!==undefined)return tile(i+1);
-    const dirs=shu([[1,0],[0,1]],rng);
-    for(const[dc,dr]of dirs){
-      const k2=`${c+dc},${r+dr}`;if(!setA.has(k2)||tOf[k2]!==undefined)continue;
-      const di=placed.length;tOf[k]=di;tOf[k2]=di;placed.push([[c,r],[c+dc,r+dr]]);
-      if(tile(i+1))return true;
-      placed.pop();delete tOf[k];delete tOf[k2];
-    }
-    return false;
-  }
-  if(!tile(0))return null;
-  const dVals=placed.map(()=>[rInt(0,5,rng),rInt(0,5,rng)]);
-  const cV=(c,r)=>{const di=tOf[`${c},${r}`];const[[ac2,ar]]=placed[di];return dVals[di][ac2===c&&ar===r?0:1];};
-
-  // Zone BFS partition
-  const zCount=Math.max(2,Math.min(5,Math.ceil(ac.length/4)));
-  const zOf={};const sh2=shu([...ac],rng);const seeds=[];
-  for(const cell of sh2){if(seeds.length>=zCount)break;if(seeds.every(s=>Math.abs(s[0]-cell[0])+Math.abs(s[1]-cell[1])>=2))seeds.push(cell);}
-  if(seeds.length<2)return null;
-  seeds.forEach(([c,r],i)=>{zOf[`${c},${r}`]=i;});
-  const q=seeds.map(([c,r],i)=>({c,r,z:i}));let bi=0;
-  while(bi<q.length){const{c,r,z}=q[bi++];for(const[nc,nr]of[[c+1,r],[c-1,r],[c,r+1],[c,r-1]]){const k2=`${nc},${nr}`;if(setA.has(k2)&&zOf[k2]===undefined){zOf[k2]=z;q.push({c:nc,r:nr,z});}}}
-  ac.forEach(([c,r])=>{if(zOf[`${c},${r}`]===undefined)zOf[`${c},${r}`]=0;});
-  const rCells=Array.from({length:zCount},()=>[]);
-  ac.forEach(([c,r])=>rCells[zOf[`${c},${r}`]].push([c,r]));
-  const regions=rCells.filter(c=>c.length>=2).map(cells=>({rule:pickRule(cells.map(([c,r])=>cV(c,r)),rng),cells}));
-  if(regions.length<2)return null;
-
-  return{cols,rows,activeCells:ac.length===cols*rows?undefined:ac,dominoes:dVals,regions};
-}
-
-function pickRule(vals,rng){
-  if(!vals.length)return{type:'none'};
-  const sum=vals.reduce((s,v)=>s+v,0);
-  const opts=[{type:'sum',v:sum}];
-  if(vals.length>=2&&vals.every(v=>v===vals[0]))opts.push({type:'eq'});
-  if(vals.length>=2&&new Set(vals).size===vals.length)opts.push({type:'neq'});
-  if(sum>=2)opts.push({type:'gt',v:sum-1});
-  if(sum<=vals.length*5-2)opts.push({type:'lt',v:sum+1});
-  const nonsum=opts.filter(o=>o.type!=='sum');
-  return nonsum.length&&rng()<.55?nonsum[Math.floor(rng()*nonsum.length)]:{type:'sum',v:sum};
-}
-
-/* ══════════════════════════════════════════
-   DAILY — seed from today's date + difficulty index
-   Same date+diff → same seed → same puzzle for ALL users
-══════════════════════════════════════════ */
-const DIFFS=['easy','med','hard'];
-const DIFF_LABELS={easy:'EASY',med:'MEDIUM',hard:'HARD'};
-const DIFF_STARS={easy:'★☆☆',med:'★★☆',hard:'★★★'};
-
-function getDailyLevel(diff){
-  const idx=DIFFS.indexOf(diff);
-  const rng=mkRng(dateSeed(0,idx));
-  const lv=genPuzzle(diff,rng);
-  lv.name='DAILY '+(DIFF_LABELS[diff]||diff);
-  lv.diff=diff;
-  return lv;
-}
-
-/* ══════════════════════════════════════════
-   MENU
-══════════════════════════════════════════ */
-let openSub=null;
-function toggleSub(id){
-  if(openSub&&openSub!==id){
-    $(openSub+'-panel').classList.remove('open');
-    $(openSub+'-arr').classList.remove('open');
-  }
-  const panel=$(id+'-panel'),arr=$(id+'-arr');
-  const isOpen=panel.classList.toggle('open');
-  arr.classList.toggle('open',isOpen);
-  openSub=isOpen?id:null;
-  if(isOpen){
-    if(id==='tut'&&!panel.children.length)buildTutPanel();
-    if(id==='day'&&!panel.children.length)buildDayPanel();
-  }
-}
-function buildTutPanel(){
-  const p=$('tut-panel');
-  TUTORIAL.forEach((lv,i)=>{
-    const card=document.createElement('div');card.className='sub-card';
-    card.innerHTML=`<div class="sc-badge ${lv.diff}">${i+1}</div>
-      <div class="sc-info"><div class="sc-name">${lv.name}</div>
-      <div class="sc-meta">${lv.cols}×${lv.rows} · ${lv.dominoes.length} костяшек</div></div>
-      <span class="sc-stars">${DIFF_STARS[lv.diff]||''}</span>`;
-    card.onclick=()=>startLevel(lv);p.appendChild(card);
-  });
-}
-function buildDayPanel(){
-  const p=$('day-panel');
-  DIFFS.forEach(diff=>{
-    const card=document.createElement('div');card.className='sub-card';
-    card.innerHTML=`<div class="sc-badge ${diff}">${DIFF_LABELS[diff][0]}</div>
-      <div class="sc-info"><div class="sc-name">${DIFF_LABELS[diff]}</div>
-      <div class="sc-meta">одинаков для всех · сменится завтра</div></div>
-      <span class="sc-stars">${DIFF_STARS[diff]}</span>`;
-    card.onclick=()=>startLevel(getDailyLevel(diff));p.appendChild(card);
-  });
-}
-function initMenu(){
-  const d=new Date();
-  const mo=['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'][d.getMonth()];
-  $('day-date').textContent=`${d.getDate()} ${mo} · easy / medium / hard`;
-}
-function goMenu(){$('win-ov').classList.remove('on');tReset();showScreen('menu');}
-function startRandom(){
-  const diff=DIFFS[Math.floor(Math.random()*3)];
-  const lv=genPuzzle(diff,()=>Math.random());
-  lv.name='СЛУЧАЙНЫЙ';lv.diff=diff;startLevel(lv);
-}
-function winNext(){
-  $('win-ov').classList.remove('on');startRandom();
-}
-function startLevel(lv){
-  puzzle=JSON.parse(JSON.stringify(lv));
-  board={};placements={};usedDom=new Set();
-  selMode=null;selDi=null;orientIdx=0;
-  tReset();buildGame();showScreen('game');
-}
-function showScreen(n){
-  $('menu').classList.toggle('hidden',n!=='menu');
-  $('game').classList.toggle('hidden',n!=='game');
-}
-
-/* ══════════════════════════════════════════
-   GAME STATE
-══════════════════════════════════════════ */
-let puzzle=null,board={},placements={},usedDom=new Set();
-let selMode=null,selDi=null,orientIdx=0;
-let CELL=46,GAP=4,STEP=50;
-let cellEls={},cellReg={},zOvEls={},activeSet=new Set(),slotEls=[],tileEls=[];
-let timerSecs=0,timerIv=null,timerOn=false;
-function tStart(){if(timerOn)return;timerOn=true;timerIv=setInterval(()=>{timerSecs++;$('timer').textContent=fmtT(timerSecs);},1000);}
-function tStop(){clearInterval(timerIv);timerIv=null;}
-function tReset(){tStop();timerSecs=0;timerOn=false;$('timer').textContent='00:00';}
-
-/* ══ BUILD GAME — fits grid to screen without scroll ══ */
-function buildGame(){
-  $('gtitle').textContent=puzzle.name||'PIPS';
-  const b=$('gbadge');b.className='game-badge '+(puzzle.diff||'rnd');
-  b.textContent=DIFF_LABELS[puzzle.diff]||'RANDOM';
-
-  // Available space calculation (all fixed UI elements)
-  // header≈42, legend≈26, status≈16, controls≈36, hand≈78, gaps≈18, grid-padding=14
-  const reservedH=42+26+16+36+78+18+14;
-  const availW=Math.min(window.innerWidth,460)-20-14;
-  const availH=window.innerHeight-reservedH;
-
-  const cellW=Math.floor((availW+GAP)/puzzle.cols)-GAP;
-  const cellH=Math.floor((availH+GAP)/puzzle.rows)-GAP;
-  CELL=Math.max(22,Math.min(60,Math.min(cellW,cellH)));
-  STEP=CELL+GAP;
-
-  activeSet.clear();
-  const ac=puzzle.activeCells||allC(puzzle.cols,puzzle.rows);
-  ac.forEach(([c,r])=>activeSet.add(`${c},${r}`));
-  cellReg={};puzzle.regions.forEach((rg,i)=>rg.cells.forEach(([c,r])=>{cellReg[`${c},${r}`]=i;}));
-
-  // Legend
-  const lg=$('legend');lg.innerHTML='';
-  puzzle.regions.forEach((rg,i)=>{
-    if(rg.rule.type==='none')return;
-    const col=ZC[i%ZC.length];const d=document.createElement('div');d.className='lg';
-    d.innerHTML=`<div class="lg-dot" style="background:${col.bg};border-color:${col.bd}"></div><span>${rT(rg.rule)}</span>`;
-    lg.appendChild(d);
-  });
-
-  // Grid
-  const grid=$('grid');grid.innerHTML='';
-  grid.style.gridTemplateColumns=`repeat(${puzzle.cols},${CELL}px)`;
-  grid.style.gridTemplateRows=`repeat(${puzzle.rows},${CELL}px)`;
-  grid.style.gap=GAP+'px';cellEls={};
-  for(let r=0;r<puzzle.rows;r++){
-    for(let c=0;c<puzzle.cols;c++){
-      const key=`${c},${r}`;const cell=document.createElement('div');
-      cell.style.width=CELL+'px';cell.style.height=CELL+'px';cell.dataset.c=c;cell.dataset.r=r;
-      if(activeSet.has(key)){
-        cell.className='cell active';const ri2=cellReg[key];
-        if(ri2!==undefined){const col=ZC[ri2%ZC.length];cell.style.background=col.bg;cell.style.borderColor=col.bd;cell.style.borderStyle='solid';cell.style.borderWidth='2px';}
-        cell.onclick=()=>onCellClick(c,r);cellEls[key]=cell;
-      } else cell.className='cell inactive';
-      grid.appendChild(cell);
-    }
-  }
-  buildZoneOv();buildRuleOv();buildHand();
-  $('dom-layer').innerHTML='';renderBoard();updateCtrl();
-  setSt('Тап = выбрать/повернуть  ·  удержание = перетащить');
-}
-
-function buildZoneOv(){
-  const ov=$('zone-overlay');ov.innerHTML='';zOvEls={};const M=3;
-  puzzle.regions.forEach((rg,i)=>{
-    const col=ZC[i%ZC.length];
-    rg.cells.forEach(([c,r])=>{
-      const key=`${c},${r}`;const div=document.createElement('div');div.className='zo';
-      div.style.cssText=`left:${c*STEP+M}px;top:${r*STEP+M}px;width:${CELL-M*2}px;height:${CELL-M*2}px;border-color:${col.bd};`;
-      ov.appendChild(div);zOvEls[key]=div;
+function makePip(n, sz) {
+    const f = document.createElement('div');
+    f.style.cssText = `position:relative; background:#f0e8d8; border-radius:4px; width:${sz}px; height:${sz}px; flex-shrink:0;`;
+    const r = sz * 0.12, step = sz / 3;
+    (PIPS[n] || []).forEach(([gx, gy]) => {
+        const d = document.createElement('div');
+        d.style.cssText = `position:absolute; width:${r*2}px; height:${r*2}px; background:var(--dark); border-radius:50%; left:${gx*step+step/2-r}px; top:${gy*step+step/2-r}px;`;
+        f.appendChild(d);
     });
-  });
-}
-function buildRuleOv(){
-  const ov=$('rule-overlay');ov.innerHTML='';
-  puzzle.regions.forEach((rg,i)=>{
-    const s=rS(rg.rule);if(!s)return;
-    const maxC=Math.max(...rg.cells.map(([c])=>c)),minR=Math.min(...rg.cells.map(([,r])=>r));
-    const badge=document.createElement('div');badge.className='rb';badge.textContent=s;
-    badge.style.left=((maxC+1)*STEP-GAP/2)+'px';badge.style.top=(minR*STEP)+'px';
-    const col=ZC[i%ZC.length];badge.style.borderColor=col.bd;badge.style.color=col.bd;badge.style.background=col.bg;
-    ov.appendChild(badge);
-  });
+    return f;
 }
 
-/* ══ HAND ══ */
-const H_SZ=26;
-function domSz(oi,sz){const isV=oi===1||oi===3,pd=Math.max(4,Math.round(sz*.18)),long=sz*2+2+8+pd*2+4,thin=sz+pd*2+4;return isV?{w:thin,h:long}:{w:long,h:thin};}
-function buildHand(){
-  const hand=$('hand');hand.innerHTML='';slotEls=[];tileEls=[];
-  puzzle.dominoes.forEach(([a,b],di)=>{
-    const slot=document.createElement('div');slot.className='hand-slot';if(usedDom.has(di))slot.classList.add('used');
-    const tile=document.createElement('div');tile.className='dom-tile';
-    const{w,h}=domSz(0,H_SZ);fillTile(tile,a,b,0,H_SZ,w,h);
-    slot.appendChild(tile);attachGesture(slot,di,'hand');hand.appendChild(slot);slotEls.push(slot);tileEls.push(tile);
-  });
-}
-function refreshHT(di){
-  if(usedDom.has(di))return;
-  const[a,b]=puzzle.dominoes[di];const oi=selDi===di?orientIdx:0;const{w,h}=domSz(oi,H_SZ);
-  fillTile(tileEls[di],a,b,oi,H_SZ,w,h);
+function fillTile(el, a, b, oi, sz) {
+    el.innerHTML = '';
+    const isV = oi % 2 !== 0, flip = oi >= 2, p1 = flip ? b : a, p2 = flip ? a : b;
+    const w = isV ? sz + 10 : sz * 2 + 15, h = isV ? sz * 2 + 15 : sz + 10;
+    el.style.width = w + 'px'; el.style.height = h + 'px';
+    const inner = document.createElement('div');
+    inner.style.cssText = `display:flex; align-items:center; justify-content:center; gap:4px; padding:5px; height:100%; width:100%; flex-direction:${isV?'column':'row'}`;
+    inner.appendChild(makePip(p1, sz));
+    const sep = document.createElement('div');
+    sep.style.cssText = `background:var(--gold); ${isV ? 'width:80%; height:2px' : 'height:80%; width:2px'}`;
+    inner.appendChild(sep);
+    inner.appendChild(makePip(p2, sz));
+    el.appendChild(inner);
 }
 
-/* ══ GESTURES — tap=select/rotate, hold=drag ══ */
-const HOLD_MS=200,MOVE_PX=8;let pSt=null;
-function makeHoldRing(el){const r=document.createElement('div');r.className='hold-ring';el.appendChild(r);requestAnimationFrame(()=>r.classList.add('go'));return r;}
-function removeHoldRing(el){el.querySelectorAll('.hold-ring').forEach(r=>r.remove());}
-function attachGesture(el,di,src){el.addEventListener('pointerdown',e=>{if(src==='hand'&&usedDom.has(di))return;e.preventDefault();startPress(e,di,src);},{passive:false});}
-function startPress(e,di,src){
-  cancelPress();makeHoldRing(e.currentTarget);
-  const timer=setTimeout(()=>{if(pSt&&!pSt.drag){pSt.drag=true;removeHoldRing(pSt.el);if(src==='grid'&&!(selMode==='grid'&&selDi===di))selGridTile(di);startDrag(e,di);}},HOLD_MS);
-  pSt={di,src,x:e.clientX,y:e.clientY,timer,drag:false,e,el:e.currentTarget};
-  document.addEventListener('pointermove',onPM,{passive:true});document.addEventListener('pointerup',onPU,{once:true});document.addEventListener('pointercancel',onPC,{once:true});
-}
-function onPM(e){if(!pSt||pSt.drag)return;if(Math.hypot(e.clientX-pSt.x,e.clientY-pSt.y)>MOVE_PX){clearTimeout(pSt.timer);pSt.drag=true;removeHoldRing(pSt.el);const{di,src}=pSt;if(src==='grid'&&!(selMode==='grid'&&selDi===di))selGridTile(di);startDrag(pSt.e,di);}}
-function onPU(){if(!pSt)return;document.removeEventListener('pointermove',onPM);if(!pSt.drag){clearTimeout(pSt.timer);removeHoldRing(pSt.el);const{di,src}=pSt;pSt=null;onTap(di,src);}}
-function onPC(){cancelPress();if(isDrag)endDrag();}
-function cancelPress(){if(!pSt)return;clearTimeout(pSt.timer);removeHoldRing(pSt.el);document.removeEventListener('pointermove',onPM);document.removeEventListener('pointerup',onPU);document.removeEventListener('pointercancel',onPC);pSt=null;}
-
-function onTap(di,src){
-  if(src==='hand'){if(usedDom.has(di))return;if(selDi===di&&selMode==='hand')doRotate();else selHandTile(di);}
-  else{if(selDi===di&&selMode==='grid')doRotate();else selGridTile(di);}
+/* ══ GRID SCALING ══ */
+function getCellSize(cols, rows) {
+    const reservedH = 42 + 20 + 20 + 40 + 80 + 20; // Exact offsets for header/UI
+    const availW = window.innerWidth - 40;
+    const availH = window.innerHeight - reservedH;
+    const cw = Math.floor(availW / cols) - 4;
+    const ch = Math.floor(availH / rows) - 4;
+    return Math.max(25, Math.min(55, Math.min(cw, ch)));
 }
 
-/* ══ SELECTION ══ */
-function selHandTile(di){clearSelVis();selMode='hand';selDi=di;slotEls[di].classList.add('sel');refreshHT(di);updateCtrl();setSt('Выбрано · тап ещё раз = повернуть · тащи = разместить');}
-function selGridTile(di){clearSelVis();selMode='grid';selDi=di;orientIdx=placements[di].oi;slotEls[di].classList.add('sel');renderBoard();updateCtrl();setSt('Выбрано · тап = повернуть · ↑ В РУКУ · тащи = переместить');}
-function clearSelVis(){if(selDi!==null){slotEls[selDi]?.classList.remove('sel');if(!usedDom.has(selDi))refreshHT(selDi);}}
-function clearSel(){clearSelVis();selMode=null;selDi=null;clearHL();updateCtrl();setSt('Тап = выбрать/повернуть · удержание = перетащить');}
+/* ══ ENGINE ══ */
+function startLevel(lv) {
+    puzzle = JSON.parse(JSON.stringify(lv));
+    board = {}; placements = {}; usedDom.clear(); selDi = null; selMode = null;
+    seconds = 0; clearInterval(timerIv);
+    timerIv = setInterval(() => { seconds++; document.getElementById('timer').textContent = `${Math.floor(seconds/60).toString().padStart(2,'0')}:${(seconds%60).toString().padStart(2,'0')}`; }, 1000);
+    document.getElementById('win-ov').classList.remove('on');
+    showScreen('game');
+    renderGame();
+}
 
-/* ══ ROTATE ══ */
-function doRotate(){
-  if(selDi===null)return;const newOi=(orientIdx+1)%4;
-  if(selMode==='hand'){orientIdx=newOi;refreshHT(selDi);updateCtrl();}
-  else{
-    const{c,r,oi:oldOi}=placements[selDi];
-    const oldK1=`${c},${r}`,oldK2=`${c+ORI[oldOi].dc},${r+ORI[oldOi].dr}`,newK2=`${c+ORI[newOi].dc},${r+ORI[newOi].dr}`;
-    if(activeSet.has(newK2)&&(!board[newK2]||board[newK2].di===selDi)){
-      const di=selDi;const{h1,h2}=halves(newOi);
-      delete board[oldK1];delete board[oldK2];board[oldK1]={di,half:h1};board[newK2]={di,half:h2};
-      placements[di]={c,r,oi:newOi};orientIdx=newOi;updateCtrl();renderBoard();validate();
-    } else {
-      // Lift to hand with new orientation
-      const di=selDi;delete board[oldK1];delete board[oldK2];delete placements[di];usedDom.delete(di);
-      orientIdx=newOi;clearSelVis();selMode='hand';selDi=di;
-      slotEls[di].classList.remove('used');slotEls[di].classList.add('sel');
-      refreshHT(di);updateCtrl();renderBoard();setSt('Повёрнуто — выбери новое место');
+function renderGame() {
+    const sz = getCellSize(puzzle.cols, puzzle.rows);
+    const grid = document.getElementById('grid');
+    grid.style.gridTemplateColumns = `repeat(${puzzle.cols}, ${sz}px)`;
+    grid.innerHTML = '';
+
+    const activeSet = new Set(puzzle.activeCells.map(c => `${c[0]},${c[1]}`));
+    for (let r = 0; r < puzzle.rows; r++) {
+        for (let c = 0; c < puzzle.cols; c++) {
+            const cell = document.createElement('div');
+            const key = `${c},${r}`;
+            const isActive = activeSet.has(key);
+            cell.className = 'cell ' + (isActive ? 'active' : 'inactive');
+            cell.style.width = sz + 'px'; cell.style.height = sz + 'px';
+
+            if (isActive) {
+                const regIdx = puzzle.regions.findIndex(rg => rg.cells.some(cc => cc[0] === c && cc[1] === r));
+                if (regIdx !== -1) {
+                    cell.style.background = ZC[regIdx % ZC.length].bg;
+                    cell.style.borderColor = ZC[regIdx % ZC.length].bd;
+                }
+                cell.onclick = () => onCellClick(c, r);
+            }
+            grid.appendChild(cell);
+        }
     }
-  }
-}
-function doLift(){
-  if(selMode!=='grid'||selDi===null)return;const di=selDi;const{c,r,oi}=placements[di];
-  delete board[`${c},${r}`];delete board[`${c+ORI[oi].dc},${r+ORI[oi].dr}`];delete placements[di];usedDom.delete(di);clearSelVis();
-  selMode='hand';selDi=di;slotEls[di].classList.remove('used');slotEls[di].classList.add('sel');refreshHT(di);updateCtrl();renderBoard();setSt('В руку');
+    renderRules(sz);
+    renderHand();
+    syncBoardUI();
 }
 
-/* ══ PLACEMENT ══ */
-function onCellClick(c,r){
-  const key=`${c},${r}`;if(board[key]){onTap(board[key].di,'grid');return;}
-  if(selDi===null){setSt('Нажмите на костяшку — она выделится');return;}
-  const[c2,r2]=sec2(c,r,orientIdx);if(!canPlace(c,r,c2,r2))return;
-  if(selMode==='hand')placeFromHand(selDi,c,r);else moveGridTile(selDi,c,r);
-}
-function canPlace(c,r,c2,r2,msg=true){
-  const k=`${c},${r}`,k2=`${c2},${r2}`;
-  if(!activeSet.has(k)){if(msg)setSt('Клетка неактивна');return false;}
-  if(!activeSet.has(k2)){if(msg)setSt('Нет соседней клетки — повернуть?');return false;}
-  const src=selMode==='grid'?new Set(Object.keys(board).filter(bk=>board[bk].di===selDi)):new Set();
-  if(board[k]&&!src.has(k)){if(msg)setSt('Клетка занята');return false;}
-  if(board[k2]&&!src.has(k2)){if(msg)setSt('Соседняя занята');return false;}
-  return true;
-}
-function placeFromHand(di,c,r){
-  const oi=orientIdx;const{dc,dr}=ORI[oi];const{h1,h2}=halves(oi);
-  board[`${c},${r}`]={di,half:h1};board[`${c+dc},${r+dr}`]={di,half:h2};placements[di]={c,r,oi};usedDom.add(di);
-  const[a,b]=puzzle.dominoes[di];const{w,h}=domSz(0,H_SZ);fillTile(tileEls[di],a,b,0,H_SZ,w,h);
-  slotEls[di].classList.remove('sel');slotEls[di].classList.add('used');
-  selMode=null;selDi=null;clearHL();updateCtrl();tStart();renderBoard();validate();
-}
-function moveGridTile(di,c,r){
-  const old=placements[di];delete board[`${old.c},${old.r}`];delete board[`${old.c+ORI[old.oi].dc},${old.r+ORI[old.oi].dr}`];
-  const oi=orientIdx;const{dc,dr}=ORI[oi];const{h1,h2}=halves(oi);
-  board[`${c},${r}`]={di,half:h1};board[`${c+dc},${r+dr}`]={di,half:h2};placements[di]={c,r,oi};
-  clearSelVis();selMode=null;selDi=null;clearHL();updateCtrl();renderBoard();validate();
-}
-function resetPuzzle(){
-  board={};placements={};usedDom.clear();tReset();selMode=null;selDi=null;orientIdx=0;
-  puzzle.dominoes.forEach(([a,b],di)=>{slotEls[di]?.classList.remove('sel','used');const{w,h}=domSz(0,H_SZ);fillTile(tileEls[di],a,b,0,H_SZ,w,h);});
-  clearHL();updateCtrl();renderBoard();setSt('Сброс.');
-}
-function updateCtrl(){$('btn-rot').disabled=selDi===null;$('btn-lift').style.display=selMode==='grid'?'':'none';$('opill').textContent=selDi!==null?ORI[orientIdx].l:'—';}
-
-/* ══ RENDER ══ */
-function renderBoard(){
-  const layer=$('dom-layer');layer.innerHTML='';Object.values(cellEls).forEach(el=>el.classList.remove('win-c'));
-  const M=3,gPip=Math.max(16,Math.min(38,CELL-12));
-  Object.entries(placements).forEach(([di_s,{c,r,oi}])=>{
-    const di=+di_s;const[a,b]=puzzle.dominoes[di];const isV=oi===1||oi===3;
-    const tW=isV?CELL-M*2:CELL*2+GAP-M*2,tH=isV?CELL*2+GAP-M*2:CELL-M*2;
-    const tile=document.createElement('div');tile.className='dom-tile placed'+(selMode==='grid'&&selDi===di?' gsel':'');
-    tile.dataset.di=di;tile.style.left=(c*STEP+M)+'px';tile.style.top=(r*STEP+M)+'px';
-    tile.style.pointerEvents='auto';fillTile(tile,a,b,oi,gPip,tW,tH);attachGesture(tile,di,'grid');layer.appendChild(tile);
-  });
+function renderRules(sz) {
+    const layer = document.getElementById('rule-layer');
+    layer.innerHTML = '';
+    const step = sz + 4;
+    puzzle.regions.forEach((rg, i) => {
+        const text = {sum: `=${rg.rule.v}`, eq: '=', neq: '≠', gt: `>${rg.rule.v}`, lt: `<${rg.rule.v}`}[rg.rule.type];
+        if (!text) return;
+        const minR = Math.min(...rg.cells.map(c => c[1]));
+        const cellsInMinR = rg.cells.filter(c => c[1] === minR);
+        const maxC = Math.max(...cellsInMinR.map(c => c[0]));
+        const badge = document.createElement('div');
+        badge.className = 'rb'; badge.textContent = text;
+        badge.style.left = (maxC * step + sz) + 'px';
+        badge.style.top = (minR * step) + 'px';
+        badge.style.borderColor = ZC[i % ZC.length].bd;
+        badge.style.color = ZC[i % ZC.length].bd;
+        layer.appendChild(badge);
+    });
 }
 
-let hlKeys=[];
-function clearHL(){hlKeys.forEach(k=>cellEls[k]?.classList.remove('hl-ok','hl-bad'));hlKeys=[];}
-function hlPrev(c,r){
-  clearHL();if(selDi===null)return;const k=`${c},${r}`;const[c2,r2]=sec2(c,r,orientIdx);const k2=`${c2},${r2}`;
-  const src=selMode==='grid'?new Set(Object.keys(board).filter(bk=>board[bk].di===selDi)):new Set();
-  const ok=activeSet.has(k)&&activeSet.has(k2)&&(!board[k]||src.has(k))&&(!board[k2]||src.has(k2));
-  cellEls[k]?.classList.add(ok?'hl-ok':'hl-bad');if(ok)cellEls[k2]?.classList.add('hl-ok');hlKeys=[k,k2];
+function renderHand() {
+    const hand = document.getElementById('hand');
+    hand.innerHTML = '';
+    puzzle.dominoes.forEach(([a, b], di) => {
+        const slot = document.createElement('div');
+        slot.className = 'hand-slot' + (usedDom.has(di) ? ' used' : '') + (selDi === di && selMode === 'hand' ? ' sel' : '');
+        const tile = document.createElement('div');
+        fillTile(tile, a, b, 0, 18);
+        slot.appendChild(tile);
+        slot.onclick = () => { if (!usedDom.has(di)) { selDi = di; selMode = 'hand'; orientIdx = 0; syncBoardUI(); renderHand(); } };
+        hand.appendChild(slot);
+    });
 }
-$('grid').addEventListener('pointermove',e=>{if(isDrag||!selDi)return;const el=e.target.closest?.('.cell.active');if(el)hlPrev(+el.dataset.c,+el.dataset.r);},{passive:true});
-$('grid-wrap').addEventListener('pointerleave',()=>{if(!isDrag)clearHL();});
 
-/* ══ VALIDATE ══ */
-function validate(){
-  Object.values(zOvEls).forEach(el=>el.classList.remove('err'));
-  if(usedDom.size<puzzle.dominoes.length){setSt(`${usedDom.size}/${puzzle.dominoes.length} размещено`);return;}
-  const errs=[];
-  puzzle.regions.forEach((rg,i)=>{
-    if(rg.rule.type==='none')return;
-    const vals=rg.cells.map(([c,r])=>{const info=board[`${c},${r}`];if(!info)return null;const[a,b]=puzzle.dominoes[info.di];return info.half==='a'?a:b;}).filter(v=>v!==null);
-    if(!chk(rg.rule,vals))errs.push(i);
-  });
-  if(!errs.length){
-    Object.values(cellEls).forEach(el=>el.classList.add('win-c'));tStop();
-    $('wtime').textContent=fmtT(timerSecs);$('wsub').textContent=`${puzzle.name} · ${puzzle.dominoes.length} костяшек`;
-    $('win-ov').classList.add('on');tg?.HapticFeedback?.notificationOccurred('success');
-  } else {
-    errs.forEach(i=>{puzzle.regions[i].cells.forEach(([c,r])=>{const el=zOvEls[`${c},${r}`];if(el)el.classList.add('err');});});
-    $('status').innerHTML=`❌ ${errs.map(i=>`<span style="color:${ZC[i%ZC.length].bd}">${rS(puzzle.regions[i].rule)}</span>`).join(' · ')}`;
-  }
+function syncBoardUI() {
+    const layer = document.getElementById('dom-layer');
+    layer.innerHTML = '';
+    const sz = getCellSize(puzzle.cols, puzzle.rows);
+    const step = sz + 4;
+    for (const di in placements) {
+        const p = placements[di];
+        const [a, b] = puzzle.dominoes[di];
+        const tile = document.createElement('div');
+        tile.className = 'dom-tile' + (selDi == di && selMode === 'grid' ? ' gsel' : '');
+        tile.style.left = (p.c * step + 5) + 'px';
+        tile.style.top = (p.r * step + 5) + 'px';
+        fillTile(tile, a, b, p.oi, Math.floor(sz * 0.45));
+        tile.onclick = (e) => { e.stopPropagation(); selDi = parseInt(di); selMode = 'grid'; orientIdx = p.oi; syncBoardUI(); renderHand(); };
+        layer.appendChild(tile);
+    }
+    document.getElementById('btn-lift').style.display = (selMode === 'grid') ? 'block' : 'none';
+    document.getElementById('status').textContent = `Размещено: ${usedDom.size} / ${puzzle.dominoes.length}`;
 }
-function setSt(msg){$('status').textContent=msg;}
 
-/* ══ DRAG ══ */
-let isDrag=false,dragDi=-1;const ghost=$('ghost');
-function startDrag(e,di){
-  isDrag=true;dragDi=di;const[a,b]=puzzle.dominoes[di];const gSz=H_SZ+4;const{w,h}=domSz(orientIdx,gSz);
-  fillTile(ghost,a,b,orientIdx,gSz,w,h);ghost.classList.add('on');mghost(e.clientX,e.clientY);
-  document.addEventListener('pointermove',onDM,{passive:true});document.addEventListener('pointerup',onDU,{once:true});
+function onCellClick(c, r) {
+    if (selDi === null) return;
+    const [a, b] = puzzle.dominoes[selDi];
+    const dc = ORI[orientIdx].dc, dr = ORI[orientIdx].dr;
+    const c2 = c + dc, r2 = r + dr;
+    const k1 = `${c},${r}`, k2 = `${c2},${r2}`;
+    const activeSet = new Set(puzzle.activeCells.map(cc => `${cc[0]},${cc[1]}`));
+
+    if (!activeSet.has(k1) || !activeSet.has(k2)) return;
+
+    const existing1 = board[k1], existing2 = board[k2];
+    if ((existing1 && existing1.di !== selDi) || (existing2 && existing2.di !== selDi)) return;
+
+    if (selMode === 'grid') {
+        const old = placements[selDi];
+        delete board[`${old.c},${old.r}`];
+        delete board[`${old.c + ORI[old.oi].dc},${old.r + ORI[old.oi].dr}`];
+    }
+
+    const h1 = orientIdx >= 2 ? 'b' : 'a', h2 = orientIdx >= 2 ? 'a' : 'b';
+    board[k1] = { di: selDi, half: h1 };
+    board[k2] = { di: selDi, half: h2 };
+    placements[selDi] = { c, r, oi: orientIdx };
+    usedDom.add(selDi);
+    selDi = null; selMode = null;
+    renderHand(); syncBoardUI(); validate();
 }
-function mghost(x,y){ghost.style.left=(x-50)+'px';ghost.style.top=(y-30)+'px';}
-function onDM(e){if(!isDrag)return;mghost(e.clientX,e.clientY);ghost.style.visibility='hidden';const el=document.elementFromPoint(e.clientX,e.clientY);ghost.style.visibility='';const cell=el?.closest?.('.cell.active');if(cell)hlPrev(+cell.dataset.c,+cell.dataset.r);else clearHL();}
-function onDU(e){
-  if(!isDrag)return;clearHL();ghost.style.visibility='hidden';const el=document.elementFromPoint(e.clientX,e.clientY);ghost.style.visibility='';
-  const cell=el?.closest?.('.cell.active');
-  if(cell){
-    const c=+cell.dataset.c,r=+cell.dataset.r;const[c2,r2]=sec2(c,r,orientIdx);
-    const src=selMode==='grid'?new Set(Object.keys(board).filter(bk=>board[bk].di===dragDi)):new Set();
-    const k=`${c},${r}`,k2=`${c2},${r2}`;
-    if(activeSet.has(k)&&activeSet.has(k2)&&(!board[k]||src.has(k))&&(!board[k2]||src.has(k2))){
-      if(selMode==='grid')moveGridTile(dragDi,c,r);else placeFromHand(dragDi,c,r);
-    } else setSt('Нельзя — другое место или поверни');
-  }
-  endDrag();cancelPress();
+
+function doRotate() {
+    if (selDi === null) return;
+    const nextOri = (orientIdx + 1) % 4;
+    if (selMode === 'grid') {
+        const p = placements[selDi];
+        const dc = ORI[nextOri].dc, dr = ORI[nextOri].dr;
+        const k1 = `${p.c},${p.r}`, k2 = `${p.c+dc},${p.r+dr}`;
+        const activeSet = new Set(puzzle.activeCells.map(cc => `${cc[0]},${cc[1]}`));
+
+        // Atomic check
+        const tempBoard = {...board};
+        delete tempBoard[k1]; delete tempBoard[`${p.c + ORI[p.oi].dc},${p.r + ORI[p.oi].dr}`];
+
+        if (activeSet.has(k2) && !tempBoard[k2]) {
+            delete board[`${p.c + ORI[p.oi].dc},${p.r + ORI[p.oi].dr}`];
+            orientIdx = nextOri;
+            const h1 = orientIdx >= 2 ? 'b' : 'a', h2 = orientIdx >= 2 ? 'a' : 'b';
+            board[k1] = { di: selDi, half: h1 };
+            board[k2] = { di: selDi, half: h2 };
+            placements[selDi].oi = orientIdx;
+        } else {
+            doLift(); // Fallback if rotation blocked
+        }
+    } else {
+        orientIdx = nextOri;
+    }
+    syncBoardUI();
 }
-function endDrag(){isDrag=false;ghost.classList.remove('on');document.removeEventListener('pointermove',onDM);}
+
+function doLift() {
+    if (selDi === null || selMode !== 'grid') return;
+    const p = placements[selDi];
+    delete board[`${p.c},${p.r}`];
+    delete board[`${p.c + ORI[p.oi].dc},${p.r + ORI[p.oi].dr}`];
+    delete placements[selDi];
+    usedDom.delete(selDi);
+    selMode = 'hand'; renderHand(); syncBoardUI();
+}
+
+function validate() {
+    if (usedDom.size < puzzle.dominoes.length) return;
+    const errs = [];
+    puzzle.regions.forEach((rg, idx) => {
+        const vals = rg.cells.map(cc => {
+            const b = board[`${cc[0]},${cc[1]}`];
+            return b ? (b.half === 'a' ? puzzle.dominoes[b.di][0] : puzzle.dominoes[b.di][1]) : null;
+        }).filter(v => v !== null);
+        if (!chkRule(rg.rule, vals)) errs.push(idx);
+    });
+    if (errs.length === 0) {
+        clearInterval(timerIv);
+        document.getElementById('win-meta').textContent = `Время: ${document.getElementById('timer').textContent} | Костяшек: ${puzzle.dominoes.length}`;
+        document.getElementById('win-ov').classList.add('on');
+    }
+}
+
+function chkRule(r, v) {
+    if (!v.length) return true;
+    const sum = v.reduce((a, b) => a + b, 0);
+    switch(r.type) {
+        case 'sum': return sum === r.v;
+        case 'eq': return v.every(x => x === v[0]);
+        case 'neq': return new Set(v).size === v.length;
+        case 'gt': return sum > r.v;
+        case 'lt': return sum < r.v;
+        default: return true;
+    }
+}
+
+/* ══ PROCEDURAL GENERATION ══ */
+function startRandom() {
+    const rng = mkRng(Date.now());
+    const cols = 6, rows = 6;
+    let ac = [];
+    const type = Math.floor(rng() * 4);
+    if (type === 0) { // Cross
+        for(let i=1; i<5; i++) { ac.push([i, 2]); ac.push([2, i]); }
+    } else if (type === 1) { // S-shape
+        for(let i=1; i<4; i++) ac.push([i, 1]);
+        ac.push([3,2]);
+        for(let i=3; i<6; i++) ac.push([i, 3]);
+    } else if (type === 2) { // Islands (Procedural)
+        const clusters = [[1,1], [4,4]];
+        clusters.forEach(c => {
+            ac.push([c[0], c[1]], [c[0]+1, c[1]], [c[0], c[1]+1], [c[0]+1, c[1]+1]);
+        });
+    } else { // Blob
+        ac = [[1,1],[2,1],[3,1],[1,2],[2,2],[3,2],[2,3],[2,4]];
+    }
+
+    const unique = []; const seen = new Set();
+    ac.forEach(c => { const k = `${c[0]},${c[1]}`; if(!seen.has(k)){ unique.push(c); seen.add(k); }});
+
+    // Parity Fix with Leaf Node removal
+    if (unique.length % 2 !== 0) {
+        const findLeaf = () => {
+            for(let i=0; i<unique.length; i++) {
+                const [cx, cy] = unique[i];
+                const n = [[cx+1, cy], [cx-1, cy], [cx, cy+1], [cx, cy-1]].filter(nb => seen.has(`${nb[0]},${nb[1]}`));
+                if (n.length <= 1) return i;
+            }
+            return 0;
+        };
+        unique.splice(findLeaf(), 1);
+    }
+
+    const dominoes = Array.from({length: unique.length/2}, () => [Math.floor(rng()*7), Math.floor(rng()*7)]);
+    const regions = [];
+    for(let i=0; i<unique.length; i+=2) {
+        const sumVal = dominoes[i/2][0] + dominoes[i/2][1]; // Guarantee solvable
+        regions.push({ rule: {type:'sum', v: sumVal}, cells: [unique[i], unique[i+1]] });
+    }
+    startLevel({ cols, rows, activeCells: unique, dominoes, regions });
+}
+
+/* ══ EDITOR ══ */
+let edState = { active: new Set(), regions: [], sel: new Set(), tool: 'toggle' };
+
+function openEditor() { showScreen('editor'); renderEditor(); }
+
+function renderEditor() {
+    const grid = document.getElementById('e-grid');
+    const sz = 40;
+    grid.style.gridTemplateColumns = `repeat(8, ${sz}px)`;
+    grid.innerHTML = '';
+    for (let r = 0; r < 8; r++) {
+        for (let c = 0; c < 8; c++) {
+            const key = `${c},${r}`;
+            const cell = document.createElement('div');
+            cell.className = 'cell ' + (edState.active.has(key) ? 'active' : 'inactive');
+            if (edState.sel.has(key)) cell.classList.add('sel-ed');
+            cell.style.width = sz + 'px'; cell.style.height = sz + 'px';
+
+            const regIdx = edState.regions.findIndex(rg => rg.cells.some(cc => cc[0] === c && cc[1] === r));
+            if (regIdx !== -1 && edState.active.has(key)) {
+                cell.style.background = ZC[regIdx % ZC.length].bg;
+                cell.style.border = `2px solid ${ZC[regIdx % ZC.length].bd}`;
+                const rule = edState.regions[regIdx].rule.type;
+                cell.innerHTML = `<span style="font-size:8px; position:absolute; top:2px; left:2px; color:${ZC[regIdx % ZC.length].bd}">${rule}</span>`;
+            }
+
+            cell.onclick = () => {
+                if (edState.tool === 'toggle') {
+                    if (edState.active.has(key)) edState.active.delete(key); else edState.active.add(key);
+                } else {
+                    if (edState.sel.has(key)) edState.sel.delete(key); else if (edState.active.has(key)) edState.sel.add(key);
+                }
+                renderEditor();
+            };
+            grid.appendChild(cell);
+        }
+    }
+}
+
+function setTool(t) {
+    edState.tool = t;
+    document.getElementById('t-toggle').classList.toggle('act', t === 'toggle');
+    document.getElementById('t-rule').classList.toggle('act', t === 'rule');
+    edState.sel.clear(); renderEditor();
+}
+
+function applyRule(type) {
+    if (edState.sel.size === 0) return;
+    let v = 0;
+    if (['sum','gt','lt'].includes(type)) v = parseInt(prompt("Значение для правила:", "5")) || 0;
+    edState.regions.push({ rule: {type, v}, cells: Array.from(edState.sel).map(k => k.split(',').map(Number)) });
+    edState.sel.clear(); renderEditor();
+}
+
+function clearRegions() { edState.regions = []; renderEditor(); }
+
+function testEditor() {
+    if (edState.active.size % 2 !== 0) { alert("Нечетное кол-во клеток!"); return; }
+    const lv = {
+        cols: 8, rows: 8,
+        activeCells: Array.from(edState.active).map(k => k.split(',').map(Number)),
+        dominoes: Array.from({length: edState.active.size/2}, () => [Math.floor(Math.random()*7), Math.floor(Math.random()*7)]),
+        regions: edState.regions
+    };
+    startLevel(lv);
+}
+
+/* ══ SHARING ══ */
+function serializePuzzle() {
+    const data = {
+        c: puzzle.cols, r: puzzle.rows,
+        a: puzzle.activeCells,
+        d: puzzle.dominoes,
+        rg: puzzle.regions
+    };
+    return btoa(JSON.stringify(data));
+}
+
+function shareLevel() {
+    const b64 = serializePuzzle();
+    const url = `${window.location.origin}${window.location.pathname}?p=${b64}`;
+    navigator.clipboard.writeText(url).then(() => alert("Ссылка скопирована!"));
+}
 
 /* ══ INIT ══ */
-initMenu();
+window.onload = () => {
+    const params = new URLSearchParams(window.location.search);
+    const p = params.get('p');
+    if (p) {
+        try {
+            const d = JSON.parse(atob(p));
+            startLevel({cols: d.c, rows: d.r, activeCells: d.a, dominoes: d.d, regions: d.rg});
+            window.history.replaceState({}, document.title, window.location.pathname);
+        } catch(e) { startRandom(); }
+    }
+};
+
+function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+    document.getElementById(id).classList.remove('hidden');
+}
+
+function goMenu() { clearInterval(timerIv); showScreen('menu'); }
+function resetPuzzle() { startLevel(puzzle); }
+
 </script>
 </body>
 </html>
