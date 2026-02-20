@@ -368,15 +368,29 @@ function addRect(S,x,y,w,h){
   for(let r=y;r<y+h;r++)for(let c=x;c<x+w;c++)if(c>=0&&r>=0)S.add(`${c},${r}`);
 }
 
-// Normalise Set: shift so min col/row = 0, make even, return shape or null
-function finishShape(S){
+// Normalise Set: shift so min col/row = 0, ensure even count, reject if too blob-like
+function finishShape(S,maxCells){
   const pairs=[...S].map(k=>k.split(',').map(Number));
   if(!pairs.length)return null;
   const minC=Math.min(...pairs.map(([c])=>c));
   const minR=Math.min(...pairs.map(([,r])=>r));
   const S2=new Set(pairs.map(([c,r])=>`${c-minC},${r-minR}`));
+  // Hard cell limit
+  if(maxCells&&S2.size>maxCells){
+    // Trim to maxCells by removing leaves
+    const arr2=[...S2].map(k=>k.split(',').map(Number));
+    while(S2.size>maxCells){
+      let removed=false;
+      for(let i=arr2.length-1;i>=0&&S2.size>maxCells;i--){
+        if(!S2.has(`${arr2[i][0]},${arr2[i][1]}`))continue;
+        const[c,r]=arr2[i];
+        const nbCount=[[c+1,r],[c-1,r],[c,r+1],[c,r-1]].filter(([nc,nr])=>S2.has(`${nc},${nr}`)).length;
+        if(nbCount<=1){S2.delete(`${c},${r}`);removed=true;}
+      }
+      if(!removed)break; // can't trim further
+    }
+  }
   if(S2.size%2!==0){
-    // Remove a leaf (≤1 neighbour) to keep even count
     const arr2=[...S2].map(k=>k.split(',').map(Number));
     for(let i=arr2.length-1;i>=0;i--){
       const[c,r]=arr2[i];
@@ -388,104 +402,96 @@ function finishShape(S){
   if(cells.length<6)return null;
   const cols=Math.max(...cells.map(([c])=>c))+1;
   const rows=Math.max(...cells.map(([,r])=>r))+1;
+  // Reject shapes that fill too much of their bounding box (too blob-like)
+  // Structured shapes should leave at least 20% of bbox empty
+  const bboxFill=cells.length/(cols*rows);
+  if(bboxFill>0.88&&cells.length>12)return null;
   return{cells,cols,rows};
 }
 
 /* 1. PIPE ──────────────────────────────────────────────
-   Horizontal (or vertical) main bar + branches at random positions.
-   Produces shapes like Map 1 — asymmetric, corridor-like. */
-function shapePipe(diff,rng){
+   Horizontal (or vertical) main bar + branches at random positions. */
+function shapePipe(diff,rng,maxC){
   const horiz=rng()<0.6;
-  const W=horiz?rInt(6,11,rng):rInt(3,5,rng);
-  const H=horiz?rInt(3,7,rng):rInt(6,11,rng);
+  const W=horiz?rInt(5,9,rng):rInt(2,4,rng);
+  const H=horiz?rInt(2,5,rng):rInt(5,9,rng);
   const barThick=rInt(1,2,rng);
-  const barPos=rInt(1,horiz?H-barThick-1:W-barThick-1,rng);
+  const barMax=horiz?H-barThick-1:W-barThick-1;
+  if(barMax<1)return null;
+  const barPos=rInt(1,barMax,rng);
   const S=new Set();
-  // Main bar
   if(horiz) addRect(S,0,barPos,W,barThick);
   else       addRect(S,barPos,0,barThick,H);
-  // 2–4 arms branching off
   const nArms=rInt(2,4,rng);
   const usedSlots=new Set();
   for(let b=0;b<nArms;b++){
     const slotMax=horiz?W-1:H-1;
-    let slot;let t=0;
+    let slot,t=0;
     do{slot=rInt(0,slotMax-1,rng);t++;}while(usedSlots.has(slot)&&t<20);
     usedSlots.add(slot);
-    const armThick=rng()<0.25?2:1;
+    const armThick=rng()<0.2?2:1;
     const goNeg=rng()<0.5;
     if(horiz){
-      if(goNeg&&barPos>0)  addRect(S,slot,barPos-rInt(1,barPos,rng),armThick,rInt(1,barPos,rng));
+      if(goNeg&&barPos>0)       addRect(S,slot,barPos-rInt(1,barPos,rng),armThick,rInt(1,barPos,rng));
       else if(barPos+barThick<H) addRect(S,slot,barPos+barThick,armThick,rInt(1,H-barPos-barThick,rng));
     } else {
-      if(goNeg&&barPos>0)  addRect(S,barPos-rInt(1,barPos,rng),slot,rInt(1,barPos,rng),armThick);
+      if(goNeg&&barPos>0)       addRect(S,barPos-rInt(1,barPos,rng),slot,rInt(1,barPos,rng),armThick);
       else if(barPos+barThick<W) addRect(S,barPos+barThick,slot,rInt(1,W-barPos-barThick,rng),armThick);
     }
   }
-  return finishShape(S);
+  return finishShape(S,maxC);
 }
 
 /* 2. FRAME ─────────────────────────────────────────────
-   Top bar connecting two side columns. Like Map 2 — bracket/U shapes.
-   Optional middle crossbar and bottom extensions. */
-function shapeFrame(diff,rng){
-  const W=rInt(5,9,rng), H=rInt(5,9,rng);
+   Top bar + two side columns. Bracket/U shapes. */
+function shapeFrame(diff,rng,maxC){
+  const W=rInt(4,8,rng), H=rInt(4,8,rng);
   const colW=rInt(1,2,rng);
   const topH=rInt(1,2,rng);
   const S=new Set();
-  addRect(S,0,0,W,topH);                    // top bar
-  addRect(S,0,topH,colW,H-topH);           // left column
-  addRect(S,W-colW,topH,colW,H-topH);     // right column
-  // Optional middle crossbar
-  if(rng()<0.45&&H>5){
-    const midR=rInt(topH+1,H-2,rng);
-    addRect(S,0,midR,W,1);
-  }
-  // Optional bottom bar closing the frame
-  if(rng()<0.35){
-    addRect(S,0,H-1,W,1);
-  }
-  return finishShape(S);
+  addRect(S,0,0,W,topH);
+  addRect(S,0,topH,colW,H-topH);
+  addRect(S,W-colW,topH,colW,H-topH);
+  if(rng()<0.4&&H>4){const midR=rInt(topH+1,H-2,rng);addRect(S,0,midR,W,1);}
+  if(rng()<0.3){addRect(S,0,H-1,W,1);}
+  return finishShape(S,maxC);
 }
 
 /* 3. CROSS ─────────────────────────────────────────────
-   Two bars (horizontal + vertical) crossing at an offset position.
-   Varying bar thicknesses create asymmetric plus shapes. */
-function shapeCross(diff,rng){
-  const W=rInt(5,10,rng), H=rInt(5,9,rng);
+   Two bars crossing at offset. */
+function shapeCross(diff,rng,maxC){
+  const W=rInt(4,9,rng), H=rInt(4,8,rng);
+  if(H<4||W<4)return null;
   const hRow=rInt(1,H-3,rng), hH=rInt(1,2,rng);
   const vCol=rInt(1,W-3,rng), vW=rInt(1,2,rng);
   const S=new Set();
   addRect(S,0,hRow,W,hH);
   addRect(S,vCol,0,vW,H);
-  return finishShape(S);
+  return finishShape(S,maxC);
 }
 
 /* 4. COMB ──────────────────────────────────────────────
-   Spine along one edge + teeth at intervals.
-   Makes grid shapes with regular gaps between arms. */
-function shapeComb(diff,rng){
-  const W=rInt(6,11,rng), H=rInt(4,7,rng);
+   Spine + teeth. */
+function shapeComb(diff,rng,maxC){
+  const W=rInt(5,9,rng), H=rInt(3,6,rng);
   const spineH=rInt(1,2,rng);
   const atTop=rng()<0.5;
-  const toothLen=rInt(2,H-spineH,rng);
-  const toothW=1;
+  const toothLen=Math.max(1,rInt(1,H-spineH,rng));
   const gap=rInt(1,2,rng);
   const S=new Set();
   const spineRow=atTop?0:H-spineH;
   addRect(S,0,spineRow,W,spineH);
-  for(let c=0;c<W;c+=toothW+gap){
-    if(atTop) addRect(S,c,spineH,toothW,toothLen);
-    else       addRect(S,c,H-spineH-toothLen,toothW,toothLen);
+  for(let c=0;c<W;c+=1+gap){
+    if(atTop) addRect(S,c,spineH,1,toothLen);
+    else       addRect(S,c,H-spineH-toothLen,1,toothLen);
   }
-  return finishShape(S);
+  return finishShape(S,maxC);
 }
 
 /* 5. SNAKE ─────────────────────────────────────────────
-   Alternating horizontal segments connected at their ends.
-   Creates winding S/Z paths, thin and long. */
-function shapeSnake(diff,rng){
-  const segLen=rInt(3,7,rng), segH=rInt(1,2,rng), nSegs=rInt(3,5,rng);
+   Alternating segments connected at ends. */
+function shapeSnake(diff,rng,maxC){
+  const segLen=rInt(3,6,rng), segH=rInt(1,2,rng), nSegs=rInt(3,5,rng);
   const S=new Set();
   let x=0,y=0;
   for(let s=0;s<nSegs;s++){
@@ -497,31 +503,27 @@ function shapeSnake(diff,rng){
       const connH=rInt(1,3,rng);
       addRect(S,connX,y+segH,1,connH);
       y+=segH+connH;
-      x=atRight?connX-rInt(segLen-2,segLen,rng)+1:connX;
-      x=Math.max(0,x);
+      x=atRight?Math.max(0,connX-rInt(segLen-2,segLen,rng)+1):connX;
     }
   }
-  return finishShape(S);
+  return finishShape(S,maxC);
 }
 
 /* 6. STAIRCASE ──────────────────────────────────────────
-   Diagonal descending steps. Clean geometric shape. */
-function shapeStair(diff,rng){
-  const steps=rInt(3,5,rng), sw=rInt(2,4,rng), sh=rInt(2,3,rng);
+   Diagonal descending steps. */
+function shapeStair(diff,rng,maxC){
+  const steps=rInt(3,4,rng), sw=rInt(2,3,rng), sh=rInt(2,3,rng);
   const S=new Set();
-  for(let s=0;s<steps;s++){
-    // Each step: from this column onwards, this row band
-    addRect(S,s*sw,s*sh,(steps-s)*sw,sh);
-  }
-  return finishShape(S);
+  for(let s=0;s<steps;s++) addRect(S,s*sw,s*sh,(steps-s)*sw,sh);
+  return finishShape(S,maxC);
 }
 
 /* 7. BLOB ───────────────────────────────────────────────
-   Organic BFS growth — rounded, irregular shapes. */
-function shapeBlob(diff,rng){
-  const szByDiff={easy:[4,6,2,4],med:[5,8,3,5],hard:[6,10,4,7]}[diff]||[5,7,3,5];
+   Organic BFS — capped at maxCells. */
+function shapeBlob(diff,rng,maxC){
+  const szByDiff={easy:[4,6,2,4],med:[5,7,3,5],hard:[5,8,4,6]}[diff]||[5,7,3,5];
   const cols=rInt(szByDiff[0],szByDiff[1],rng), rows=rInt(szByDiff[2],szByDiff[3],rng);
-  const density={easy:.85,med:.70,hard:.60}[diff]||.70;
+  const density={easy:.75,med:.65,hard:.58}[diff]||.65;
   let target=Math.floor(cols*rows*density);if(target%2!==0)target--;
   if(target<6)return null;
   const active=new Set(),front=[];
@@ -533,16 +535,25 @@ function shapeBlob(diff,rng){
     const nbrs=[[c+1,r],[c-1,r],[c,r+1],[c,r-1]].filter(([nc,nr])=>nc>=0&&nc<cols&&nr>=0&&nr<rows&&!active.has(`${nc},${nr}`));
     shu(nbrs,rng);for(const nb of nbrs){if(active.size>=target)break;active.add(`${nb[0]},${nb[1]}`);front.push(nb);}
   }
-  return finishShape(active);
+  return finishShape(active,maxC);
 }
+
+/* ── Cell limits per difficulty ── */
+const MAX_CELLS={easy:14,med:22,hard:30};
+const MAX_COLS={easy:9,med:11,hard:13};
+const MAX_ROWS={easy:7,med:9,hard:11};
 
 /* ── Main entry: pick archetype, retry until valid ── */
 function genPuzzle(diff,rng){
+  const maxC=MAX_CELLS[diff]||22;
+  const maxCols=MAX_COLS[diff]||11;
+  const maxRows=MAX_ROWS[diff]||9;
   const fns=[shapePipe,shapeFrame,shapeCross,shapeComb,shapeSnake,shapeStair,shapeBlob];
-  for(let attempt=0;attempt<100;attempt++){
+  for(let attempt=0;attempt<120;attempt++){
     const fn=fns[Math.floor(rng()*fns.length)];
-    const sh=fn(diff,rng);
+    const sh=fn(diff,rng,maxC);
     if(!sh||sh.cells.length<6||sh.cells.length%2!==0)continue;
+    if(sh.cols>maxCols||sh.rows>maxRows)continue;
     const lv=buildPuzzle(sh.cells,sh.cols,sh.rows,rng);
     if(lv)return lv;
   }
@@ -566,36 +577,132 @@ function buildPuzzle(ac,cols,rows,rng){
     return false;
   }
   if(!tile(0))return null;
-  const dVals=placed.map(()=>[rInt(0,5,rng),rInt(0,5,rng)]);
-  const cV=(c,r)=>{const di=tOf[`${c},${r}`];const[[ac2,ar]]=placed[di];return dVals[di][ac2===c&&ar===r?0:1];};
 
-  // Zone BFS partition
-  const zCount=Math.max(2,Math.min(5,Math.ceil(ac.length/4)));
+  /* ── Zone BFS: small zones, 2–4 cells each ─────────────────
+     Target ~n/2 zones so each zone ≈ 1 domino (2 cells).
+     Cap at 5 zones for readability. */
+  const nDom=placed.length;
+  const zCount=Math.max(2,Math.min(5,Math.round(ac.length/3)));
   const zOf={};const sh2=shu([...ac],rng);const seeds=[];
-  for(const cell of sh2){if(seeds.length>=zCount)break;if(seeds.every(s=>Math.abs(s[0]-cell[0])+Math.abs(s[1]-cell[1])>=2))seeds.push(cell);}
+  for(const cell of sh2){
+    if(seeds.length>=zCount)break;
+    if(seeds.every(s=>Math.abs(s[0]-cell[0])+Math.abs(s[1]-cell[1])>=3))seeds.push(cell);
+  }
   if(seeds.length<2)return null;
   seeds.forEach(([c,r],i)=>{zOf[`${c},${r}`]=i;});
   const q=seeds.map(([c,r],i)=>({c,r,z:i}));let bi=0;
-  while(bi<q.length){const{c,r,z}=q[bi++];for(const[nc,nr]of[[c+1,r],[c-1,r],[c,r+1],[c,r-1]]){const k2=`${nc},${nr}`;if(setA.has(k2)&&zOf[k2]===undefined){zOf[k2]=z;q.push({c:nc,r:nr,z});}}}
+  while(bi<q.length){
+    const{c,r,z}=q[bi++];
+    for(const[nc,nr]of[[c+1,r],[c-1,r],[c,r+1],[c,r-1]]){
+      const k2=`${nc},${nr}`;
+      if(setA.has(k2)&&zOf[k2]===undefined){zOf[k2]=z;q.push({c:nc,r:nr,z});}
+    }
+  }
   ac.forEach(([c,r])=>{if(zOf[`${c},${r}`]===undefined)zOf[`${c},${r}`]=0;});
+
+  /* ── Collect zone cells ── */
   const rCells=Array.from({length:zCount},()=>[]);
   ac.forEach(([c,r])=>rCells[zOf[`${c},${r}`]].push([c,r]));
-  const regions=rCells.filter(c=>c.length>=2).map(cells=>({rule:pickRule(cells.map(([c,r])=>cV(c,r)),rng),cells}));
+
+  /* ── Helper: set pip value for a cell ── */
+  const dVals=placed.map(()=>[0,0]);
+  function setCell(c,r,v){
+    const di=tOf[`${c},${r}`];const[[c0,r0]]=placed[di];
+    dVals[di][(c===c0&&r===r0)?0:1]=v;
+  }
+  function getCell(c,r){
+    const di=tOf[`${c},${r}`];const[[c0,r0]]=placed[di];
+    return dVals[di][(c===c0&&r===r0)?0:1];
+  }
+
+  /* ── Assign pip values + rules together ─────────────────────
+     Rule distribution (target): 30% eq · 20% neq · 25% sum · 12.5% gt · 12.5% lt
+     We pick the rule FIRST then set values to match. */
+  const RULE_WEIGHTS=[
+    {type:'eq',  w:30},
+    {type:'neq', w:20},
+    {type:'sum', w:25},
+    {type:'gt',  w:12},
+    {type:'lt',  w:13},
+  ];
+  function pickType(){
+    const total=RULE_WEIGHTS.reduce((s,x)=>s+x.w,0);
+    let r2=rng()*total;
+    for(const{type,w}of RULE_WEIGHTS){r2-=w;if(r2<=0)return type;}
+    return'sum';
+  }
+
+  const regions=[];
+  for(const cells of rCells){
+    if(cells.length<2)continue;
+    // Clamp zone to max 4 cells for clean constraints
+    const zoneCells=cells.length>4?cells.slice(0,4):cells;
+    const n=zoneCells.length;
+    const type=pickType();
+
+    if(type==='eq'){
+      const v=rInt(1,5,rng); // avoid 0-all for visual interest
+      zoneCells.forEach(([c,r])=>setCell(c,r,v));
+      regions.push({rule:{type:'eq'},cells:zoneCells});
+
+    } else if(type==='neq'){
+      // Assign distinct values 0-5; if zone too big for distinct, fallback to sum
+      if(n>5){
+        const s=rInt(n*1,n*4,rng);
+        zoneCells.forEach(([c,r],i)=>setCell(c,r,Math.min(5,Math.max(0,Math.round(s/n)+rInt(-1,1,rng)))));
+        const realSum=zoneCells.reduce((a,[c,r])=>a+getCell(c,r),0);
+        regions.push({rule:{type:'sum',v:realSum},cells:zoneCells});
+      } else {
+        const pool=shu([0,1,2,3,4,5].slice(0,Math.max(n,4)),rng).slice(0,n);
+        zoneCells.forEach(([c,r],i)=>setCell(c,r,pool[i]));
+        regions.push({rule:{type:'neq'},cells:zoneCells});
+      }
+
+    } else if(type==='sum'){
+      // Pick a target sum, distribute across cells
+      const minS=n*1, maxS=n*4;
+      const target=rInt(minS,maxS,rng);
+      // Distribute: fill each cell attempting to hit target
+      let rem=target;
+      zoneCells.forEach(([c,r],i)=>{
+        const left=n-i-1;
+        const lo=Math.max(0,rem-left*5),hi=Math.min(5,rem-left*0);
+        const v=rInt(lo,hi,rng);setCell(c,r,v);rem-=v;
+      });
+      const realSum=zoneCells.reduce((a,[c,r])=>a+getCell(c,r),0);
+      regions.push({rule:{type:'sum',v:realSum},cells:zoneCells});
+
+    } else if(type==='gt'){
+      // Choose sum, set values, threshold = sum-1 (tight: must achieve at least that)
+      const target=rInt(Math.max(1,n*1),n*4,rng);
+      let rem=target;
+      zoneCells.forEach(([c,r],i)=>{
+        const left=n-i-1;
+        const lo=Math.max(0,rem-left*5),hi=Math.min(5,rem-left*0);
+        const v=rInt(lo,hi,rng);setCell(c,r,v);rem-=v;
+      });
+      const realSum=zoneCells.reduce((a,[c,r])=>a+getCell(c,r),0);
+      // Threshold: 1-2 below actual (meaningful but achievable)
+      const thresh=Math.max(0,realSum-rInt(1,2,rng));
+      regions.push({rule:{type:'gt',v:thresh},cells:zoneCells});
+
+    } else { // lt
+      const target=rInt(n*1,n*4,rng);
+      let rem=target;
+      zoneCells.forEach(([c,r],i)=>{
+        const left=n-i-1;
+        const lo=Math.max(0,rem-left*5),hi=Math.min(5,rem-left*0);
+        const v=rInt(lo,hi,rng);setCell(c,r,v);rem-=v;
+      });
+      const realSum=zoneCells.reduce((a,[c,r])=>a+getCell(c,r),0);
+      // Threshold: 1-2 above actual
+      const thresh=Math.min(n*5,realSum+rInt(1,2,rng));
+      regions.push({rule:{type:'lt',v:thresh},cells:zoneCells});
+    }
+  }
   if(regions.length<2)return null;
 
   return{cols,rows,activeCells:ac.length===cols*rows?undefined:ac,dominoes:dVals,regions};
-}
-
-function pickRule(vals,rng){
-  if(!vals.length)return{type:'none'};
-  const sum=vals.reduce((s,v)=>s+v,0);
-  const opts=[{type:'sum',v:sum}];
-  if(vals.length>=2&&vals.every(v=>v===vals[0]))opts.push({type:'eq'});
-  if(vals.length>=2&&new Set(vals).size===vals.length)opts.push({type:'neq'});
-  if(sum>=2)opts.push({type:'gt',v:sum-1});
-  if(sum<=vals.length*5-2)opts.push({type:'lt',v:sum+1});
-  const nonsum=opts.filter(o=>o.type!=='sum');
-  return nonsum.length&&rng()<.55?nonsum[Math.floor(rng()*nonsum.length)]:{type:'sum',v:sum};
 }
 
 /* ══════════════════════════════════════════
@@ -698,15 +805,20 @@ function buildGame(){
   const b=$('gbadge');b.className='game-badge '+(puzzle.diff||'rnd');
   b.textContent=DIFF_LABELS[puzzle.diff]||'RANDOM';
 
-  // Available space calculation (all fixed UI elements)
-  // header≈42, legend≈26, status≈16, controls≈36, hand≈78, gaps≈18, grid-padding=14
-  const reservedH=42+26+16+36+78+18+14;
-  const availW=Math.min(window.innerWidth,460)-20-14;
+  // ── Screen fit: compute CELL so grid fits without scroll ──
+  // Measure actual available space
+  const nDom=puzzle.dominoes.length;
+  const handRows=Math.ceil(nDom/5); // ~5 slots per row
+  const handH=Math.min(handRows*76+10, 160); // cap hand area
+  const headerH=46, legendH=puzzle.regions.length>0?30:0;
+  const statusH=18, controlsH=40, padH=24, gridBorder=14;
+  const reservedH=headerH+legendH+statusH+controlsH+handH+padH+gridBorder;
+  const availW=Math.min(window.innerWidth,460)-20-gridBorder;
   const availH=window.innerHeight-reservedH;
 
   const cellW=Math.floor((availW+GAP)/puzzle.cols)-GAP;
-  const cellH=Math.floor((availH+GAP)/puzzle.rows)-GAP;
-  CELL=Math.max(22,Math.min(60,Math.min(cellW,cellH)));
+  const cellH=availH>0?Math.floor((availH+GAP)/puzzle.rows)-GAP:cellW;
+  CELL=Math.max(30,Math.min(58,Math.min(cellW,cellH)));
   STEP=CELL+GAP;
 
   activeSet.clear();
