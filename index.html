@@ -15,9 +15,9 @@ body{font-family:'DM Mono',monospace;background:var(--cream);}
 .screen.hidden{opacity:0;pointer-events:none;transform:scale(.97);}
 
 /* ══ MENU ══ */
-#menu{background:radial-gradient(ellipse at 30% 20%,#2d1a06,#080503);justify-content:center;gap:0;padding:24px 20px;}
-.menu-title{font-family:'Playfair Display',serif;font-size:3rem;font-weight:900;color:var(--gold2);letter-spacing:6px;text-shadow:0 0 40px rgba(200,150,60,.45);line-height:1;margin-bottom:4px;}
-.menu-sub{font-size:.55rem;letter-spacing:8px;color:#b89060;text-transform:uppercase;margin-bottom:22px;}
+#menu{background:radial-gradient(ellipse at 30% 20%,#2d1a06,#080503);justify-content:flex-start;gap:0;padding:16px 20px;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.menu-title{font-family:'Playfair Display',serif;font-size:2.6rem;font-weight:900;color:var(--gold2);letter-spacing:6px;text-shadow:0 0 40px rgba(200,150,60,.45);line-height:1;margin-bottom:3px;margin-top:8px;text-align:center;width:100%;}
+.menu-sub{font-size:.52rem;letter-spacing:8px;color:#b89060;text-transform:uppercase;margin-bottom:16px;text-align:center;width:100%;}
 .divider{width:80px;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:16px auto;}
 
 .menu-btn{width:100%;max-width:300px;border:none;border-radius:14px;cursor:pointer;display:flex;align-items:center;gap:14px;padding:14px 18px;transition:all .15s;margin-bottom:10px;}
@@ -118,11 +118,11 @@ body{font-family:'DM Mono',monospace;background:var(--cream);}
 .ctrl.warn{background:#7a1818;}.ctrl.lite{background:#e4dcd0;color:var(--wood);}
 .opill{background:rgba(0,0,0,.1);border-radius:8px;padding:4px 9px;font-size:.85rem;font-weight:700;color:var(--dark);min-width:26px;text-align:center;}
 
-#hand{display:flex;flex-wrap:wrap;justify-content:center;gap:5px;max-width:420px;padding:2px;flex-shrink:0;}
-.hand-slot{flex-shrink:0;width:72px;height:72px;display:flex;align-items:center;justify-content:center;border-radius:10px;cursor:pointer;border:2px solid transparent;background:rgba(0,0,0,.05);transition:border-color .15s,background .15s;touch-action:none;position:relative;}
+#hand{display:flex;flex-wrap:wrap;justify-content:center;gap:4px;max-width:100%;padding:2px 4px;flex-shrink:0;overflow-y:auto;max-height:130px;-webkit-overflow-scrolling:touch;}
+.hand-slot{flex-shrink:0;width:60px;height:60px;display:flex;align-items:center;justify-content:center;border-radius:9px;cursor:pointer;border:2px solid transparent;background:rgba(0,0,0,.05);transition:border-color .15s,background .15s;touch-action:none;position:relative;}
 .hand-slot.sel{border-color:var(--gold2);background:rgba(240,192,96,.12);}
 .hand-slot.used{opacity:.18;pointer-events:none;}
-.hand-slot.sel::after{content:'↻';position:absolute;top:-14px;right:2px;font-size:11px;color:var(--gold2);animation:hf 2.5s ease .4s both;pointer-events:none;}
+.hand-slot.sel::after{content:'↻';position:absolute;top:-13px;right:2px;font-size:10px;color:var(--gold2);animation:hf 2.5s ease .4s both;pointer-events:none;}
 @keyframes hf{0%{opacity:0}15%{opacity:1}75%{opacity:1}100%{opacity:0}}
 
 .dom-tile{background:var(--dark);border:2px solid var(--gold);border-radius:7px;box-shadow:2px 3px 0 rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.07);overflow:hidden;flex-shrink:0;}
@@ -275,16 +275,26 @@ body{font-family:'DM Mono',monospace;background:var(--cream);}
 
   <div class="ed-actions">
     <button class="ctrl" onclick="edGenerate()">⚙ ГЕНЕРИРОВАТЬ</button>
+    <button class="ctrl" onclick="edPlay()">▶ ИГРАТЬ</button>
+    <button class="ctrl lite" onclick="edSave()">💾 СОХРАНИТЬ</button>
     <button class="ctrl lite" onclick="edShare()">🔗 ПОДЕЛИТЬСЯ</button>
     <button class="ctrl lite" onclick="edClear()">↺ ОЧИСТИТЬ</button>
   </div>
-</div>
 
+  <!-- Saved levels -->
+  <div style="width:100%;max-width:360px;margin-top:8px;overflow-y:auto;max-height:180px">
+    <div style="font-size:.58rem;letter-spacing:2px;color:#888;margin-bottom:6px;text-align:center">МОИ УРОВНИ</div>
+    <div id="saved-panel"></div>
+  </div>
+</div><!-- /editor -->
+
+<div id="ghost" class="dom-tile"></div>
 
 <div id="win-ov">
   <div class="win-t">✦ ПОБЕДА ✦</div>
   <div class="win-time" id="wtime"></div>
   <div class="win-s" id="wsub"></div>
+  <button class="win-btn sec" id="wshare-btn" onclick="shareReport()" style="display:none;font-size:.7rem">📋 ПОДЕЛИТЬСЯ РЕЗУЛЬТАТОМ</button>
   <div class="win-row">
     <button class="win-btn" onclick="goMenu()">← МЕНЮ</button>
     <button class="win-btn sec" onclick="winNext()">⚄ ЕЩЁ</button>
@@ -806,7 +816,7 @@ function getDailyLevel(diff){
   const rng=mkRng(dateSeed(0,idx));
   const lv=genPuzzle(diff,rng);
   lv.name='DAILY '+(DIFF_LABELS[diff]||diff);
-  lv.diff=diff;
+  lv.diff=diff;lv.isDaily=true;lv.dailyDiff=diff;
   return lv;
 }
 
@@ -843,12 +853,32 @@ function buildTutPanel(){
 function buildDayPanel(){
   const p=$('day-panel');
   DIFFS.forEach(diff=>{
+    const record=getDailyRecord(diff);
+    const done=!!record;
     const card=document.createElement('div');card.className='sub-card';
-    card.innerHTML=`<div class="sc-badge ${diff}">${DIFF_LABELS[diff][0]}</div>
+    card.style.opacity=done?'1':'1';
+    const timeStr=done?`✓ ${fmtT(record.secs)}`:'';
+    const meta=done?`пройдено · ${timeStr}`:'одинаков для всех · сменится завтра';
+    const bg=done?'rgba(60,150,60,.12)':'';
+    const border=done?'rgba(60,150,60,.3)':'rgba(200,150,60,.18)';
+    card.style.background=bg;card.style.borderColor=border;
+    card.innerHTML=`<div class="sc-badge ${diff}">${done?'✓':DIFF_LABELS[diff][0]}</div>
       <div class="sc-info"><div class="sc-name">${DIFF_LABELS[diff]}</div>
-      <div class="sc-meta">одинаков для всех · сменится завтра</div></div>
-      <span class="sc-stars">${DIFF_STARS[diff]}</span>`;
-    card.onclick=()=>startLevel(getDailyLevel(diff));p.appendChild(card);
+      <div class="sc-meta">${meta}</div></div>
+      <span class="sc-stars">${done?'':'${DIFF_STARS[diff]}'}</span>`;
+    // Fix template literal issue
+    card.querySelector('.sc-stars').textContent=done?'':DIFF_STARS[diff];
+    if(done){
+      // Show view-only button instead of play
+      card.onclick=()=>{
+        const lv=getDailyLevel(diff);
+        lv.viewOnly=true;
+        startLevel(lv);
+      };
+    } else {
+      card.onclick=()=>startLevel(getDailyLevel(diff));
+    }
+    p.appendChild(card);
   });
 }
 function buildRndPanel(){
@@ -988,8 +1018,8 @@ function buildRuleOv(){
 }
 
 /* ══ HAND ══ */
-const H_SZ=26;
-function domSz(oi,sz){const isV=oi===1||oi===3,pd=Math.max(4,Math.round(sz*.18)),long=sz*2+2+8+pd*2+4,thin=sz+pd*2+4;return isV?{w:thin,h:long}:{w:long,h:thin};}
+const H_SZ=20; // smaller base pip size for hand slots
+function domSz(oi,sz){const isV=oi===1||oi===3,pd=Math.max(3,Math.round(sz*.18)),long=sz*2+2+6+pd*2+2,thin=sz+pd*2+4;return isV?{w:thin,h:long}:{w:long,h:thin};}
 function buildHand(){
   const hand=$('hand');hand.innerHTML='';slotEls=[];tileEls=[];
   puzzle.dominoes.forEach(([a,b],di)=>{
@@ -1005,22 +1035,54 @@ function refreshHT(di){
   fillTile(tileEls[di],a,b,oi,H_SZ,w,h);
 }
 
-/* ══ GESTURES — tap=select/rotate, hold=drag ══ */
-const HOLD_MS=200,MOVE_PX=8;let pSt=null;
+/* ══ GESTURES — tap=select/rotate · swipe=drag immediately ══ */
+const HOLD_MS=250,MOVE_PX=6;let pSt=null;
 function makeHoldRing(el){const r=document.createElement('div');r.className='hold-ring';el.appendChild(r);requestAnimationFrame(()=>r.classList.add('go'));return r;}
 function removeHoldRing(el){el.querySelectorAll('.hold-ring').forEach(r=>r.remove());}
 function attachGesture(el,di,src){el.addEventListener('pointerdown',e=>{if(src==='hand'&&usedDom.has(di))return;e.preventDefault();startPress(e,di,src);},{passive:false});}
 function startPress(e,di,src){
-  cancelPress();makeHoldRing(e.currentTarget);
-  const timer=setTimeout(()=>{if(pSt&&!pSt.drag){pSt.drag=true;removeHoldRing(pSt.el);if(src==='grid'&&!(selMode==='grid'&&selDi===di))selGridTile(di);startDrag(e,di);}},HOLD_MS);
-  pSt={di,src,x:e.clientX,y:e.clientY,timer,drag:false,e,el:e.currentTarget};
-  document.addEventListener('pointermove',onPM,{passive:true});document.addEventListener('pointerup',onPU,{once:true});document.addEventListener('pointercancel',onPC,{once:true});
+  cancelPress();
+  const ring=makeHoldRing(e.currentTarget);
+  const startX=e.clientX,startY=e.clientY,startE=e;
+  let drag=false;
+  const tmr=setTimeout(()=>{
+    if(drag)return;drag=true;ring.remove();
+    if(src==='grid'&&!(selMode==='grid'&&selDi===di))selGridTile(di);
+    else if(src==='hand'&&!(selMode==='hand'&&selDi===di))selHandTile(di);
+    startDrag(startE,di);
+  },HOLD_MS);
+  pSt={di,src,tmr,drag:()=>drag,setDrag:(v)=>{drag=v;},startX,startY,startE,el:e.currentTarget};
+  document.addEventListener('pointermove',onPM,{passive:false});
+  document.addEventListener('pointerup',onPU,{once:true});
+  document.addEventListener('pointercancel',onPC,{once:true});
 }
-function onPM(e){if(!pSt||pSt.drag)return;if(Math.hypot(e.clientX-pSt.x,e.clientY-pSt.y)>MOVE_PX){clearTimeout(pSt.timer);pSt.drag=true;removeHoldRing(pSt.el);const{di,src}=pSt;if(src==='grid'&&!(selMode==='grid'&&selDi===di))selGridTile(di);startDrag(pSt.e,di);}}
-function onPU(){if(!pSt)return;document.removeEventListener('pointermove',onPM);if(!pSt.drag){clearTimeout(pSt.timer);removeHoldRing(pSt.el);const{di,src}=pSt;pSt=null;onTap(di,src);}}
+function onPM(e){
+  if(!pSt||pSt.drag())return;
+  if(Math.hypot(e.clientX-pSt.startX,e.clientY-pSt.startY)>MOVE_PX){
+    clearTimeout(pSt.tmr);pSt.setDrag(true);removeHoldRing(pSt.el);
+    const{di,src}=pSt;
+    if(src==='grid'&&!(selMode==='grid'&&selDi===di))selGridTile(di);
+    else if(src==='hand'&&!(selMode==='hand'&&selDi===di))selHandTile(di);
+    startDrag({clientX:e.clientX,clientY:e.clientY},di);
+  }
+}
+function onPU(){
+  if(!pSt)return;
+  document.removeEventListener('pointermove',onPM);
+  const wasDrag=pSt.drag();
+  const{di,src}=pSt;
+  clearTimeout(pSt.tmr);removeHoldRing(pSt.el);pSt=null;
+  if(!wasDrag)onTap(di,src);
+}
 function onPC(){cancelPress();if(isDrag)endDrag();}
-function cancelPress(){if(!pSt)return;clearTimeout(pSt.timer);removeHoldRing(pSt.el);document.removeEventListener('pointermove',onPM);document.removeEventListener('pointerup',onPU);document.removeEventListener('pointercancel',onPC);pSt=null;}
-
+function cancelPress(){
+  if(!pSt)return;
+  clearTimeout(pSt.tmr);removeHoldRing(pSt.el);
+  document.removeEventListener('pointermove',onPM);
+  document.removeEventListener('pointerup',onPU);
+  document.removeEventListener('pointercancel',onPC);
+  pSt=null;
+}
 function onTap(di,src){
   if(src==='hand'){if(usedDom.has(di))return;if(selDi===di&&selMode==='hand')doRotate();else selHandTile(di);}
   else{if(selDi===di&&selMode==='grid')doRotate();else selGridTile(di);}
@@ -1097,7 +1159,8 @@ function updateCtrl(){$('btn-rot').disabled=selDi===null;$('btn-lift').style.dis
 /* ══ RENDER ══ */
 function renderBoard(){
   const layer=$('dom-layer');layer.innerHTML='';Object.values(cellEls).forEach(el=>el.classList.remove('win-c'));
-  const M=3,gPip=Math.max(16,Math.min(38,CELL-12));
+  const M=Math.max(2,Math.round(CELL*.06));
+  const gPip=Math.max(14,Math.min(36,Math.round(CELL*.52))); // scale pip to cell
   Object.entries(placements).forEach(([di_s,{c,r,oi}])=>{
     const di=+di_s;const[a,b]=puzzle.dominoes[di];const isV=oi===1||oi===3;
     const tW=isV?CELL-M*2:CELL*2+GAP-M*2,tH=isV?CELL*2+GAP-M*2:CELL-M*2;
@@ -1118,6 +1181,13 @@ function hlPrev(c,r){
 $('grid').addEventListener('pointermove',e=>{if(isDrag||!selDi)return;const el=e.target.closest?.('.cell.active');if(el)hlPrev(+el.dataset.c,+el.dataset.r);},{passive:true});
 $('grid-wrap').addEventListener('pointerleave',()=>{if(!isDrag)clearHL();});
 
+/* ══ DAILY TRACKING ══ */
+function dailyKey(diff){const d=new Date();return`pips_daily_${d.toISOString().slice(0,10)}_${diff}`;}
+function getDailyRecord(diff){try{return JSON.parse(localStorage.getItem(dailyKey(diff)))||null;}catch(e){return null;}}
+function saveDailyRecord(diff,secs){
+  try{localStorage.setItem(dailyKey(diff),JSON.stringify({secs,ts:Date.now()}));}catch(e){}
+}
+
 /* ══ VALIDATE ══ */
 function validate(){
   Object.values(zOvEls).forEach(el=>el.classList.remove('err'));
@@ -1130,12 +1200,31 @@ function validate(){
   });
   if(!errs.length){
     Object.values(cellEls).forEach(el=>el.classList.add('win-c'));tStop();
-    $('wtime').textContent=fmtT(timerSecs);$('wsub').textContent=`${puzzle.name} · ${puzzle.dominoes.length} костяшек`;
-    $('win-ov').classList.add('on');tg?.HapticFeedback?.notificationOccurred('success');
+    const t=fmtT(timerSecs);
+    $('wtime').textContent=t;
+    $('wsub').textContent=`${puzzle.name} · ${puzzle.dominoes.length} костяшек`;
+    // Save daily record if this is a daily level
+    if(puzzle.isDaily){
+      saveDailyRecord(puzzle.dailyDiff,timerSecs);
+      $('wshare-btn').style.display='';
+      const d=new Date();
+      const mo=['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'][d.getMonth()];
+      $('wshare-btn').dataset.report=`Pips Daily ${DIFF_LABELS[puzzle.dailyDiff]} · ${d.getDate()} ${mo}\n⏱ ${t}\n✦ ${puzzle.dominoes.length} костяшек`;
+    } else {
+      $('wshare-btn').style.display='none';
+    }
+    $('win-ov').classList.add('on');
+    tg?.HapticFeedback?.notificationOccurred('success');
   } else {
     errs.forEach(i=>{puzzle.regions[i].cells.forEach(([c,r])=>{const el=zOvEls[`${c},${r}`];if(el)el.classList.add('err');});});
     $('status').innerHTML=`❌ ${errs.map(i=>`<span style="color:${ZC[i%ZC.length].bd}">${rS(puzzle.regions[i].rule)}</span>`).join(' · ')}`;
   }
+}
+function shareReport(){
+  const txt=$('wshare-btn').dataset.report||'';
+  if(tg?.shareText)tg.shareText(txt);
+  else if(navigator.share)navigator.share({text:txt}).catch(()=>{});
+  else if(navigator.clipboard)navigator.clipboard.writeText(txt).then(()=>{$('wsub').textContent='✓ Скопировано!';});
 }
 function setSt(msg){$('status').textContent=msg;}
 
@@ -1175,7 +1264,7 @@ function initEditor(){
   $('ed-cols-lbl').textContent=edCols;$('ed-rows-lbl').textContent=edRows;
   $('tab-cells').classList.add('active');$('tab-zones').classList.remove('active');
   $('zone-panel').style.display='none';
-  renderEdGrid();renderZonePicker();
+  renderEdGrid();renderZonePicker();buildSavedPanel();
   $('ed-status').textContent='Тапай клетки чтобы активировать / деактивировать';
 }
 
@@ -1276,10 +1365,11 @@ function edGenerate(){
   const ac=[...edActive].map(k=>k.split(',').map(Number));
   if(ac.length<4){$('ed-status').textContent='Нужно минимум 4 активные клетки';return;}
   if(ac.length%2!==0){$('ed-status').textContent='Число клеток должно быть чётным';return;}
-  const zones=edZones.filter(z=>z.cells.size>=2).map(z=>({cells:[...z.cells].map(k=>k.split(',').map(Number)),rule:{...z.rule}}));
+  // Allow zones with ≥1 cell (single cell only works for eq/sum types)
+  const zones=edZones.filter(z=>z.cells.size>=1).map(z=>({cells:[...z.cells].map(k=>k.split(',').map(Number)),rule:{...z.rule}}));
   const lv=buildPuzzleWithZones(ac,edCols,edRows,zones,()=>Math.random());
   if(!lv){$('ed-status').textContent='Не удалось разбить на домино — измени форму';return;}
-  lv.name='МОЙ УРОВЕНЬ';lv.diff='rnd';
+  lv.name='МОЙ УРОВЕНЬ';lv.diff='rnd';lv.isCustom=true;
   edGeneratedLevel=lv;
   $('ed-status').textContent=`Готово! ${lv.dominoes.length} костяшек, ${lv.regions.length} зон · нажми ▶ ИГРАТЬ`;
 }
@@ -1287,13 +1377,26 @@ function edPlay(){
   if(!edGeneratedLevel)edGenerate();
   if(edGeneratedLevel){startLevel(edGeneratedLevel);}
 }
+function edSave(){
+  if(!edGeneratedLevel)edGenerate();
+  if(!edGeneratedLevel)return;
+  try{
+    const saves=JSON.parse(localStorage.getItem('pips_saved')||'[]');
+    const entry={...edGeneratedLevel,savedAt:Date.now(),saveName:edGeneratedLevel.name};
+    saves.unshift(entry);if(saves.length>20)saves.pop();
+    localStorage.setItem('pips_saved',JSON.stringify(saves));
+    $('ed-status').textContent='✓ Уровень сохранён!';
+  }catch(e){$('ed-status').textContent='Ошибка сохранения';}
+}
 function edShare(){
   if(!edGeneratedLevel)edGenerate();
   if(!edGeneratedLevel)return;
   try{
     const enc=btoa(unescape(encodeURIComponent(JSON.stringify(edGeneratedLevel))));
     const url=location.href.split('?')[0]+'?level='+enc;
-    if(navigator.clipboard){navigator.clipboard.writeText(url).then(()=>$('ed-status').textContent='✓ Ссылка скопирована!');}
+    if(tg?.shareURL){tg.shareURL(url,'Сыграй в мой уровень Pips!');}
+    else if(navigator.share){navigator.share({title:'Мой уровень Pips',url}).catch(()=>{});}
+    else if(navigator.clipboard){navigator.clipboard.writeText(url).then(()=>$('ed-status').textContent='✓ Ссылка скопирована! Открой её в браузере чтобы поиграть');}
     else{prompt('Скопируй ссылку:',url);}
   }catch(e){$('ed-status').textContent='Ошибка экспорта';}
 }
@@ -1302,6 +1405,27 @@ function edClear(){
   edZones=Array.from({length:5},()=>({cells:new Set(),rule:{type:'sum',v:4}}));
   edGeneratedLevel=null;renderEdGrid();renderZonePicker();
   $('ed-status').textContent='Очищено.';
+}
+
+/* ── Saved levels panel in editor ── */
+function buildSavedPanel(){
+  const p=$('saved-panel');p.innerHTML='';
+  let saves=[];try{saves=JSON.parse(localStorage.getItem('pips_saved')||'[]');}catch(e){}
+  if(!saves.length){p.innerHTML='<div style="color:#888;font-size:.6rem;text-align:center;padding:8px">Нет сохранённых уровней</div>';return;}
+  saves.forEach((lv,idx)=>{
+    const d=new Date(lv.savedAt||0);
+    const ds=`${d.getDate()}.${d.getMonth()+1}`;
+    const card=document.createElement('div');card.className='sub-card';
+    card.style.cssText='background:rgba(0,0,0,.04);border:1px solid rgba(0,0,0,.1);margin-bottom:5px;';
+    card.innerHTML=`<div class="sc-badge med" style="font-size:.55rem">✏️</div>
+      <div class="sc-info"><div class="sc-name" style="color:var(--dark)">${lv.saveName||'Уровень'}</div>
+      <div class="sc-meta" style="color:#888">${lv.dominoes?.length||0} костяшек · ${ds}</div></div>
+      <button onclick="event.stopPropagation();deleteSaved(${idx})" style="background:none;border:none;color:#c04;font-size:.8rem;cursor:pointer">✕</button>`;
+    card.onclick=()=>startLevel(lv);p.appendChild(card);
+  });
+}
+function deleteSaved(idx){
+  try{const saves=JSON.parse(localStorage.getItem('pips_saved')||'[]');saves.splice(idx,1);localStorage.setItem('pips_saved',JSON.stringify(saves));buildSavedPanel();}catch(e){}
 }
 
 /* ── Build puzzle from editor zones ── */
