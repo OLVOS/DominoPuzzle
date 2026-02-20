@@ -356,44 +356,175 @@ function shu(a,rng){
 }
 function rInt(lo,hi,rng){return lo+Math.floor(rng()*(hi-lo+1));}
 
-/* Difficulty → generator params */
-const DIFF_PARAMS={
-  easy: {minCols:3,maxCols:5,minRows:2,maxRows:3,density:.9},
-  med:  {minCols:5,maxCols:7,minRows:3,maxRows:4,density:.70},
-  hard: {minCols:6,maxCols:9,minRows:3,maxRows:5,density:.60},
-};
+/* ═══════════════════════════════════════════════════════
+   SHAPE GENERATORS — 7 creative archetypes
+   Each returns {cells, cols, rows} or null.
+   Shapes are built from rectangular segments (addRect),
+   producing pipes, frames, crosses, combs, snakes, stairs, blobs.
+═══════════════════════════════════════════════════════ */
 
-function genPuzzle(diff,rng){
-  const p=DIFF_PARAMS[diff]||DIFF_PARAMS.med;
-  for(let attempt=0;attempt<80;attempt++){
-    const cols=rInt(p.minCols,p.maxCols,rng);
-    const rows=rInt(p.minRows,p.maxRows,rng);
-    // Randomly choose shape archetype
-    const roll=rng();
-    let ac;
-    if(rows===1||(roll<.25&&cols>=6)){
-      // Full rectangle (includes thin tubes when rows=1 or 2)
-      ac=allC(cols,rows);
-    } else if(roll<.5){
-      ac=blobShape(cols,rows,p.density,rng);
-    } else {
-      // Structured: L, T, cross, ring — picked by sub-roll
-      ac=structuredShape(cols,rows,rng);
-    }
-    if(!ac||ac.length<4||ac.length%2!==0)continue;
-    const lv=buildPuzzle(ac,cols,rows,rng);
-    if(lv)return lv;
-  }
-  // Fallback to easy rect
-  const ac=allC(4,3);
-  return buildPuzzle(ac,4,3,rng)||TUTORIAL[0];
+// Add cells of a rectangle into a Set
+function addRect(S,x,y,w,h){
+  for(let r=y;r<y+h;r++)for(let c=x;c<x+w;c++)if(c>=0&&r>=0)S.add(`${c},${r}`);
 }
 
-function blobShape(cols,rows,density,rng){
-  let target=Math.floor(cols*rows*density);
-  if(target%2!==0)target--;
-  if(target<4)return null;
-  const active=new Set();const front=[];
+// Normalise Set: shift so min col/row = 0, make even, return shape or null
+function finishShape(S){
+  const pairs=[...S].map(k=>k.split(',').map(Number));
+  if(!pairs.length)return null;
+  const minC=Math.min(...pairs.map(([c])=>c));
+  const minR=Math.min(...pairs.map(([,r])=>r));
+  const S2=new Set(pairs.map(([c,r])=>`${c-minC},${r-minR}`));
+  if(S2.size%2!==0){
+    // Remove a leaf (≤1 neighbour) to keep even count
+    const arr2=[...S2].map(k=>k.split(',').map(Number));
+    for(let i=arr2.length-1;i>=0;i--){
+      const[c,r]=arr2[i];
+      if([[c+1,r],[c-1,r],[c,r+1],[c,r-1]].filter(([nc,nr])=>S2.has(`${nc},${nr}`)).length<=1)
+        {S2.delete(`${c},${r}`);break;}
+    }
+  }
+  const cells=[...S2].map(k=>k.split(',').map(Number));
+  if(cells.length<6)return null;
+  const cols=Math.max(...cells.map(([c])=>c))+1;
+  const rows=Math.max(...cells.map(([,r])=>r))+1;
+  return{cells,cols,rows};
+}
+
+/* 1. PIPE ──────────────────────────────────────────────
+   Horizontal (or vertical) main bar + branches at random positions.
+   Produces shapes like Map 1 — asymmetric, corridor-like. */
+function shapePipe(diff,rng){
+  const horiz=rng()<0.6;
+  const W=horiz?rInt(6,11,rng):rInt(3,5,rng);
+  const H=horiz?rInt(3,7,rng):rInt(6,11,rng);
+  const barThick=rInt(1,2,rng);
+  const barPos=rInt(1,horiz?H-barThick-1:W-barThick-1,rng);
+  const S=new Set();
+  // Main bar
+  if(horiz) addRect(S,0,barPos,W,barThick);
+  else       addRect(S,barPos,0,barThick,H);
+  // 2–4 arms branching off
+  const nArms=rInt(2,4,rng);
+  const usedSlots=new Set();
+  for(let b=0;b<nArms;b++){
+    const slotMax=horiz?W-1:H-1;
+    let slot;let t=0;
+    do{slot=rInt(0,slotMax-1,rng);t++;}while(usedSlots.has(slot)&&t<20);
+    usedSlots.add(slot);
+    const armThick=rng()<0.25?2:1;
+    const goNeg=rng()<0.5;
+    if(horiz){
+      if(goNeg&&barPos>0)  addRect(S,slot,barPos-rInt(1,barPos,rng),armThick,rInt(1,barPos,rng));
+      else if(barPos+barThick<H) addRect(S,slot,barPos+barThick,armThick,rInt(1,H-barPos-barThick,rng));
+    } else {
+      if(goNeg&&barPos>0)  addRect(S,barPos-rInt(1,barPos,rng),slot,rInt(1,barPos,rng),armThick);
+      else if(barPos+barThick<W) addRect(S,barPos+barThick,slot,rInt(1,W-barPos-barThick,rng),armThick);
+    }
+  }
+  return finishShape(S);
+}
+
+/* 2. FRAME ─────────────────────────────────────────────
+   Top bar connecting two side columns. Like Map 2 — bracket/U shapes.
+   Optional middle crossbar and bottom extensions. */
+function shapeFrame(diff,rng){
+  const W=rInt(5,9,rng), H=rInt(5,9,rng);
+  const colW=rInt(1,2,rng);
+  const topH=rInt(1,2,rng);
+  const S=new Set();
+  addRect(S,0,0,W,topH);                    // top bar
+  addRect(S,0,topH,colW,H-topH);           // left column
+  addRect(S,W-colW,topH,colW,H-topH);     // right column
+  // Optional middle crossbar
+  if(rng()<0.45&&H>5){
+    const midR=rInt(topH+1,H-2,rng);
+    addRect(S,0,midR,W,1);
+  }
+  // Optional bottom bar closing the frame
+  if(rng()<0.35){
+    addRect(S,0,H-1,W,1);
+  }
+  return finishShape(S);
+}
+
+/* 3. CROSS ─────────────────────────────────────────────
+   Two bars (horizontal + vertical) crossing at an offset position.
+   Varying bar thicknesses create asymmetric plus shapes. */
+function shapeCross(diff,rng){
+  const W=rInt(5,10,rng), H=rInt(5,9,rng);
+  const hRow=rInt(1,H-3,rng), hH=rInt(1,2,rng);
+  const vCol=rInt(1,W-3,rng), vW=rInt(1,2,rng);
+  const S=new Set();
+  addRect(S,0,hRow,W,hH);
+  addRect(S,vCol,0,vW,H);
+  return finishShape(S);
+}
+
+/* 4. COMB ──────────────────────────────────────────────
+   Spine along one edge + teeth at intervals.
+   Makes grid shapes with regular gaps between arms. */
+function shapeComb(diff,rng){
+  const W=rInt(6,11,rng), H=rInt(4,7,rng);
+  const spineH=rInt(1,2,rng);
+  const atTop=rng()<0.5;
+  const toothLen=rInt(2,H-spineH,rng);
+  const toothW=1;
+  const gap=rInt(1,2,rng);
+  const S=new Set();
+  const spineRow=atTop?0:H-spineH;
+  addRect(S,0,spineRow,W,spineH);
+  for(let c=0;c<W;c+=toothW+gap){
+    if(atTop) addRect(S,c,spineH,toothW,toothLen);
+    else       addRect(S,c,H-spineH-toothLen,toothW,toothLen);
+  }
+  return finishShape(S);
+}
+
+/* 5. SNAKE ─────────────────────────────────────────────
+   Alternating horizontal segments connected at their ends.
+   Creates winding S/Z paths, thin and long. */
+function shapeSnake(diff,rng){
+  const segLen=rInt(3,7,rng), segH=rInt(1,2,rng), nSegs=rInt(3,5,rng);
+  const S=new Set();
+  let x=0,y=0;
+  for(let s=0;s<nSegs;s++){
+    const W2=segLen+rInt(0,2,rng);
+    addRect(S,x,y,W2,segH);
+    if(s<nSegs-1){
+      const atRight=(s%2===0);
+      const connX=atRight?x+W2-1:x;
+      const connH=rInt(1,3,rng);
+      addRect(S,connX,y+segH,1,connH);
+      y+=segH+connH;
+      x=atRight?connX-rInt(segLen-2,segLen,rng)+1:connX;
+      x=Math.max(0,x);
+    }
+  }
+  return finishShape(S);
+}
+
+/* 6. STAIRCASE ──────────────────────────────────────────
+   Diagonal descending steps. Clean geometric shape. */
+function shapeStair(diff,rng){
+  const steps=rInt(3,5,rng), sw=rInt(2,4,rng), sh=rInt(2,3,rng);
+  const S=new Set();
+  for(let s=0;s<steps;s++){
+    // Each step: from this column onwards, this row band
+    addRect(S,s*sw,s*sh,(steps-s)*sw,sh);
+  }
+  return finishShape(S);
+}
+
+/* 7. BLOB ───────────────────────────────────────────────
+   Organic BFS growth — rounded, irregular shapes. */
+function shapeBlob(diff,rng){
+  const szByDiff={easy:[4,6,2,4],med:[5,8,3,5],hard:[6,10,4,7]}[diff]||[5,7,3,5];
+  const cols=rInt(szByDiff[0],szByDiff[1],rng), rows=rInt(szByDiff[2],szByDiff[3],rng);
+  const density={easy:.85,med:.70,hard:.60}[diff]||.70;
+  let target=Math.floor(cols*rows*density);if(target%2!==0)target--;
+  if(target<6)return null;
+  const active=new Set(),front=[];
   const sc=Math.floor(cols/2),sr=Math.floor(rows/2);
   active.add(`${sc},${sr}`);front.push([sc,sr]);
   while(active.size<target&&front.length){
@@ -402,48 +533,20 @@ function blobShape(cols,rows,density,rng){
     const nbrs=[[c+1,r],[c-1,r],[c,r+1],[c,r-1]].filter(([nc,nr])=>nc>=0&&nc<cols&&nr>=0&&nr<rows&&!active.has(`${nc},${nr}`));
     shu(nbrs,rng);for(const nb of nbrs){if(active.size>=target)break;active.add(`${nb[0]},${nb[1]}`);front.push(nb);}
   }
-  const arr=[...active].map(k=>k.split(',').map(Number));
-  if(arr.length%2===1){
-    const sa=new Set(active);
-    for(let i=arr.length-1;i>=0;i--){
-      const[c,r]=arr[i];
-      if([[c+1,r],[c-1,r],[c,r+1],[c,r-1]].filter(([nc,nr])=>sa.has(`${nc},${nr}`)).length<=1)
-        {arr.splice(i,1);sa.delete(`${c},${r}`);break;}
-    }
-  }
-  return arr.length>=4&&arr.length%2===0?arr:null;
+  return finishShape(active);
 }
 
-function structuredShape(cols,rows,rng){
-  const type=Math.floor(rng()*4);
-  let cells=[];
-  if(type===0){
-    // L-shape: full top row + right column
-    for(let c=0;c<cols;c++)cells.push([c,0]);
-    for(let r=1;r<rows;r++)cells.push([cols-1,r]);
-    if(cells.length%2!==0)cells.pop();
-  } else if(type===1){
-    // T-shape: full top row + center column going down
-    for(let c=0;c<cols;c++)cells.push([c,0]);
-    const mc=Math.floor(cols/2)-((Math.floor(cols/2))%2===0&&cols%2===0?1:0);
-    for(let r=1;r<rows;r++){cells.push([mc,r]);cells.push([mc+1,r]);}
-    if(cells.length%2!==0)cells.pop();
-  } else if(type===2){
-    // Ring: outer shell
-    for(let c=0;c<cols;c++){cells.push([c,0]);if(rows>2)cells.push([c,rows-1]);}
-    for(let r=1;r<rows-1;r++){cells.push([0,r]);if(cols>2)cells.push([cols-1,r]);}
-    if(cells.length%2!==0)cells.pop();
-  } else {
-    // S/Z snake
-    const half=Math.floor(rows/2);
-    for(let r=0;r<half;r++)for(let c=0;c<cols;c++)cells.push([c,r]);
-    const offset=Math.floor(cols/2);
-    for(let r=half;r<rows;r++)for(let c=offset;c<cols;c++)cells.push([c,r]);
-    if(cells.length%2!==0)cells.pop();
+/* ── Main entry: pick archetype, retry until valid ── */
+function genPuzzle(diff,rng){
+  const fns=[shapePipe,shapeFrame,shapeCross,shapeComb,shapeSnake,shapeStair,shapeBlob];
+  for(let attempt=0;attempt<100;attempt++){
+    const fn=fns[Math.floor(rng()*fns.length)];
+    const sh=fn(diff,rng);
+    if(!sh||sh.cells.length<6||sh.cells.length%2!==0)continue;
+    const lv=buildPuzzle(sh.cells,sh.cols,sh.rows,rng);
+    if(lv)return lv;
   }
-  // Deduplicate
-  const seen=new Set();cells=cells.filter(([c,r])=>{const k=`${c},${r}`;if(seen.has(k))return false;seen.add(k);return true;});
-  return cells.length>=4?cells:null;
+  return buildPuzzle(allC(4,3),4,3,rng)||TUTORIAL[0];
 }
 
 function buildPuzzle(ac,cols,rows,rng){
