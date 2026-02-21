@@ -15,7 +15,7 @@ body{font-family:'DM Mono',monospace;background:var(--cream);}
 .screen.hidden{opacity:0;pointer-events:none;transform:scale(.97);}
 
 /* ══ MENU ══ */
-#menu{background:radial-gradient(ellipse at 30% 20%,#2d1a06,#080503);justify-content:flex-start;gap:0;padding:16px 20px;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+#menu{background:radial-gradient(ellipse at 30% 20%,#2d1a06,#080503);justify-content:flex-start;gap:0;padding:16px 20px;overflow-y:auto;-webkit-overflow-scrolling:touch;touch-action:pan-y;}
 .menu-title{font-family:'Playfair Display',serif;font-size:2.6rem;font-weight:900;color:var(--gold2);letter-spacing:6px;text-shadow:0 0 40px rgba(200,150,60,.45);line-height:1;margin-bottom:3px;margin-top:8px;text-align:center;width:100%;}
 .menu-sub{font-size:.52rem;letter-spacing:8px;color:#b89060;text-transform:uppercase;margin-bottom:16px;text-align:center;width:100%;}
 .divider{width:80px;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:16px auto;}
@@ -35,8 +35,8 @@ body{font-family:'DM Mono',monospace;background:var(--cream);}
 .mb-arr.open{transform:rotate(90deg);}
 
 /* Expandable sub-panels */
-.sub-panel{width:100%;max-width:300px;overflow:hidden;max-height:0;transition:max-height .3s ease;}
-.sub-panel.open{max-height:320px;}
+.sub-panel{width:100%;max-width:300px;overflow:hidden;max-height:0;transition:max-height .35s ease;}
+.sub-panel.open{max-height:600px;}
 .sub-card{background:rgba(255,255,255,.04);border:1px solid rgba(200,150,60,.18);border-radius:10px;padding:9px 14px;display:flex;align-items:center;gap:10px;cursor:pointer;color:var(--cream);margin-bottom:6px;transition:background .12s;}
 .sub-card:active{background:rgba(200,150,60,.12);}
 .sc-badge{width:30px;height:30px;border-radius:7px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;font-family:'Playfair Display',serif;color:var(--dark);}
@@ -68,7 +68,7 @@ body{font-family:'DM Mono',monospace;background:var(--cream);}
 #grid-wrap{background:var(--wood);padding:7px;border-radius:13px;box-shadow:0 6px 20px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.07);position:relative;display:inline-block;flex-shrink:0;}
 
 /* ══ EDITOR ══ */
-#editor{background:var(--cream);justify-content:flex-start;padding:0 10px 8px;overflow:hidden;}
+#editor{background:var(--cream);justify-content:flex-start;padding:0 10px 8px;overflow-y:auto;-webkit-overflow-scrolling:touch;touch-action:pan-y;}
 .ed-header{width:100%;display:flex;align-items:center;gap:6px;padding:8px 0 4px;flex-shrink:0;}
 .ed-title{font-family:'Playfair Display',serif;font-size:.9rem;font-weight:700;color:var(--dark);letter-spacing:2px;flex:1;text-align:center;}
 .btn-play-ed{background:linear-gradient(135deg,var(--gold),#7a4a10);color:var(--dark);border:none;font-family:'Playfair Display',serif;font-size:.72rem;font-weight:700;letter-spacing:1px;padding:6px 12px;border-radius:8px;cursor:pointer;}
@@ -86,7 +86,7 @@ body{font-family:'DM Mono',monospace;background:var(--cream);}
 .rule-row{display:flex;align-items:center;gap:5px;justify-content:center;flex-wrap:wrap;}
 #ed-grid-outer{overflow:auto;-webkit-overflow-scrolling:touch;flex-shrink:0;margin-bottom:6px;display:flex;justify-content:center;}
 #ed-grid-wrap{background:var(--wood);padding:6px;border-radius:12px;display:inline-block;}
-#ed-grid{display:grid;gap:3px;}
+#ed-grid{display:grid;gap:3px;touch-action:none;}
 .ed-cell{border-radius:5px;cursor:pointer;transition:background .08s,border .08s;border:2px solid transparent;}
 .ed-cell.ec-inactive{background:rgba(0,0,0,.45);border-color:transparent;}
 .ed-cell.ec-free{background:#e8e2d8;border-color:#c0b8a8;}
@@ -118,7 +118,7 @@ body{font-family:'DM Mono',monospace;background:var(--cream);}
 .ctrl.warn{background:#7a1818;}.ctrl.lite{background:#e4dcd0;color:var(--wood);}
 .opill{background:rgba(0,0,0,.1);border-radius:8px;padding:4px 9px;font-size:.85rem;font-weight:700;color:var(--dark);min-width:26px;text-align:center;}
 
-#hand{display:flex;flex-wrap:wrap;justify-content:center;gap:4px;max-width:100%;padding:2px 4px;flex-shrink:0;overflow-y:auto;max-height:130px;-webkit-overflow-scrolling:touch;}
+#hand{display:flex;flex-wrap:wrap;justify-content:center;gap:4px;max-width:100%;padding:2px 4px;flex-shrink:0;overflow-y:auto;max-height:200px;-webkit-overflow-scrolling:touch;}
 .hand-slot{flex-shrink:0;width:60px;height:60px;display:flex;align-items:center;justify-content:center;border-radius:9px;cursor:pointer;border:2px solid transparent;background:rgba(0,0,0,.05);transition:border-color .15s,background .15s;touch-action:none;position:relative;}
 .hand-slot.sel{border-color:var(--gold2);background:rgba(240,192,96,.12);}
 .hand-slot.used{opacity:.18;pointer-events:none;}
@@ -143,6 +143,10 @@ body{font-family:'DM Mono',monospace;background:var(--cream);}
 
 #win-ov{position:fixed;inset:0;z-index:1000;background:rgba(8,5,2,.85);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;opacity:0;pointer-events:none;transition:opacity .4s;}
 #win-ov.on{opacity:1;pointer-events:all;}
+#pause-ov{position:fixed;inset:0;z-index:999;background:rgba(8,5,2,.7);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;opacity:0;pointer-events:none;transition:opacity .3s;}
+#pause-ov.on{opacity:1;pointer-events:all;}
+.pause-t{font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:900;color:var(--gold2);letter-spacing:6px;}
+.pause-sub{font-size:.58rem;letter-spacing:3px;color:#b89060;}
 .win-t{font-family:'Playfair Display',serif;font-size:2.2rem;font-weight:900;color:var(--gold2);letter-spacing:4px;animation:wf 2s ease infinite;}
 @keyframes wf{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
 .win-time{font-size:1.2rem;color:var(--gold);letter-spacing:4px;}
@@ -203,7 +207,7 @@ body{font-family:'DM Mono',monospace;background:var(--cream);}
 <!-- ══ GAME ══ -->
 <div class="screen hidden" id="game">
   <div class="game-header">
-    <button class="btn-back" onclick="goMenu()">← МЕНЮ</button>
+    <button class="btn-back" onclick="pauseGame()">⏸ ПАУЗА</button>
     <div class="gh-center">
       <div class="game-title" id="gtitle">PIPS</div>
       <div class="game-timer" id="timer">00:00</div>
@@ -278,7 +282,13 @@ body{font-family:'DM Mono',monospace;background:var(--cream);}
     <button class="ctrl" onclick="edPlay()">▶ ИГРАТЬ</button>
     <button class="ctrl lite" onclick="edSave()">💾 СОХРАНИТЬ</button>
     <button class="ctrl lite" onclick="edShare()">🔗 ПОДЕЛИТЬСЯ</button>
-    <button class="ctrl lite" onclick="edClear()">↺ ОЧИСТИТЬ</button>
+  </div>
+  <div class="ed-actions" style="margin-top:4px">
+    <button class="ctrl lite" onclick="edFill()">▪ ВСЕ</button>
+    <button class="ctrl lite" onclick="edClear()">○ ОЧИСТИТЬ</button>
+    <button class="ctrl lite" onclick="edUndo()" id="btn-undo" disabled>↩ ОТМЕНА</button>
+    <button class="ctrl lite" onclick="edRedo()" id="btn-redo" disabled>↪ ПОВТОР</button>
+    <button class="ctrl lite" onclick="edReset()">✕ НОВЫЙ</button>
   </div>
 
   <!-- Saved levels -->
@@ -289,6 +299,14 @@ body{font-family:'DM Mono',monospace;background:var(--cream);}
 </div><!-- /editor -->
 
 <div id="ghost" class="dom-tile"></div>
+
+<div id="pause-ov">
+  <div class="pause-t">⏸ ПАУЗА</div>
+  <div class="pause-sub" id="pause-sub">Прогресс сохранён</div>
+  <button class="win-btn" onclick="resumeGame()">▶ ПРОДОЛЖИТЬ</button>
+  <button class="win-btn sec" onclick="goMenu()">← В МЕНЮ</button>
+  <button class="win-btn sec" id="pause-reset-btn" onclick="confirmResetPuzzle()" style="font-size:.7rem">↺ НАЧАТЬ ЗАНОВО</button>
+</div>
 
 <div id="win-ov">
   <div class="win-t">✦ ПОБЕДА ✦</div>
@@ -319,7 +337,9 @@ function mkRng(seed){
 }
 function dateSeed(offsetDays=0,diffIdx=0){
   const d=new Date();d.setDate(d.getDate()+offsetDays);
-  const str=d.toISOString().slice(0,10).replace(/-/g,'');
+  // Use LOCAL date, not UTC, so midnight = new daily for everyone in their timezone
+  const y=d.getFullYear(),m=d.getMonth()+1,day=d.getDate();
+  const str=`${y}${String(m).padStart(2,'0')}${String(day).padStart(2,'0')}`;
   return (parseInt(str,10)*7+diffIdx*137+42)>>>0;
 }
 
@@ -349,7 +369,12 @@ function fillTile(el,a,b,oi,sz,w,h){
 const ORI=[{l:'→',dc:1,dr:0},{l:'↓',dc:0,dr:1},{l:'←',dc:1,dr:0},{l:'↑',dc:0,dr:1}];
 function sec2(c,r,oi){return[c+ORI[oi].dc,r+ORI[oi].dr];}
 function halves(oi){return oi>=2?{h1:'b',h2:'a'}:{h1:'a',h2:'b'};}
-const ZC=[{bg:'#f7d6e0',bd:'#c8457a'},{bg:'#cfe3f7',bd:'#2f78c1'},{bg:'#d0f0d8',bd:'#2f9c50'},{bg:'#ead6f5',bd:'#7a38c0'},{bg:'#fde8cc',bd:'#c07028'}];
+const ZC=[
+  {bg:'#f7d6e0',bd:'#c8457a'},{bg:'#cfe3f7',bd:'#2f78c1'},{bg:'#d0f0d8',bd:'#2f9c50'},
+  {bg:'#ead6f5',bd:'#7a38c0'},{bg:'#fde8cc',bd:'#c07028'},{bg:'#e0f7f7',bd:'#1a9c9c'},
+  {bg:'#f5f0d0',bd:'#9c8c10'},{bg:'#ffd6d6',bd:'#c04040'},{bg:'#d6f0ff',bd:'#0078b4'},
+  {bg:'#e8ffe0',bd:'#40a020'},
+];
 
 /* ══ RULES ══
    gt/lt compare TOTAL SUM of pip values in zone (strictly > or <)
@@ -733,21 +758,27 @@ function buildPuzzle(ac,cols,rows,rng){
   const regions=[];
   for(const cells of rCells){
     if(cells.length<2)continue;
-    // Clamp zone to max 4 cells for clean constraints
-    const zoneCells=cells.length>4?cells.slice(0,4):cells;
+    // Use all zone cells — no artificial cap
+    const zoneCells=cells;
     const n=zoneCells.length;
     const type=pickType();
 
     if(type==='eq'){
-      const v=rInt(1,5,rng); // avoid 0-all for visual interest
+      const v=rInt(1,5,rng);
       zoneCells.forEach(([c,r])=>setCell(c,r,v));
       regions.push({rule:{type:'eq'},cells:zoneCells});
 
     } else if(type==='neq'){
-      // Assign distinct values 0-5; if zone too big for distinct, fallback to sum
-      if(n>5){
-        const s=rInt(n*1,n*4,rng);
-        zoneCells.forEach(([c,r],i)=>setCell(c,r,Math.min(5,Math.max(0,Math.round(s/n)+rInt(-1,1,rng)))));
+      // neq needs all distinct — only feasible for ≤6 cells (values 0-5)
+      if(n>6){
+        // fallback to sum for large zones
+        const minS=n*1, maxS=n*4, target=rInt(minS,maxS,rng);
+        let rem=target;
+        zoneCells.forEach(([c,r],i)=>{
+          const left=n-i-1;
+          const lo=Math.max(0,rem-left*5),hi=Math.min(5,rem);
+          const v=rInt(lo,hi,rng);setCell(c,r,v);rem-=v;
+        });
         const realSum=zoneCells.reduce((a,[c,r])=>a+getCell(c,r),0);
         regions.push({rule:{type:'sum',v:realSum},cells:zoneCells});
       } else {
@@ -757,30 +788,26 @@ function buildPuzzle(ac,cols,rows,rng){
       }
 
     } else if(type==='sum'){
-      // Pick a target sum, distribute across cells
       const minS=n*1, maxS=n*4;
       const target=rInt(minS,maxS,rng);
-      // Distribute: fill each cell attempting to hit target
       let rem=target;
       zoneCells.forEach(([c,r],i)=>{
         const left=n-i-1;
-        const lo=Math.max(0,rem-left*5),hi=Math.min(5,rem-left*0);
+        const lo=Math.max(0,rem-left*5),hi=Math.min(5,rem);
         const v=rInt(lo,hi,rng);setCell(c,r,v);rem-=v;
       });
       const realSum=zoneCells.reduce((a,[c,r])=>a+getCell(c,r),0);
       regions.push({rule:{type:'sum',v:realSum},cells:zoneCells});
 
     } else if(type==='gt'){
-      // Choose sum, set values, threshold = sum-1 (tight: must achieve at least that)
       const target=rInt(Math.max(1,n*1),n*4,rng);
       let rem=target;
       zoneCells.forEach(([c,r],i)=>{
         const left=n-i-1;
-        const lo=Math.max(0,rem-left*5),hi=Math.min(5,rem-left*0);
+        const lo=Math.max(0,rem-left*5),hi=Math.min(5,rem);
         const v=rInt(lo,hi,rng);setCell(c,r,v);rem-=v;
       });
       const realSum=zoneCells.reduce((a,[c,r])=>a+getCell(c,r),0);
-      // Threshold: 1-2 below actual (meaningful but achievable)
       const thresh=Math.max(0,realSum-rInt(1,2,rng));
       regions.push({rule:{type:'gt',v:thresh},cells:zoneCells});
 
@@ -789,16 +816,22 @@ function buildPuzzle(ac,cols,rows,rng){
       let rem=target;
       zoneCells.forEach(([c,r],i)=>{
         const left=n-i-1;
-        const lo=Math.max(0,rem-left*5),hi=Math.min(5,rem-left*0);
+        const lo=Math.max(0,rem-left*5),hi=Math.min(5,rem);
         const v=rInt(lo,hi,rng);setCell(c,r,v);rem-=v;
       });
       const realSum=zoneCells.reduce((a,[c,r])=>a+getCell(c,r),0);
-      // Threshold: 1-2 above actual
       const thresh=Math.min(n*5,realSum+rInt(1,2,rng));
       regions.push({rule:{type:'lt',v:thresh},cells:zoneCells});
     }
   }
   if(regions.length<2)return null;
+
+  // Fill any remaining cells not covered by a region with random values
+  const coveredCells=new Set(regions.flatMap(r=>r.cells).map(([c,r])=>`${c},${r}`));
+  placed.forEach(([[c1,r1],[c2,r2]],di)=>{
+    if(!coveredCells.has(`${c1},${r1}`))dVals[di][0]=rInt(0,5,rng);
+    if(!coveredCells.has(`${c2},${r2}`))dVals[di][1]=rInt(0,5,rng);
+  });
 
   return{cols,rows,activeCells:ac.length===cols*rows?undefined:ac,dominoes:dVals,regions};
 }
@@ -855,26 +888,27 @@ function buildDayPanel(){
   DIFFS.forEach(diff=>{
     const record=getDailyRecord(diff);
     const done=!!record;
+    const prog=!done?loadGameProgress(diff):null;
+    const inProgress=!!prog&&prog.usedDom.length>0;
     const card=document.createElement('div');card.className='sub-card';
-    card.style.opacity=done?'1':'1';
-    const timeStr=done?`✓ ${fmtT(record.secs)}`:'';
-    const meta=done?`пройдено · ${timeStr}`:'одинаков для всех · сменится завтра';
-    const bg=done?'rgba(60,150,60,.12)':'';
-    const border=done?'rgba(60,150,60,.3)':'rgba(200,150,60,.18)';
-    card.style.background=bg;card.style.borderColor=border;
-    card.innerHTML=`<div class="sc-badge ${diff}">${done?'✓':DIFF_LABELS[diff][0]}</div>
+    let meta,bg,border,badgeTxt,starsTxt='';
+    if(done){
+      meta=`пройдено · ✓ ${fmtT(record.secs)}`;
+      bg='rgba(60,150,60,.12)';border='rgba(60,150,60,.3)';badgeTxt='✓';
+    } else if(inProgress){
+      meta=`в процессе · ${prog.usedDom.length}/${JSON.parse(JSON.stringify(getDailyLevel(diff))).dominoes.length} · ⏱ ${fmtT(prog.secs)}`;
+      bg='rgba(200,150,60,.1)';border='rgba(200,150,60,.4)';badgeTxt='▶';starsTxt=DIFF_STARS[diff];
+    } else {
+      meta='одинаков для всех · сменится завтра';
+      bg='';border='rgba(200,150,60,.18)';badgeTxt=DIFF_LABELS[diff][0];starsTxt=DIFF_STARS[diff];
+    }
+    card.style.cssText=`background:${bg};border-color:${border};`;
+    card.innerHTML=`<div class="sc-badge ${diff}">${badgeTxt}</div>
       <div class="sc-info"><div class="sc-name">${DIFF_LABELS[diff]}</div>
       <div class="sc-meta">${meta}</div></div>
-      <span class="sc-stars">${done?'':'${DIFF_STARS[diff]}'}</span>`;
-    // Fix template literal issue
-    card.querySelector('.sc-stars').textContent=done?'':DIFF_STARS[diff];
+      <span class="sc-stars">${starsTxt}</span>`;
     if(done){
-      // Show view-only button instead of play
-      card.onclick=()=>{
-        const lv=getDailyLevel(diff);
-        lv.viewOnly=true;
-        startLevel(lv);
-      };
+      card.onclick=()=>{const lv=getDailyLevel(diff);lv.viewOnly=true;startLevel(lv);};
     } else {
       card.onclick=()=>startLevel(getDailyLevel(diff));
     }
@@ -897,7 +931,58 @@ function initMenu(){
   const mo=['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'][d.getMonth()];
   $('day-date').textContent=`${d.getDate()} ${mo} · easy / medium / hard`;
 }
-function goMenu(){$('win-ov').classList.remove('on');tReset();showScreen('menu');}
+/* ══ DAILY PROGRESS (pause/resume) ══ */
+function progressKey(diff){const dk=dailyKey(diff);return`pips_prog_${diff}_${dk.slice(dk.lastIndexOf('_')+1)}`;}
+function saveGameProgress(){
+  if(!puzzle?.isDaily||puzzle.viewOnly)return;
+  try{
+    localStorage.setItem(progressKey(puzzle.dailyDiff),JSON.stringify({
+      board,placements,usedDom:[...usedDom],secs:timerSecs
+    }));
+  }catch(e){}
+}
+function loadGameProgress(diff){
+  try{return JSON.parse(localStorage.getItem(progressKey(diff)))||null;}catch(e){return null;}
+}
+function clearGameProgress(diff){
+  try{localStorage.removeItem(progressKey(diff));}catch(e){}
+}
+function restoreGameProgress(state){
+  board=state.board;
+  placements={};
+  Object.entries(state.placements).forEach(([k,v])=>{placements[+k]=v;});
+  usedDom=new Set(state.usedDom.map(Number));
+  timerSecs=state.secs;
+  $('timer').textContent=fmtT(timerSecs);
+  renderBoard();
+  puzzle.dominoes.forEach((_,di)=>{
+    slotEls[di]?.classList.toggle('used',usedDom.has(di));
+    if(!usedDom.has(di))refreshHT(di);
+  });
+  updateCtrl();
+  setSt(`${usedDom.size}/${puzzle.dominoes.length} размещено · прогресс восстановлен`);
+}
+
+function pauseGame(){
+  tStop();saveGameProgress();
+  const sub=puzzle?.isDaily?`${usedDom.size}/${puzzle.dominoes.length} домино · ⏱ ${fmtT(timerSecs)}`:'';
+  $('pause-sub').textContent=sub||'Прогресс сохранён';
+  $('pause-ov').classList.add('on');
+}
+function resumeGame(){
+  $('pause-ov').classList.remove('on');
+  if(usedDom.size>0&&!timerOn)tStart();
+}
+function confirmResetPuzzle(){
+  if(puzzle?.isDaily)clearGameProgress(puzzle.dailyDiff);
+  resetPuzzle();
+  $('pause-ov').classList.remove('on');
+}
+function goMenu(){
+  saveGameProgress();
+  $('win-ov').classList.remove('on');$('pause-ov').classList.remove('on');
+  tStop();showScreen('menu');
+}
 function startRandom(diff){
   diff=diff||(DIFFS[Math.floor(Math.random()*3)]);
   const lv=genPuzzle(diff,()=>Math.random());
@@ -910,13 +995,30 @@ function regenRandom(){
   tReset();
   startRandom(diff);
 }
-function winNext(){$('win-ov').classList.remove('on');startRandom();}
-function openEditor(){initEditor();showScreen('editor');}
+function winNext(){
+  $('win-ov').classList.remove('on');
+  if(puzzle.isDaily)goMenu();
+  else startRandom(puzzle.randomDiff);
+}
+let editorInitialized=false;
+function openEditor(){
+  if(!editorInitialized){initEditor();editorInitialized=true;}
+  else{buildSavedPanel();} // refresh saved list only
+  showScreen('editor');
+}
 function startLevel(lv){
   puzzle=JSON.parse(JSON.stringify(lv));
   board={};placements={};usedDom=new Set();
   selMode=null;selDi=null;orientIdx=0;
   tReset();buildGame();showScreen('game');
+  // Auto-restore daily progress if exists
+  if(puzzle.isDaily&&!puzzle.viewOnly){
+    const prog=loadGameProgress(puzzle.dailyDiff);
+    if(prog&&prog.usedDom&&prog.usedDom.length>0){
+      restoreGameProgress(prog);
+      // don't auto-start timer — user resumes manually or by placing a piece
+    }
+  }
 }
 function showScreen(n){
   ['menu','game','editor'].forEach(s=>$(s).classList.toggle('hidden',s!==n));
@@ -938,15 +1040,32 @@ function tReset(){tStop();timerSecs=0;timerOn=false;$('timer').textContent='00:0
 function buildGame(){
   $('gtitle').textContent=puzzle.name||'PIPS';
   const b=$('gbadge');b.className='game-badge '+(puzzle.diff||'rnd');
-  b.textContent=DIFF_LABELS[puzzle.diff]||'RANDOM';
+  b.textContent=puzzle.viewOnly?'✓ ПРОЙДЕНО':(DIFF_LABELS[puzzle.diff]||'RANDOM');
   // Show regen button only for random levels
   $('btn-regen').style.display=puzzle.isRandom?'':'none';
+
+  // VIEW-ONLY mode for already-completed dailies
+  if(puzzle.viewOnly){
+    const rec=getDailyRecord(puzzle.dailyDiff);
+    $('win-ov').classList.remove('on');
+    // Show completed overlay after brief delay so layout renders
+    setTimeout(()=>{
+      $('wtime').textContent=rec?fmtT(rec.secs):'—';
+      $('wsub').textContent=`${puzzle.name} · уже пройден ✓`;
+      $('wshare-btn').style.display='';
+      const d=new Date();
+      const mo=['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'][d.getMonth()];
+      $('wshare-btn').dataset.report=`Pips Daily ${DIFF_LABELS[puzzle.dailyDiff]} · ${d.getDate()} ${mo}\n⏱ ${rec?fmtT(rec.secs):'—'}\n✦ ${puzzle.dominoes.length} костяшек`;
+      $('win-ov').classList.add('on');
+    },200);
+  }
 
   // ── Screen fit: compute CELL to fit height; allow horizontal scroll ──
   const nDom=puzzle.dominoes.length;
   const handRows=Math.ceil(nDom/5);
-  const handH=Math.min(handRows*76+10,160);
-  const headerH=46,legendH=puzzle.regions.length>0?28:0;
+  const slotPx=64;
+  const handH=Math.min(handRows*slotPx+8,200); // match CSS max-height:200px
+  const headerH=50,legendH=puzzle.regions.length>0?30:0;
   const statusH=16,controlsH=38,padH=20,gridBorder=14;
   const reservedH=headerH+legendH+statusH+controlsH+handH+padH+gridBorder;
   const availH=window.innerHeight-reservedH;
@@ -1007,13 +1126,24 @@ function buildZoneOv(){
 }
 function buildRuleOv(){
   const ov=$('rule-overlay');ov.innerHTML='';
+  const gridW=puzzle.cols*STEP-GAP;
   puzzle.regions.forEach((rg,i)=>{
     const s=rS(rg.rule);if(!s)return;
-    const maxC=Math.max(...rg.cells.map(([c])=>c)),minR=Math.min(...rg.cells.map(([,r])=>r));
+    // Position badge at top-right corner of the zone's bounding box, clamped inside grid
+    const maxC=Math.max(...rg.cells.map(([c])=>c));
+    const minR=Math.min(...rg.cells.map(([,r])=>r));
     const badge=document.createElement('div');badge.className='rb';badge.textContent=s;
-    badge.style.left=((maxC+1)*STEP-GAP/2)+'px';badge.style.top=(minR*STEP)+'px';
     const col=ZC[i%ZC.length];badge.style.borderColor=col.bd;badge.style.color=col.bd;badge.style.background=col.bg;
-    ov.appendChild(badge);
+    // Temporarily append to measure width
+    badge.style.visibility='hidden';ov.appendChild(badge);
+    const bw=badge.offsetWidth||30;badge.style.visibility='';
+    // Right-align to the right edge of maxC cell, but clamp so badge doesn't overflow grid
+    let left=(maxC+1)*STEP-GAP/2;
+    left=Math.min(left,gridW-bw/2);
+    left=Math.max(bw/2,left);
+    badge.style.left=left+'px';
+    badge.style.top=(minR*STEP+2)+'px';
+    badge.style.transform='translate(-50%,0)';
   });
 }
 
@@ -1069,6 +1199,7 @@ function onPM(e){
 function onPU(){
   if(!pSt)return;
   document.removeEventListener('pointermove',onPM);
+  document.removeEventListener('pointercancel',onPC);
   const wasDrag=pSt.drag();
   const{di,src}=pSt;
   clearTimeout(pSt.tmr);removeHoldRing(pSt.el);pSt=null;
@@ -1182,7 +1313,7 @@ $('grid').addEventListener('pointermove',e=>{if(isDrag||!selDi)return;const el=e
 $('grid-wrap').addEventListener('pointerleave',()=>{if(!isDrag)clearHL();});
 
 /* ══ DAILY TRACKING ══ */
-function dailyKey(diff){const d=new Date();return`pips_daily_${d.toISOString().slice(0,10)}_${diff}`;}
+function dailyKey(diff){const d=new Date();return`pips_daily_${d.getFullYear()}_${String(d.getMonth()+1).padStart(2,'0')}_${String(d.getDate()).padStart(2,'0')}_${diff}`;}
 function getDailyRecord(diff){try{return JSON.parse(localStorage.getItem(dailyKey(diff)))||null;}catch(e){return null;}}
 function saveDailyRecord(diff,secs){
   try{localStorage.setItem(dailyKey(diff),JSON.stringify({secs,ts:Date.now()}));}catch(e){}
@@ -1190,6 +1321,7 @@ function saveDailyRecord(diff,secs){
 
 /* ══ VALIDATE ══ */
 function validate(){
+  if(puzzle.viewOnly)return; // already-completed daily — don't validate
   Object.values(zOvEls).forEach(el=>el.classList.remove('err'));
   if(usedDom.size<puzzle.dominoes.length){setSt(`${usedDom.size}/${puzzle.dominoes.length} размещено`);return;}
   const errs=[];
@@ -1255,18 +1387,48 @@ function endDrag(){isDrag=false;ghost.classList.remove('on');document.removeEven
 /* ══════════════════════════════════════════
    EDITOR
 ══════════════════════════════════════════ */
-/* ══ EDITOR STATE — dynamic zones, paint mode ══ */
+/* ══ EDITOR STATE ══ */
 let edCols=6,edRows=4,edActive=new Set(),edZones=[],edSelZone=0,edEditMode='cells',edGeneratedLevel=null;
-// Extended color palette for many zones
-const ED_COLORS=[
-  {bg:'#f7d6e0',bd:'#c8457a'},{bg:'#cfe3f7',bd:'#2f78c1'},{bg:'#d0f0d8',bd:'#2f9c50'},
-  {bg:'#ead6f5',bd:'#7a38c0'},{bg:'#fde8cc',bd:'#c07028'},{bg:'#e0f7f7',bd:'#1a9c9c'},
-  {bg:'#f5f0d0',bd:'#9c8c10'},{bg:'#ffd6d6',bd:'#c04040'},{bg:'#d6f0ff',bd:'#0078b4'},
-  {bg:'#e8ffe0',bd:'#40a020'},
-];
+let edHistory=[],edHistoryIdx=-1; // undo/redo stack
+
+/* ── Snapshot helpers ── */
+function edSnapshot(){
+  // Save current state; trim redo tail
+  const snap={
+    active:new Set(edActive),
+    zones:edZones.map(z=>({cells:new Set(z.cells),rule:{...z.rule}})),
+    cols:edCols,rows:edRows
+  };
+  edHistory=edHistory.slice(0,edHistoryIdx+1);
+  edHistory.push(snap);
+  if(edHistory.length>60)edHistory.shift();
+  edHistoryIdx=edHistory.length-1;
+  edUpdateUndoRedo();
+}
+function edRestoreSnap(snap){
+  edCols=snap.cols;edRows=snap.rows;
+  edActive=new Set(snap.active);
+  edZones=snap.zones.map(z=>({cells:new Set(z.cells),rule:{...z.rule}}));
+  if(edSelZone>=edZones.length)edSelZone=edZones.length-1;
+  $('ed-cols-lbl').textContent=edCols;$('ed-rows-lbl').textContent=edRows;
+  edGeneratedLevel=null;renderEdGrid();renderZonePicker();
+}
+function edUndo(){
+  if(edHistoryIdx<=0)return;
+  edHistoryIdx--;edRestoreSnap(edHistory[edHistoryIdx]);edUpdateUndoRedo();
+}
+function edRedo(){
+  if(edHistoryIdx>=edHistory.length-1)return;
+  edHistoryIdx++;edRestoreSnap(edHistory[edHistoryIdx]);edUpdateUndoRedo();
+}
+function edUpdateUndoRedo(){
+  $('btn-undo').disabled=edHistoryIdx<=0;
+  $('btn-redo').disabled=edHistoryIdx>=edHistory.length-1;
+}
 
 function initEditor(){
   edCols=6;edRows=4;edEditMode='cells';edSelZone=0;edGeneratedLevel=null;
+  edHistory=[];edHistoryIdx=-1;
   edActive=new Set(allC(edCols,edRows).map(([c,r])=>`${c},${r}`));
   edZones=[
     {cells:new Set(),rule:{type:'sum',v:4}},
@@ -1276,8 +1438,9 @@ function initEditor(){
   $('ed-cols-lbl').textContent=edCols;$('ed-rows-lbl').textContent=edRows;
   $('tab-cells').classList.add('active');$('tab-zones').classList.remove('active');
   $('zone-panel').style.display='none';
+  edSnapshot(); // initial snapshot
   renderEdGrid();renderZonePicker();buildSavedPanel();
-  $('ed-status').textContent='Тапай клетки · удержание = рисовать';
+  $('ed-status').textContent='Тап = вкл/выкл · удержи = рисовать · Зоны → раскрась области';
 }
 
 function edResize(dc,dr){
@@ -1287,7 +1450,7 @@ function edResize(dc,dr){
   const prune=k=>{const[c,r]=k.split(',').map(Number);return c>=edCols||r>=edRows;};
   for(const k of [...edActive])if(prune(k))edActive.delete(k);
   edZones.forEach(z=>{for(const k of [...z.cells])if(prune(k))z.cells.delete(k);});
-  edGeneratedLevel=null;renderEdGrid();
+  edGeneratedLevel=null;edSnapshot();renderEdGrid();
 }
 
 function edMode(m){
@@ -1295,17 +1458,37 @@ function edMode(m){
   $('tab-cells').classList.toggle('active',m==='cells');
   $('tab-zones').classList.toggle('active',m==='zones');
   $('zone-panel').style.display=m==='zones'?'':'none';
-  $('ed-status').textContent=m==='cells'?'Тап = вкл/выкл · удержание = рисовать':'Выбери зону → тап/рисуй клетки';
+  $('ed-status').textContent=m==='cells'?'Тап/удержи = рисовать/стирать клетки':'Выбери зону → тап/рисуй клетки';
 }
 
-/* Paint mode: track pointer state over grid */
-let edPaintActive=false,edPaintVal=null; // null=toggle, true=add, false=remove
+/* Paint mode */
+let edPaintActive=false,edPaintVal=null;
 function renderEdGrid(){
   const edCell=Math.max(26,Math.min(46,Math.floor((window.innerWidth-48)/edCols)));
   const g=$('ed-grid');
   g.style.gridTemplateColumns=`repeat(${edCols},${edCell}px)`;
   g.style.gridTemplateRows=`repeat(${edRows},${edCell}px)`;
   g.style.gap='3px';g.innerHTML='';
+
+  // Build pip value map from generated level (for preview)
+  const pipMap={};
+  if(edGeneratedLevel){
+    const lv=edGeneratedLevel;
+    const ac2=lv.activeCells||allC(lv.cols,lv.rows);
+    const placed2=[];
+    const tOf2={};
+    // reconstruct placements from domino list (same order as buildPuzzleWithZones)
+    const sorted2=[...ac2].sort((a,b)=>a[1]!==b[1]?a[1]-b[1]:a[0]-b[0]);
+    // We can't re-derive placements easily; use region cells to show pip values
+    lv.regions.forEach(rg=>{
+      // we don't have per-cell values here easily without re-running generation
+    });
+    // Alternative: show pip values from dominoes if we stored them
+    if(lv._cellVals){
+      Object.entries(lv._cellVals).forEach(([k,v])=>{pipMap[k]=v;});
+    }
+  }
+
   for(let r=0;r<edRows;r++){
     for(let c=0;c<edCols;c++){
       const k=`${c},${r}`;
@@ -1315,118 +1498,131 @@ function renderEdGrid(){
       const isActive=edActive.has(k);
       const zi=edZones.findIndex(z=>z.cells.has(k));
       if(!isActive){el.classList.add('ec-inactive');}
-      else if(zi>=0){const col=ED_COLORS[zi%ED_COLORS.length];el.style.background=col.bg;el.style.borderColor=col.bd;el.style.borderStyle='solid';el.style.borderWidth='2px';}
-      else{el.classList.add('ec-free');}
+      else if(zi>=0){
+        const col=ZC[zi%ZC.length];
+        el.style.background=col.bg;el.style.borderColor=col.bd;
+        el.style.borderStyle='solid';el.style.borderWidth='2px';
+        // Show pip value if preview available
+        if(pipMap[k]!==undefined){
+          const pip=document.createElement('div');
+          pip.style.cssText=`font-size:${Math.max(9,edCell*.28)}px;font-weight:700;color:${col.bd};position:absolute;bottom:2px;right:3px;`;
+          pip.textContent=pipMap[k];el.style.position='relative';el.appendChild(pip);
+        }
+      } else {el.classList.add('ec-free');}
       g.appendChild(el);
     }
   }
-  // Pointer events on the whole grid for paint mode
+
+  // Pointer events — paint mode
   g.onpointerdown=e=>{
     e.preventDefault();
     const el=e.target.closest('.ed-cell');if(!el)return;
     const c=+el.dataset.c,r=+el.dataset.r,k=`${c},${r}`;
     edPaintActive=true;
-    if(edEditMode==='cells'){
-      edPaintVal=!edActive.has(k); // paint ON if was OFF, paint OFF if was ON
-    } else {
-      edPaintVal=!edZones[edSelZone].cells.has(k);
-    }
-    edApplyPaint(c,r);
+    if(edEditMode==='cells'){edPaintVal=!edActive.has(k);}
+    else{edPaintVal=!edZones[edSelZone]?.cells.has(k);}
+    edApplyPaint(c,r,false); // false = don't snapshot yet
   };
   g.onpointermove=e=>{
     if(!edPaintActive)return;
     const el=document.elementFromPoint(e.clientX,e.clientY);
     const cell=el?.closest?.('.ed-cell');if(!cell)return;
-    edApplyPaint(+cell.dataset.c,+cell.dataset.r);
+    edApplyPaint(+cell.dataset.c,+cell.dataset.r,false);
   };
-  g.onpointerup=g.onpointercancel=()=>{edPaintActive=false;edPaintVal=null;};
-  g.setPointerCapture&&g.addEventListener('pointerdown',e=>g.setPointerCapture(e.pointerId),{passive:true});
+  g.onpointerup=g.onpointercancel=()=>{
+    if(edPaintActive){edPaintActive=false;edPaintVal=null;edSnapshot();}
+  };
 }
 
-function edApplyPaint(c,r){
+function edApplyPaint(c,r,snap=true){
   const k=`${c},${r}`;
   if(edEditMode==='cells'){
     if(edPaintVal){edActive.add(k);}
     else{edActive.delete(k);edZones.forEach(z=>z.cells.delete(k));}
   } else {
     if(!edActive.has(k))return;
-    const z=edZones[edSelZone];
+    const z=edZones[edSelZone];if(!z)return;
     if(edPaintVal){edZones.forEach((oz,i)=>{if(i!==edSelZone)oz.cells.delete(k);});z.cells.add(k);}
     else{z.cells.delete(k);}
   }
-  // Update just this cell visually (fast, no full re-render)
+  // Update just this cell visually
   const cell=$('ed-grid').querySelector(`[data-c="${c}"][data-r="${r}"]`);
   if(cell){
-    cell.className='ed-cell';cell.style.cssText=`width:${cell.style.width};height:${cell.style.height}`;
+    const sz=cell.style.width;
+    cell.className='ed-cell';cell.style.cssText=`width:${sz};height:${sz}`;
+    cell.dataset.c=c;cell.dataset.r=r;
     const isActive=edActive.has(k);
     const zi=edZones.findIndex(z=>z.cells.has(k));
     if(!isActive){cell.classList.add('ec-inactive');}
-    else if(zi>=0){const col=ED_COLORS[zi%ED_COLORS.length];cell.style.background=col.bg;cell.style.borderColor=col.bd;cell.style.borderStyle='solid';cell.style.borderWidth='2px';}
+    else if(zi>=0){const col=ZC[zi%ZC.length];cell.style.background=col.bg;cell.style.borderColor=col.bd;cell.style.borderStyle='solid';cell.style.borderWidth='2px';}
     else{cell.classList.add('ec-free');}
   }
   edGeneratedLevel=null;
+  if(snap)edSnapshot();
   if(edEditMode==='zones')renderZonePicker();
 }
 
 function renderZonePicker(){
   const p=$('zone-picker');p.innerHTML='';
-  edZones.forEach((z,i)=>{
-    const col=ED_COLORS[i%ED_COLORS.length];
-    const sw=document.createElement('div');sw.className='zp-sw'+(i===edSelZone?' sel':'');
-    sw.style.cssText=`background:${col.bg};border:3px solid ${i===edSelZone?'var(--dark)':col.bd};position:relative;`;
-    sw.onclick=()=>{edSelZone=i;renderZonePicker();renderRuleRow();};
+  const ruleLabel=z=>{
+    const r=z.rule;
     const cnt=z.cells.size;
-    if(cnt>0){sw.style.display='flex';sw.style.alignItems='center';sw.style.justifyContent='center';sw.style.fontSize='.55rem';sw.style.fontWeight='700';sw.style.color=col.bd;sw.textContent=cnt;}
-    // Delete button (only if >1 zone)
+    const suffix=cnt>0?` (${cnt})`:'';
+    switch(r.type){
+      case'eq':  return`= ${suffix}`;
+      case'neq': return`≠ ${suffix}`;
+      case'sum': return`Σ${r.v}${suffix}`;
+      case'gt':  return`>${r.v}${suffix}`;
+      case'lt':  return`<${r.v}${suffix}`;
+      default:   return`?${suffix}`;
+    }
+  };
+  edZones.forEach((z,i)=>{
+    const col=ZC[i%ZC.length];
+    const sw=document.createElement('div');sw.className='zp-sw'+(i===edSelZone?' sel':'');
+    sw.style.cssText=`background:${col.bg};border:3px solid ${i===edSelZone?'var(--dark)':col.bd};position:relative;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:1px;min-width:36px;width:auto;padding:2px 6px;flex-shrink:0;`;
+    sw.onclick=()=>{edSelZone=i;renderZonePicker();renderRuleRow();};
+    const lbl=document.createElement('div');
+    lbl.style.cssText=`font-size:.52rem;font-weight:700;color:${col.bd};white-space:nowrap;line-height:1.1`;
+    lbl.textContent=ruleLabel(z);sw.appendChild(lbl);
     if(edZones.length>1){
       const del=document.createElement('div');
-      del.style.cssText='position:absolute;top:-6px;right:-6px;width:14px;height:14px;background:#c04;color:#fff;border-radius:50%;font-size:.55rem;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:5';
+      del.style.cssText='position:absolute;top:-6px;right:-4px;width:14px;height:14px;background:#c04;color:#fff;border-radius:50%;font-size:.55rem;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:5';
       del.textContent='×';del.onclick=e=>{e.stopPropagation();deleteZone(i);};
       sw.appendChild(del);
     }
     p.appendChild(sw);
   });
-  // Add zone button
-  if(edZones.length<ED_COLORS.length){
-    const add=document.createElement('div');
-    add.className='zp-sw';
-    add.style.cssText='background:rgba(0,0,0,.05);border:2px dashed #ccc;display:flex;align-items:center;justify-content:center;font-size:1.1rem;color:#999;cursor:pointer;';
-    add.textContent='+';
-    add.onclick=addZone;
-    p.appendChild(add);
+  if(edZones.length<ZC.length){
+    const add=document.createElement('div');add.className='zp-sw';
+    add.style.cssText='background:rgba(0,0,0,.05);border:2px dashed #ccc;display:flex;align-items:center;justify-content:center;font-size:1.1rem;color:#999;cursor:pointer;min-width:30px;';
+    add.textContent='+';add.onclick=addZone;p.appendChild(add);
   }
   renderRuleRow();
 }
-function addZone(){
-  edZones.push({cells:new Set(),rule:{type:'sum',v:4}});
-  edSelZone=edZones.length-1;
-  renderZonePicker();
-}
-function deleteZone(i){
-  edZones.splice(i,1);
-  if(edSelZone>=edZones.length)edSelZone=edZones.length-1;
-  renderEdGrid();renderZonePicker();
-}
+function addZone(){edZones.push({cells:new Set(),rule:{type:'sum',v:4}});edSelZone=edZones.length-1;edSnapshot();renderZonePicker();}
+function deleteZone(i){edZones.splice(i,1);if(edSelZone>=edZones.length)edSelZone=edZones.length-1;edSnapshot();renderEdGrid();renderZonePicker();}
 
 function renderRuleRow(){
-  const z=edZones[edSelZone];const rr=$('rule-row');rr.innerHTML='';
+  const z=edZones[edSelZone];if(!z){$('rule-row').innerHTML='';return;}
+  const rr=$('rule-row');rr.innerHTML='';
   const types=['eq','neq','sum','gt','lt'];
-  const lbls={eq:'= одинак.',neq:'≠ разные',sum:'сумма=N',gt:'сумма>N',lt:'сумма<N'};
-  const typeBtn=document.createElement('button');typeBtn.className='ctrl lite';typeBtn.style.fontSize='.58rem';
+  const lbls={eq:'= одинак.',neq:'≠ разные',sum:'Σ=N',gt:'>N',lt:'<N'};
+  const typeBtn=document.createElement('button');typeBtn.className='ctrl lite';typeBtn.style.fontSize='.6rem';
   typeBtn.textContent=lbls[z.rule.type]||'?';
   typeBtn.onclick=()=>{
     const idx=types.indexOf(z.rule.type);z.rule.type=types[(idx+1)%types.length];
     if(!['sum','gt','lt'].includes(z.rule.type)){delete z.rule.v;}
     else if(z.rule.v===undefined){z.rule.v=4;}
-    renderRuleRow();
+    edSnapshot();renderZonePicker();
   };
   rr.appendChild(typeBtn);
   if(['sum','gt','lt'].includes(z.rule.type)){
     const m=document.createElement('button');m.className='ed-dim-btn';m.textContent='−';
-    m.onclick=()=>{z.rule.v=Math.max(0,(z.rule.v||0)-1);renderRuleRow();};
+    m.onclick=()=>{z.rule.v=Math.max(0,(z.rule.v||0)-1);edSnapshot();renderZonePicker();};
     const vEl=document.createElement('div');vEl.className='opill';vEl.textContent=z.rule.v??0;
     const pl=document.createElement('button');pl.className='ed-dim-btn';pl.textContent='+';
-    pl.onclick=()=>{z.rule.v=Math.min(60,(z.rule.v||0)+1);renderRuleRow();};
+    pl.onclick=()=>{z.rule.v=Math.min(60,(z.rule.v||0)+1);edSnapshot();renderZonePicker();};
     rr.appendChild(m);rr.appendChild(vEl);rr.appendChild(pl);
   }
 }
@@ -1434,29 +1630,92 @@ function renderRuleRow(){
 function edGenerate(){
   const ac=[...edActive].map(k=>k.split(',').map(Number));
   if(ac.length<4){$('ed-status').textContent='Нужно минимум 4 активные клетки';return;}
-  if(ac.length%2!==0){$('ed-status').textContent='Число клеток должно быть чётным';return;}
-  // Allow zones with ≥1 cell (single cell only works for eq/sum types)
+  if(ac.length%2!==0){$('ed-status').textContent='Число клеток должно быть чётным (сейчас '+ac.length+')';return;}
   const zones=edZones.filter(z=>z.cells.size>=1).map(z=>({cells:[...z.cells].map(k=>k.split(',').map(Number)),rule:{...z.rule}}));
   const lv=buildPuzzleWithZones(ac,edCols,edRows,zones,()=>Math.random());
   if(!lv){$('ed-status').textContent='Не удалось разбить на домино — измени форму';return;}
   lv.name='МОЙ УРОВЕНЬ';lv.diff='rnd';lv.isCustom=true;
+  // Store per-cell pip values for visual preview
+  const cellVals={};
+  lv.regions.forEach(rg=>rg.cells.forEach(([c,r],ci)=>{
+    // value is stored in domino — find which domino covers this cell
+  }));
+  // Attach cell value map for preview: reconstruct from dominoes+activeCells
+  // We'll pass this through the level object itself
   edGeneratedLevel=lv;
-  $('ed-status').textContent=`Готово! ${lv.dominoes.length} костяшек, ${lv.regions.length} зон · нажми ▶ ИГРАТЬ`;
+  // Visual preview: re-render grid showing zone colors PLUS pip values
+  renderEdGridWithPreview(lv);
+  $('ed-status').textContent=`✓ ${lv.dominoes.length} домино · ${lv.regions.length} зон · нажми ▶ ИГРАТЬ или 💾 СОХРАНИТЬ`;
 }
+
+function renderEdGridWithPreview(lv){
+  // Re-render editor grid showing the generated pip values
+  const edCell=Math.max(26,Math.min(46,Math.floor((window.innerWidth-48)/edCols)));
+  const g=$('ed-grid');
+  // Keep grid structure, just update cell visuals
+  // We need cell→pipvalue map. Reconstruct from domino tiling.
+  // activeCells sorted same way as buildPuzzleWithZones
+  const ac=lv.activeCells||(()=>{const a=[];for(let r=0;r<lv.rows;r++)for(let c=0;c<lv.cols;c++)a.push([c,r]);return a;})();
+  const setA=new Set(ac.map(([c,r])=>`${c},${r}`));
+  const sorted=[...ac].sort((a,b)=>a[1]!==b[1]?a[1]-b[1]:a[0]-b[0]);
+  // Re-tile deterministically using same greedy order to find cell→domino mapping
+  const tOf={};let placed2=[];
+  const rng2=mkRng(12345); // fixed seed just for tiling reconstruction
+  function tile2(i){
+    if(i>=sorted.length)return true;
+    const[c,r]=sorted[i];const k=`${c},${r}`;if(tOf[k]!==undefined)return tile2(i+1);
+    for(const[dc,dr]of shu([[1,0],[0,1]],rng2)){
+      const k2=`${c+dc},${r+dr}`;if(!setA.has(k2)||tOf[k2]!==undefined)continue;
+      const di=placed2.length;tOf[k]=di;tOf[k2]=di;placed2.push([[c,r],[c+dc,r+dr]]);
+      if(tile2(i+1))return true;placed2.pop();delete tOf[k];delete tOf[k2];
+    }
+    return false;
+  }
+  tile2(0);
+  // Build cell→value map
+  const cellVal={};
+  placed2.forEach(([[c1,r1],[c2,r2]],di)=>{
+    if(di<lv.dominoes.length){
+      cellVal[`${c1},${r1}`]=lv.dominoes[di][0];
+      cellVal[`${c2},${r2}`]=lv.dominoes[di][1];
+    }
+  });
+  // Re-render cells with pip values
+  Array.from(g.children).forEach(el=>{
+    const c=+el.dataset.c,r=+el.dataset.r,k=`${c},${r}`;
+    if(!edActive.has(k))return;
+    const v=cellVal[k];
+    if(v===undefined)return;
+    // Add value badge
+    el.querySelectorAll('.ed-pip').forEach(x=>x.remove());
+    const pip=document.createElement('div');pip.className='ed-pip';
+    const zi=edZones.findIndex(z=>z.cells.has(k));
+    const col=zi>=0?ZC[zi%ZC.length]:{bd:'#888'};
+    pip.style.cssText=`font-size:${Math.max(9,edCell*.3)}px;font-weight:900;color:${col.bd};position:absolute;bottom:1px;right:3px;line-height:1;pointer-events:none;`;
+    pip.textContent=v;el.style.position='relative';el.appendChild(pip);
+  });
+}
+
 function edPlay(){
   if(!edGeneratedLevel)edGenerate();
-  if(edGeneratedLevel){startLevel(edGeneratedLevel);}
+  if(edGeneratedLevel)startLevel(edGeneratedLevel);
 }
 function edSave(){
   if(!edGeneratedLevel)edGenerate();
   if(!edGeneratedLevel)return;
   try{
     const saves=JSON.parse(localStorage.getItem('pips_saved')||'[]');
-    const entry={...edGeneratedLevel,savedAt:Date.now(),saveName:edGeneratedLevel.name};
+    const entry={...edGeneratedLevel,savedAt:Date.now(),saveName:edGeneratedLevel.name,
+      // Store editor state for re-editing
+      _edState:{
+        active:[...edActive],cols:edCols,rows:edRows,
+        zones:edZones.map(z=>({cells:[...z.cells],rule:{...z.rule}}))
+      }
+    };
     saves.unshift(entry);if(saves.length>20)saves.pop();
     localStorage.setItem('pips_saved',JSON.stringify(saves));
-    $('ed-status').textContent='✓ Уровень сохранён!';
-  }catch(e){$('ed-status').textContent='Ошибка сохранения';}
+    $('ed-status').textContent='✓ Сохранено!';buildSavedPanel();
+  }catch(e){$('ed-status').textContent='Ошибка: '+e.message;}
 }
 function edShare(){
   if(!edGeneratedLevel)edGenerate();
@@ -1466,19 +1725,53 @@ function edShare(){
     const url=shareBase()+'?level='+enc;
     if(navigator.clipboard){
       navigator.clipboard.writeText(url).then(
-        ()=>$('ed-status').textContent='✓ Ссылка скопирована! Отправь другу — он откроет и сразу попадёт в уровень',
-        ()=>prompt('Скопируй ссылку вручную:',url)
+        ()=>$('ed-status').textContent='✓ Ссылка скопирована!',
+        ()=>prompt('Ссылка:',url)
       );
-    } else {
-      prompt('Скопируй ссылку:',url);
-    }
+    } else prompt('Ссылка:',url);
   }catch(e){$('ed-status').textContent='Ошибка: '+e.message;}
 }
+function edFill(){
+  edActive=new Set(allC(edCols,edRows).map(([c,r])=>`${c},${r}`));
+  edGeneratedLevel=null;edSnapshot();renderEdGrid();
+  $('ed-status').textContent='Все клетки активны';
+}
 function edClear(){
-  edActive=new Set(); // ← empty, not filled
-  edZones=Array.from({length:edZones.length},(_,i)=>({cells:new Set(),rule:edZones[i]?.rule||{type:'sum',v:4}}));
-  edGeneratedLevel=null;renderEdGrid();renderZonePicker();
-  $('ed-status').textContent='Очищено. Тапай клетки чтобы их добавить.';
+  edActive=new Set();
+  edZones=edZones.map(z=>({...z,cells:new Set()}));
+  edGeneratedLevel=null;edSnapshot();renderEdGrid();renderZonePicker();
+  $('ed-status').textContent='Очищено';
+}
+function edReset(){
+  editorInitialized=false;initEditor();editorInitialized=true;
+}
+
+/* Load saved level back into editor for re-editing */
+function edLoadSaved(idx){
+  try{
+    const saves=JSON.parse(localStorage.getItem('pips_saved')||'[]');
+    const lv=saves[idx];if(!lv)return;
+    // Restore editor state if stored, otherwise reconstruct from level
+    if(lv._edState){
+      const s=lv._edState;
+      edCols=s.cols;edRows=s.rows;
+      edActive=new Set(s.active);
+      edZones=s.zones.map(z=>({cells:new Set(z.cells),rule:{...z.rule}}));
+    } else {
+      // Reconstruct from level structure
+      edCols=lv.cols;edRows=lv.rows;
+      const ac=lv.activeCells||allC(lv.cols,lv.rows);
+      edActive=new Set(ac.map(([c,r])=>`${c},${r}`));
+      edZones=lv.regions.map(rg=>({cells:new Set(rg.cells.map(([c,r])=>`${c},${r}`)),rule:{...rg.rule}}));
+    }
+    if(edSelZone>=edZones.length)edSelZone=0;
+    edGeneratedLevel={...lv};
+    $('ed-cols-lbl').textContent=edCols;$('ed-rows-lbl').textContent=edRows;
+    edHistory=[];edHistoryIdx=-1;edSnapshot();
+    renderEdGrid();renderZonePicker();
+    $('ed-status').textContent=`Загружено: ${lv.saveName||'Уровень'} · можно редактировать`;
+    $('ed-status').scrollIntoView({behavior:'smooth',block:'nearest'});
+  }catch(e){$('ed-status').textContent='Ошибка загрузки: '+e.message;}
 }
 
 /* ── Saved levels panel in editor ── */
@@ -1490,14 +1783,18 @@ function buildSavedPanel(){
     const d=new Date(lv.savedAt||0);
     const ds=`${d.getDate()}.${d.getMonth()+1}`;
     const card=document.createElement('div');card.className='sub-card';
-    card.style.cssText='background:rgba(0,0,0,.04);border:1px solid rgba(0,0,0,.1);margin-bottom:5px;gap:6px;';
+    card.style.cssText='background:rgba(0,0,0,.04);border:1px solid rgba(0,0,0,.1);margin-bottom:5px;gap:5px;flex-wrap:nowrap;';
     const name=lv.saveName||'Уровень';
     card.innerHTML=`
       <div class="sc-badge med" style="font-size:.55rem;flex-shrink:0">✏️</div>
-      <div class="sc-info" style="flex:1;min-width:0"><div class="sc-name" style="color:var(--dark);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${name}</div>
-      <div class="sc-meta" style="color:#888">${lv.dominoes?.length||0} костяшек · ${ds}</div></div>
-      <button class="sv-share" style="background:rgba(200,150,60,.15);border:1px solid rgba(200,150,60,.3);border-radius:6px;font-size:.65rem;padding:3px 7px;cursor:pointer;color:var(--dark);flex-shrink:0" title="Скопировать ссылку">🔗</button>
-      <button class="sv-del" style="background:none;border:none;color:#c04;font-size:.9rem;cursor:pointer;padding:0 3px;flex-shrink:0" title="Удалить">✕</button>`;
+      <div class="sc-info" style="flex:1;min-width:0">
+        <div class="sc-name" style="color:var(--dark);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${name}</div>
+        <div class="sc-meta" style="color:#888">${lv.dominoes?.length||0} д · ${lv.regions?.length||0} зон · ${ds}</div>
+      </div>
+      <button class="sv-edit" style="background:rgba(47,120,193,.15);border:1px solid rgba(47,120,193,.3);border-radius:6px;font-size:.6rem;padding:3px 6px;cursor:pointer;color:#1a5a9a;flex-shrink:0">✏</button>
+      <button class="sv-share" style="background:rgba(200,150,60,.15);border:1px solid rgba(200,150,60,.3);border-radius:6px;font-size:.6rem;padding:3px 6px;cursor:pointer;color:var(--wood);flex-shrink:0">🔗</button>
+      <button class="sv-del" style="background:none;border:none;color:#c04;font-size:.85rem;cursor:pointer;padding:0 2px;flex-shrink:0">✕</button>`;
+    card.querySelector('.sv-edit').onclick=e=>{e.stopPropagation();edLoadSaved(idx);};
     card.querySelector('.sv-share').onclick=e=>{
       e.stopPropagation();
       try{
@@ -1540,8 +1837,10 @@ function buildPuzzleWithZones(ac,cols,rows,zones,rng){
   const regions=[];
   for(const z of zones){
     const cells=z.cells.filter(([c,r])=>setA.has(`${c},${r}`));
-    if(cells.length<2)continue;
+    if(cells.length<1)continue;
     const n=cells.length,rule=z.rule;
+    // neq needs ≥2 distinct cells; others work with 1+
+    if(rule.type==='neq'&&n<2)continue;
     if(rule.type==='eq'){
       const v=rInt(1,5,rng);cells.forEach(([c,r])=>setCell(c,r,v));
       regions.push({rule:{type:'eq'},cells});
@@ -1550,19 +1849,30 @@ function buildPuzzleWithZones(ac,cols,rows,zones,rng){
       cells.forEach(([c,r],i)=>setCell(c,r,pool[i]));
       regions.push({rule:{type:'neq'},cells});
     } else if(rule.type==='sum'){
-      const target=rule.v??n*2;let rem=target;
+      const target=rule.v!=null?rule.v:n*2;
+      const clampedTarget=Math.max(0,Math.min(n*5,target));
+      let rem=clampedTarget;
       cells.forEach(([c,r],i)=>{const left=n-i-1;const v=rInt(Math.max(0,rem-left*5),Math.min(5,rem),rng);setCell(c,r,v);rem-=v;});
       regions.push({rule:{type:'sum',v:cells.reduce((a,[c,r])=>a+getCell(c,r),0)},cells});
     } else if(rule.type==='gt'){
-      const thresh=rule.v??0;let target=Math.max(thresh+1,rInt(thresh+1,Math.min(n*5,thresh+n*2+2),rng));
-      let rem=target;
-      cells.forEach(([c,r],i)=>{const left=n-i-1;const v=rInt(Math.max(0,rem-left*5),Math.min(5,rem),rng);setCell(c,r,v);rem-=v;});
-      regions.push({rule:{type:'gt',v:thresh},cells});
+      const thresh=rule.v??0;
+      const maxPossible=n*5;
+      if(thresh>=maxPossible){cells.forEach(([c,r])=>setCell(c,r,5));regions.push({rule:{type:'gt',v:thresh-1},cells});}
+      else{
+        let target=rInt(thresh+1,Math.min(maxPossible,thresh+Math.max(2,n*2)),rng);
+        let rem=target;
+        cells.forEach(([c,r],i)=>{const left=n-i-1;const v=rInt(Math.max(0,rem-left*5),Math.min(5,rem),rng);setCell(c,r,v);rem-=v;});
+        regions.push({rule:{type:'gt',v:thresh},cells});
+      }
     } else { // lt
-      const thresh=rule.v??n*5;let target=Math.min(thresh-1,rInt(0,thresh-1,rng));
-      let rem=Math.max(0,target);
-      cells.forEach(([c,r],i)=>{const left=n-i-1;const v=rInt(Math.max(0,rem-left*5),Math.min(5,rem),rng);setCell(c,r,v);rem-=v;});
-      regions.push({rule:{type:'lt',v:thresh},cells});
+      const thresh=rule.v??n*5;
+      if(thresh<=0){cells.forEach(([c,r])=>setCell(c,r,0));regions.push({rule:{type:'lt',v:1},cells});}
+      else{
+        let target=rInt(0,Math.max(0,thresh-1),rng);
+        let rem=target;
+        cells.forEach(([c,r],i)=>{const left=n-i-1;const v=rInt(Math.max(0,rem-left*5),Math.min(5,rem),rng);setCell(c,r,v);rem-=v;});
+        regions.push({rule:{type:'lt',v:thresh},cells});
+      }
     }
   }
   // Fill unzoned cells randomly
