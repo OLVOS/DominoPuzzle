@@ -1363,7 +1363,7 @@ function startLevel(lv){
   }
 }
 function showScreen(n){
-  ['menu','game','editor'].forEach(s=>$(s).classList.toggle('hidden',s!==n));
+  ['menu','game','editor','cfg-screen'].forEach(s=>{ const el=$(s); if(el)el.classList.toggle('hidden',s!==n); });
 }
 
 /* ══════════════════════════════════════════
@@ -2337,13 +2337,13 @@ function saveCfgStorage(){
 }
 
 function openCfgScreen(){
-  show('cfg-screen');
+  showScreen('cfg-screen');
   cfgRenderParams();
   cfgRenderPresets();
   cfgRegenPreview();
 }
-function closeCfgScreen(){show('menu');}
-function cfgApplyAndClose(){saveCfgStorage();show('menu');}
+function closeCfgScreen(){showScreen('menu');}
+function cfgApplyAndClose(){saveCfgStorage();showScreen('menu');}
 
 function cfgSetDiff(d){
   _cfgDiff=d;
