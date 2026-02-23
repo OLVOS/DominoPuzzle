@@ -164,10 +164,10 @@ body{font-family:'DM Mono',monospace;background:var(--cream);}
 .cfg-hdr-diff{display:flex;gap:4px;}
 .cfg-diff-btn{background:rgba(200,150,60,.1);border:1px solid rgba(200,150,60,.25);border-radius:8px;color:#c0a060;font-family:"DM Mono",monospace;font-size:.5rem;padding:5px 9px;cursor:pointer;letter-spacing:1px;transition:all .15s;}
 .cfg-diff-btn.on{background:rgba(200,150,60,.3);color:var(--gold2);border-color:var(--gold2);}
-.cfg-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column;padding:14px 16px;gap:0;}
-.cfg-preview-wrap{display:flex;gap:12px;align-items:flex-start;margin-bottom:4px;}
-.cfg-canvas-col{display:flex;flex-direction:column;gap:8px;flex-shrink:0;}
-.cfg-stats-col{flex:1;display:flex;flex-direction:column;gap:6px;padding-top:4px;}
+.cfg-preview-fixed{display:flex;gap:12px;align-items:flex-start;flex-shrink:0;padding:12px 16px 10px;border-bottom:1px solid rgba(200,150,60,.18);background:radial-gradient(ellipse at 20% 10%,#2d1a06,#080503);}
+.cfg-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:12px 16px 0;}
+.cfg-canvas-col{display:flex;flex-direction:column;gap:7px;flex-shrink:0;}
+.cfg-stats-col{flex:1;display:flex;flex-direction:column;gap:4px;padding-top:2px;}
 .cfg-section{color:#c0a060;font-size:.52rem;letter-spacing:3px;margin:12px 0 6px;text-transform:uppercase;border-bottom:1px solid rgba(200,150,60,.1);padding-bottom:4px;}
 .cfg-section:first-child{margin-top:0;}
 .cfg-row{display:flex;align-items:center;gap:8px;margin-bottom:7px;position:relative;}
@@ -269,33 +269,30 @@ body{font-family:'DM Mono',monospace;background:var(--cream);}
     <span class="cfg-hdr-title">ГЕНЕРАЦИЯ УРОВНЕЙ</span>
   </div>
 
-  <div class="cfg-body">
-
-    <!-- PREVIEW ROW -->
-    <div class="cfg-preview-wrap">
-      <div class="cfg-canvas-col">
-        <div class="cfg-preview-label">ПРЕВЬЮ</div>
-        <canvas id="cfg-canvas" width="155" height="175"></canvas>
-        <button class="cfg-regen-btn" onclick="cfgRegenPreview()">↺ НОВЫЙ</button>
-      </div>
-      <div class="cfg-stats-col">
-        <div class="cfg-preview-stats" id="cfg-stats"></div>
-        <div class="cfg-section" style="margin-top:8px">Сложность</div>
-        <div class="cfg-hdr-diff" style="flex-wrap:wrap;gap:5px">
-          <button class="cfg-diff-btn on" id="cfg-d-easy" onclick="cfgSetDiff('easy')">EASY</button>
-          <button class="cfg-diff-btn" id="cfg-d-med" onclick="cfgSetDiff('med')">MED</button>
-          <button class="cfg-diff-btn" id="cfg-d-hard" onclick="cfgSetDiff('hard')">HARD</button>
-        </div>
+  <!-- PREVIEW: fixed height, never scrolls -->
+  <div class="cfg-preview-fixed">
+    <div class="cfg-canvas-col">
+      <div class="cfg-preview-label">ПРЕВЬЮ</div>
+      <canvas id="cfg-canvas" width="148" height="160"></canvas>
+      <button class="cfg-regen-btn" onclick="cfgRegenPreview()">↺ НОВЫЙ</button>
+    </div>
+    <div class="cfg-stats-col">
+      <div class="cfg-preview-stats" id="cfg-stats"></div>
+      <div class="cfg-section" style="margin-top:10px;margin-bottom:6px">Сложность</div>
+      <div style="display:flex;gap:5px;flex-wrap:wrap">
+        <button class="cfg-diff-btn on" id="cfg-d-easy" onclick="cfgSetDiff('easy')">EASY</button>
+        <button class="cfg-diff-btn" id="cfg-d-med" onclick="cfgSetDiff('med')">MED</button>
+        <button class="cfg-diff-btn" id="cfg-d-hard" onclick="cfgSetDiff('hard')">HARD</button>
       </div>
     </div>
+  </div>
 
-    <!-- PRESETS -->
-    <div class="cfg-section">Пресеты</div>
-    <div class="cfg-presets-list" id="cfg-presets-list" style="margin-bottom:8px"></div>
+  <!-- SCROLLABLE: presets + params -->
+  <div class="cfg-scroll">
+    <div class="cfg-section" style="margin-top:0">Пресеты</div>
+    <div class="cfg-presets-list" id="cfg-presets-list" style="margin-bottom:10px"></div>
 
-    <!-- PARAMETERS -->
     <div id="cfg-params"><!-- rendered by JS --></div>
-
   </div>
 
   <div class="cfg-actions">
