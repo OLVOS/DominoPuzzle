@@ -154,6 +154,55 @@ body{font-family:'DM Mono',monospace;background:var(--cream);}
 .win-row{display:flex;gap:10px;}
 .win-btn{background:var(--gold);color:var(--dark);border:none;font-family:'Playfair Display',serif;font-size:.82rem;font-weight:700;letter-spacing:2px;padding:10px 20px;border-radius:10px;cursor:pointer;box-shadow:0 4px 0 rgba(0,0,0,.3);}
 .win-btn.sec{background:rgba(255,255,255,.08);color:var(--gold2);border:1.5px solid rgba(200,150,60,.3);}
+
+
+/* ══ CONFIG SCREEN ══ */
+#cfg-screen{background:radial-gradient(ellipse at 20% 10%,#2d1a06,#080503);flex-direction:column;align-items:stretch;padding:0;overflow:hidden;}
+.cfg-hdr{display:flex;align-items:center;gap:12px;padding:14px 18px 10px;border-bottom:1px solid rgba(200,150,60,.18);flex-shrink:0;}
+.cfg-hdr-back{background:none;border:none;color:var(--gold2);font-size:1.2rem;cursor:pointer;padding:4px 8px;}
+.cfg-hdr-title{font-family:"Playfair Display",serif;font-size:1rem;font-weight:700;color:var(--gold2);letter-spacing:3px;flex:1;}
+.cfg-hdr-diff{display:flex;gap:5px;}
+.cfg-diff-btn{background:rgba(200,150,60,.1);border:1px solid rgba(200,150,60,.25);border-radius:8px;color:#c0a060;font-family:"DM Mono",monospace;font-size:.52rem;padding:4px 10px;cursor:pointer;letter-spacing:1px;transition:all .15s;}
+.cfg-diff-btn.on{background:rgba(200,150,60,.3);color:var(--gold2);border-color:var(--gold2);}
+.cfg-body{display:flex;flex:1;overflow:hidden;}
+.cfg-left{flex:1;overflow-y:auto;padding:14px 16px;-webkit-overflow-scrolling:touch;}
+.cfg-right{width:220px;flex-shrink:0;border-left:1px solid rgba(200,150,60,.15);padding:12px;display:flex;flex-direction:column;gap:10px;overflow:hidden;}
+.cfg-section{color:#c0a060;font-size:.52rem;letter-spacing:3px;margin:12px 0 6px;text-transform:uppercase;border-bottom:1px solid rgba(200,150,60,.1);padding-bottom:4px;}
+.cfg-section:first-child{margin-top:0;}
+.cfg-row{display:flex;align-items:center;gap:8px;margin-bottom:7px;position:relative;}
+.cfg-lbl{color:#d0b880;font-size:.58rem;flex:1;cursor:help;border-bottom:1px dashed rgba(200,150,60,.25);}
+.cfg-val{color:var(--gold2);font-size:.6rem;min-width:36px;text-align:right;font-weight:500;}
+.cfg-slider{-webkit-appearance:none;height:3px;border-radius:2px;background:rgba(200,150,60,.25);outline:none;flex:1.2;cursor:pointer;}
+.cfg-slider::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--gold2);cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.5);}
+.cfg-check{width:18px;height:18px;accent-color:var(--gold2);cursor:pointer;}
+.cfg-tooltip{position:absolute;bottom:calc(100% + 6px);left:0;right:0;background:#2a1a08;border:1px solid rgba(200,150,60,.35);border-radius:8px;padding:7px 10px;font-size:.52rem;color:#d0c090;line-height:1.5;z-index:10;pointer-events:none;opacity:0;transition:opacity .15s;box-shadow:0 4px 16px rgba(0,0,0,.5);}
+.cfg-lbl:hover~.cfg-tooltip,.cfg-row:focus-within .cfg-tooltip{opacity:1;}
+/* shape weight chips */
+.cfg-shapes-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:4px;}
+.cfg-sw-row{display:flex;align-items:center;gap:5px;background:rgba(200,150,60,.06);border-radius:8px;padding:5px 8px;}
+.cfg-sw-name{color:#d0b880;font-size:.52rem;flex:1;}
+.cfg-sw-val{color:var(--gold2);font-size:.55rem;min-width:20px;text-align:center;}
+.cfg-sw-sl{-webkit-appearance:none;height:3px;background:rgba(200,150,60,.25);border-radius:2px;outline:none;flex:1;cursor:pointer;}
+.cfg-sw-sl::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:var(--gold2);cursor:pointer;}
+/* presets */
+.cfg-presets-list{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:4px;}
+.cfg-preset{background:rgba(200,150,60,.08);border:1px solid rgba(200,150,60,.22);border-radius:9px;color:#b09060;font-family:"DM Mono",monospace;font-size:.52rem;padding:5px 11px;cursor:pointer;letter-spacing:1px;transition:all .12s;}
+.cfg-preset:active{transform:scale(.95);}
+.cfg-preset.on{background:rgba(200,150,60,.28);color:var(--gold2);border-color:var(--gold2);}
+.cfg-preset.user{border-style:dashed;}
+/* preview pane */
+.cfg-preview-label{color:#806040;font-size:.5rem;letter-spacing:2px;text-transform:uppercase;text-align:center;}
+#cfg-canvas{border-radius:10px;border:1px solid rgba(200,150,60,.2);background:#1a1108;display:block;margin:0 auto;}
+.cfg-regen-btn{background:rgba(200,150,60,.15);border:1px solid rgba(200,150,60,.3);border-radius:9px;color:var(--gold2);font-family:"DM Mono",monospace;font-size:.52rem;padding:7px;cursor:pointer;letter-spacing:1px;text-align:center;transition:all .12s;}
+.cfg-regen-btn:active{transform:scale(.97);}
+.cfg-preview-stats{color:#806040;font-size:.48rem;text-align:center;line-height:1.7;}
+/* actions bar */
+.cfg-actions{display:flex;gap:8px;padding:10px 16px;border-top:1px solid rgba(200,150,60,.15);flex-shrink:0;}
+.cfg-act-btn{flex:1;background:rgba(200,150,60,.1);border:1px solid rgba(200,150,60,.25);border-radius:10px;color:var(--gold2);font-family:"DM Mono",monospace;font-size:.55rem;padding:9px;cursor:pointer;letter-spacing:1px;transition:all .12s;}
+.cfg-act-btn:active{transform:scale(.97);}
+.cfg-act-btn.primary{background:linear-gradient(135deg,rgba(200,150,60,.4),rgba(150,100,20,.4));border-color:var(--gold2);}
+/* menu button */
+.menu-btn.cfg-open-btn{background:rgba(200,150,60,.08);border:1.5px solid rgba(200,150,60,.3);}
 </style>
 </head>
 <body>
@@ -202,6 +251,53 @@ body{font-family:'DM Mono',monospace;background:var(--cream);}
       <span class="mb-sub">создай свой уровень</span>
     </div>
   </button>
+
+  <button class="menu-btn cfg-open-btn" onclick="openCfgScreen()">
+    <div class="mb-icon">⚙️</div>
+    <div class="mb-text">
+      <span class="mb-title">ГЕНЕРАЦИЯ</span>
+      <span class="mb-sub">настройка алгоритма уровней</span>
+    </div>
+  </button>
+</div>
+
+<!-- ══ CONFIG SCREEN ══ -->
+<div class="screen hidden" id="cfg-screen">
+  <div class="cfg-hdr">
+    <button class="cfg-hdr-back" onclick="closeCfgScreen()">‹</button>
+    <span class="cfg-hdr-title">ГЕНЕРАЦИЯ УРОВНЕЙ</span>
+    <div class="cfg-hdr-diff">
+      <button class="cfg-diff-btn on" id="cfg-d-easy" onclick="cfgSetDiff('easy')">EASY</button>
+      <button class="cfg-diff-btn" id="cfg-d-med" onclick="cfgSetDiff('med')">MED</button>
+      <button class="cfg-diff-btn" id="cfg-d-hard" onclick="cfgSetDiff('hard')">HARD</button>
+    </div>
+  </div>
+
+  <div class="cfg-body">
+    <!-- LEFT: parameters -->
+    <div class="cfg-left" id="cfg-params">
+      <!-- rendered by JS -->
+    </div>
+
+    <!-- RIGHT: live preview -->
+    <div class="cfg-right">
+      <div class="cfg-preview-label">ПРЕВЬЮ ФОРМЫ</div>
+      <canvas id="cfg-canvas" width="190" height="220"></canvas>
+      <button class="cfg-regen-btn" onclick="cfgRegenPreview()">↺ НОВЫЙ УРОВЕНЬ</button>
+      <div class="cfg-preview-stats" id="cfg-stats"></div>
+
+      <div style="margin-top:auto">
+        <div class="cfg-section" style="margin-top:0">Пресеты</div>
+        <div class="cfg-presets-list" id="cfg-presets-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cfg-actions">
+    <button class="cfg-act-btn" onclick="cfgReset()">↺ СБРОС</button>
+    <button class="cfg-act-btn" onclick="cfgSavePreset()">💾 СОХРАНИТЬ</button>
+    <button class="cfg-act-btn primary" onclick="cfgApplyAndClose()">✓ ПРИМЕНИТЬ</button>
+  </div>
 </div>
 
 <!-- ══ GAME ══ -->
@@ -298,7 +394,9 @@ body{font-family:'DM Mono',monospace;background:var(--cream);}
   </div>
 </div><!-- /editor -->
 
-<div id="ghost" class="dom-tile"></div>
+
+
+<div id="ghost"<div id="ghost" class="dom-tile"></div>
 
 <div id="pause-ov">
   <div class="pause-t">⏸ ПАУЗА</div>
@@ -486,193 +584,325 @@ function rInt(lo,hi,rng){return lo+Math.floor(rng()*(hi-lo+1));}
    producing pipes, frames, crosses, combs, snakes, stairs, blobs.
 ═══════════════════════════════════════════════════════ */
 
-// Add cells of a rectangle into a Set
-function addRect(S,x,y,w,h){
-  for(let r=y;r<y+h;r++)for(let c=x;c<x+w;c++)if(c>=0&&r>=0)S.add(`${c},${r}`);
-}
 
-// Normalise Set: shift so min col/row = 0, ensure even count, reject if too blob-like
+
+// Normalise & sanitize produced Set
 function finishShape(S,maxCells){
   const pairs=[...S].map(k=>k.split(',').map(Number));
   if(!pairs.length)return null;
   const minC=Math.min(...pairs.map(([c])=>c));
   const minR=Math.min(...pairs.map(([,r])=>r));
   const S2=new Set(pairs.map(([c,r])=>`${c-minC},${r-minR}`));
-  // Hard cell limit
   if(maxCells&&S2.size>maxCells){
-    // Trim to maxCells by removing leaves
-    const arr2=[...S2].map(k=>k.split(',').map(Number));
+    let arr2=[...S2].map(k=>k.split(',').map(Number));
     while(S2.size>maxCells){
+      arr2=[...S2].map(k=>k.split(',').map(Number));
       let removed=false;
       for(let i=arr2.length-1;i>=0&&S2.size>maxCells;i--){
-        if(!S2.has(`${arr2[i][0]},${arr2[i][1]}`))continue;
         const[c,r]=arr2[i];
-        const nbCount=[[c+1,r],[c-1,r],[c,r+1],[c,r-1]].filter(([nc,nr])=>S2.has(`${nc},${nr}`)).length;
-        if(nbCount<=1){S2.delete(`${c},${r}`);removed=true;}
+        const nb=[[c+1,r],[c-1,r],[c,r+1],[c,r-1]].filter(([nc,nr])=>S2.has(`${nc},${nr}`)).length;
+        if(nb<=1){S2.delete(`${c},${r}`);removed=true;}
       }
-      if(!removed)break; // can't trim further
+      if(!removed)break;
     }
   }
   if(S2.size%2!==0){
     const arr2=[...S2].map(k=>k.split(',').map(Number));
     for(let i=arr2.length-1;i>=0;i--){
       const[c,r]=arr2[i];
-      if([[c+1,r],[c-1,r],[c,r+1],[c,r-1]].filter(([nc,nr])=>S2.has(`${nc},${nr}`)).length<=1)
-        {S2.delete(`${c},${r}`);break;}
+      if([[c+1,r],[c-1,r],[c,r+1],[c,r-1]].filter(([nc,nr])=>S2.has(`${nc},${nr}`)).length<=1){S2.delete(`${c},${r}`);break;}
+    }
+  }
+  // Apply irregularity: randomly add/remove edge cells
+  const _irreg=(typeof GCfg!=="undefined"?GCfg.irregularity:15)/100;
+  if(_irreg>0){
+    const cellArr=[...S2].map(k=>k.split(',').map(Number));
+    const dirs4=[[1,0],[-1,0],[0,1],[0,-1]];
+    // Add protrusions: cells adjacent to shape with 1 neighbour in shape
+    cellArr.forEach(([cc,rr])=>{
+      dirs4.forEach(([dx,dy])=>{
+        const nk=`${cc+dx},${rr+dy}`;
+        if(!S2.has(nk)&&Math.random()<_irreg*0.25){
+          const nbCount=dirs4.filter(([ex,ey])=>S2.has(`${cc+dx+ex},${rr+dy+ey}`)).length;
+          if(nbCount===1)S2.add(nk);
+        }
+      });
+    });
+    // Remove peninsulas: cells with only 1 neighbour (randomly)
+    [...S2].map(k=>k.split(',').map(Number)).forEach(([cc,rr])=>{
+      const nb=dirs4.filter(([dx,dy])=>S2.has(`${cc+dx},${rr+dy}`)).length;
+      if(nb===1&&Math.random()<_irreg*0.2)S2.delete(`${cc},${rr}`);
+    });
+    if(S2.size%2!==0){
+      const a=[...S2].map(k=>k.split(',').map(Number));
+      for(let i=a.length-1;i>=0;i--){
+        const[cc,rr]=a[i];
+        if(dirs4.filter(([dx,dy])=>S2.has(`${cc+dx},${rr+dy}`)).length<=1){S2.delete(`${cc},${rr}`);break;}
+      }
     }
   }
   const cells=[...S2].map(k=>k.split(',').map(Number));
   if(cells.length<6)return null;
   const cols=Math.max(...cells.map(([c])=>c))+1;
   const rows=Math.max(...cells.map(([,r])=>r))+1;
-  // Reject shapes that fill too much of their bounding box (too blob-like)
-  // Structured shapes should leave at least 20% of bbox empty
+  // Strict tubular check — reject anything too filled
   const bboxFill=cells.length/(cols*rows);
-  if(bboxFill>0.88&&cells.length>12)return null;
+  if(bboxFill>(typeof GCfg!=="undefined"?GCfg.bboxFill:62)/100&&cells.length>10)return null;
   return{cells,cols,rows};
 }
 
-/* 1. PIPE ──────────────────────────────────────────────
-   Horizontal (or vertical) main bar + branches at random positions. */
+function addRect(S,x,y,w,h){
+  for(let r=y;r<y+h;r++)for(let c=x;c<x+w;c++)if(c>=0&&r>=0)S.add(`${c},${r}`);
+}
+
+/* ═══════════════════════════════════════════════════════
+   SHAPE GENERATORS — thin tubular NYT-style shapes
+   Key principle: arms are 1 cell wide (rarely 2), shapes
+   look like bent pipes, L/T/H letters, zigzags.
+═══════════════════════════════════════════════════════ */
+
+/* Core: true self-avoiding walk — stays 1 cell wide, avoids own proximity.
+   This is the main building block for all tubular shapes. */
+function sawPath(W,H,target,rng){
+  const S=new Set();
+  const dirs=[[1,0],[-1,0],[0,1],[0,-1]];
+  // Start near an edge to encourage long paths
+  let x=rInt(0,Math.min(2,W-1),rng), y=rInt(0,Math.min(2,H-1),rng);
+  S.add(`${x},${y}`);
+  let lastDx=0,lastDy=0;
+
+  for(let step=0;step<target*6&&S.size<target;step++){
+    // Build candidate list: in-bounds, not visited, not adjacent to visited (except current)
+    const cands=[];
+    for(const[dx,dy]of dirs){
+      const nx=x+dx,ny=y+dy;
+      if(nx<0||ny<0||nx>=W||ny>=H||S.has(`${nx},${ny}`))continue;
+      // Check adjacency: count visited neighbours of (nx,ny) excluding current cell
+      const adjVisited=dirs.filter(([ex,ey])=>{
+        const ax=nx+ex,ay=ny+ey;
+        return(ax!==x||ay!==y)&&S.has(`${ax},${ay}`);
+      }).length;
+      if(adjVisited===0)cands.push([dx,dy,nx,ny]);
+    }
+    if(!cands.length)break;
+
+    // Prefer continuing same direction (momentum), then random
+    let chosen=null;
+    // momentum chance to continue same direction
+    const _mom=(typeof GCfg!=="undefined"?GCfg.momentum:65)/100;
+    if((lastDx||lastDy)&&rng()<_mom){
+      const fwd=cands.find(([dx,dy])=>dx===lastDx&&dy===lastDy);
+      if(fwd)chosen=fwd;
+    }
+    if(!chosen)chosen=cands[Math.floor(rng()*cands.length)];
+    const[dx,dy,nx,ny]=chosen;
+    x=nx;y=ny;lastDx=dx;lastDy=dy;
+    S.add(`${x},${y}`);
+
+    // bulge chance
+    const _bulge=(typeof GCfg!=="undefined"?GCfg.bulge:7)/100;
+    if(rng()<_bulge){
+      const perp=dirs.filter(([px,py])=>px!==-dx||py!==-dy);
+      for(const[px,py]of shu([...perp],rng)){
+        const bx=x+px,by=y+py;
+        if(bx>=0&&bx<W&&by>=0&&by<H&&!S.has(`${bx},${by}`)){
+          const adjB=dirs.filter(([ex,ey])=>{
+            const ax=bx+ex,ay=by+ey;
+            return(ax!==x||ay!==y)&&S.has(`${ax},${ay}`);
+          }).length;
+          if(adjB===0){S.add(`${bx},${by}`);break;}
+        }
+      }
+    }
+  }
+  return S;
+}
+
+/* 1. PIPE — single long winding tube, 1-wide */
 function shapePipe(diff,rng,maxC){
-  const horiz=rng()<0.6;
-  const W=horiz?rInt(5,9,rng):rInt(2,4,rng);
-  const H=horiz?rInt(2,5,rng):rInt(5,9,rng);
-  const barThick=rInt(1,2,rng);
-  const barMax=horiz?H-barThick-1:W-barThick-1;
-  if(barMax<1)return null;
-  const barPos=rInt(1,barMax,rng);
-  const S=new Set();
-  if(horiz) addRect(S,0,barPos,W,barThick);
-  else       addRect(S,barPos,0,barThick,H);
-  const nArms=rInt(2,4,rng);
-  const usedSlots=new Set();
-  for(let b=0;b<nArms;b++){
-    const slotMax=horiz?W-1:H-1;
-    let slot,t=0;
-    do{slot=rInt(0,slotMax-1,rng);t++;}while(usedSlots.has(slot)&&t<20);
-    usedSlots.add(slot);
-    const armThick=rng()<0.2?2:1;
-    const goNeg=rng()<0.5;
-    if(horiz){
-      if(goNeg&&barPos>0)       addRect(S,slot,barPos-rInt(1,barPos,rng),armThick,rInt(1,barPos,rng));
-      else if(barPos+barThick<H) addRect(S,slot,barPos+barThick,armThick,rInt(1,H-barPos-barThick,rng));
-    } else {
-      if(goNeg&&barPos>0)       addRect(S,barPos-rInt(1,barPos,rng),slot,rInt(1,barPos,rng),armThick);
-      else if(barPos+barThick<W) addRect(S,barPos+barThick,slot,rInt(1,W-barPos-barThick,rng),armThick);
-    }
-  }
-  return finishShape(S,maxC);
+  const szByDiff={easy:[6,8,4,6],med:[7,10,6,9],hard:[8,12,8,12]}[diff]||[7,10,6,9];
+  const W=rInt(szByDiff[0],szByDiff[1],rng);
+  const H=rInt(szByDiff[2],szByDiff[3],rng);
+  const _mul=(typeof GCfg!=="undefined"?GCfg.pathMul:130)/100;
+  const target=Math.min(maxC,Math.max(8,Math.round((W+H)*_mul)));
+  return finishShape(sawPath(W,H,target,rng),maxC);
 }
 
-/* 2. FRAME ─────────────────────────────────────────────
-   Top bar + two side columns. Bracket/U shapes. */
+/* 2. FRAME — hollow rectangle, 1-wide walls, open on one side */
 function shapeFrame(diff,rng,maxC){
-  const W=rInt(4,8,rng), H=rInt(4,8,rng);
-  const colW=rInt(1,2,rng);
-  const topH=rInt(1,2,rng);
+  const szByDiff={easy:[5,7,4,6],med:[6,9,5,9],hard:[7,11,7,12]}[diff]||[6,9,5,9];
+  const W=rInt(szByDiff[0],szByDiff[1],rng);
+  const H=rInt(szByDiff[2],szByDiff[3],rng);
   const S=new Set();
-  addRect(S,0,0,W,topH);
-  addRect(S,0,topH,colW,H-topH);
-  addRect(S,W-colW,topH,colW,H-topH);
-  if(rng()<0.4&&H>4){const midR=rInt(topH+1,H-2,rng);addRect(S,0,midR,W,1);}
-  if(rng()<0.3){addRect(S,0,H-1,W,1);}
+  const open=Math.floor(rng()*4); // which side is open
+  if(open!==0)addRect(S,0,0,W,1);        // top
+  if(open!==1)addRect(S,0,H-1,W,1);      // bottom
+  if(open!==2)addRect(S,0,1,1,H-2);      // left
+  if(open!==3)addRect(S,W-1,1,1,H-2);    // right
+  // Always draw closed sides
+  if(open===0){addRect(S,0,0,W,1);}
+  // Add 1-2 internal horizontal bars
+  const nBars=rInt(0,2,rng);
+  for(let b=0;b<nBars;b++){
+    const barY=rInt(2,H-3,rng);
+    const barX=rInt(1,Math.floor(W/3),rng);
+    const barW=rInt(Math.floor(W/3),W-barX-1,rng);
+    addRect(S,barX,barY,barW,1);
+  }
   return finishShape(S,maxC);
 }
 
-/* 3. CROSS ─────────────────────────────────────────────
-   Two bars crossing at offset. */
+/* 3. CROSS / PLUS — 1-wide arms, asymmetric offsets */
 function shapeCross(diff,rng,maxC){
-  const W=rInt(4,9,rng), H=rInt(4,8,rng);
-  if(H<4||W<4)return null;
-  const hRow=rInt(1,H-3,rng), hH=rInt(1,2,rng);
-  const vCol=rInt(1,W-3,rng), vW=rInt(1,2,rng);
+  const szByDiff={easy:[5,7,4,6],med:[6,9,6,9],hard:[7,11,7,12]}[diff]||[6,9,6,9];
+  const W=rInt(szByDiff[0],szByDiff[1],rng);
+  const H=rInt(szByDiff[2],szByDiff[3],rng);
   const S=new Set();
-  addRect(S,0,hRow,W,hH);
-  addRect(S,vCol,0,vW,H);
+  // Horizontal bar: 1 high, at random vertical position
+  const _mal=typeof GCfg!=='undefined'?GCfg.minArmLen:2;
+  const hY=rInt(1,H-2,rng);
+  addRect(S,0,hY,W,1);
+  const vX=rInt(1,W-2,rng);
+  addRect(S,vX,0,1,H);
+  // Optional: second arm (T or H shape)
+  if(rng()<0.4){
+    const vX2=rInt(Math.min(vX+2,W-2),W-1,rng);
+    if(vX2!==vX)addRect(S,vX2,rInt(0,hY-1,rng),1,rInt(hY,H,rng));
+  }
   return finishShape(S,maxC);
 }
 
-/* 4. COMB ──────────────────────────────────────────────
-   Spine + teeth. */
+/* 4. COMB — horizontal spine + vertical teeth, 1-wide */
 function shapeComb(diff,rng,maxC){
-  const W=rInt(5,9,rng), H=rInt(3,6,rng);
-  const spineH=rInt(1,2,rng);
+  const szByDiff={easy:[5,7,3,5],med:[6,9,4,7],hard:[7,11,5,9]}[diff]||[6,9,4,7];
+  const W=rInt(szByDiff[0],szByDiff[1],rng);
+  const H=rInt(szByDiff[2],szByDiff[3],rng);
+  const S=new Set();
   const atTop=rng()<0.5;
-  const toothLen=Math.max(1,rInt(1,H-spineH,rng));
+  const spineY=atTop?0:H-1;
+  addRect(S,0,spineY,W,1); // spine
   const gap=rInt(1,2,rng);
-  const S=new Set();
-  const spineRow=atTop?0:H-spineH;
-  addRect(S,0,spineRow,W,spineH);
+  const _mal2=typeof GCfg!=='undefined'?GCfg.minArmLen:2;
   for(let c=0;c<W;c+=1+gap){
-    if(atTop) addRect(S,c,spineH,1,toothLen);
-    else       addRect(S,c,H-spineH-toothLen,1,toothLen);
+    const toothLen=rInt(_mal2,H-1,rng);
+    if(atTop)addRect(S,c,1,1,toothLen);
+    else addRect(S,c,H-1-toothLen,1,toothLen);
   }
   return finishShape(S,maxC);
 }
 
-/* 5. SNAKE ─────────────────────────────────────────────
-   Alternating segments connected at ends. */
+/* 5. SNAKE — true alternating zigzag, 1-wide horizontal segments */
 function shapeSnake(diff,rng,maxC){
-  const segLen=rInt(3,6,rng), segH=rInt(1,2,rng), nSegs=rInt(3,5,rng);
+  const szByDiff={easy:[4,6,4,6],med:[5,8,5,9],hard:[6,10,7,12]}[diff]||[5,8,5,9];
+  const W=rInt(szByDiff[0],szByDiff[1],rng);
+  const H=rInt(szByDiff[2],szByDiff[3],rng);
   const S=new Set();
-  let x=0,y=0;
-  for(let s=0;s<nSegs;s++){
-    const W2=segLen+rInt(0,2,rng);
-    addRect(S,x,y,W2,segH);
-    if(s<nSegs-1){
-      const atRight=(s%2===0);
-      const connX=atRight?x+W2-1:x;
-      const connH=rInt(1,3,rng);
-      addRect(S,connX,y+segH,1,connH);
-      y+=segH+connH;
-      x=atRight?Math.max(0,connX-rInt(segLen-2,segLen,rng)+1):connX;
+  // Zigzag: alternating horizontal bars connected by 1-wide verticals
+  let y=0;
+  let goRight=rng()<0.5;
+  while(y<H){
+    // horizontal segment, width varies
+    const segW=rInt(Math.floor(W*0.5),W,rng);
+    const segX=goRight?0:W-segW;
+    addRect(S,segX,y,segW,1);
+    y++;
+    if(y>=H)break;
+    // vertical connector: 1 cell wide on the far end
+    const connH=rInt(1,Math.min(3,H-y-1),rng);
+    if(connH>0){
+      const connX=goRight?segX+segW-1:segX;
+      addRect(S,connX,y,1,connH);
+      y+=connH;
     }
+    goRight=!goRight;
   }
   return finishShape(S,maxC);
 }
 
-/* 6. STAIRCASE ──────────────────────────────────────────
-   Diagonal descending steps. */
+/* 6. STAIR — diagonal L-shaped steps going down */
 function shapeStair(diff,rng,maxC){
-  const steps=rInt(3,4,rng), sw=rInt(2,3,rng), sh=rInt(2,3,rng);
+  const szByDiff={easy:[4,6,4,6],med:[5,8,5,9],hard:[6,10,7,12]}[diff]||[5,8,5,9];
+  const W=rInt(szByDiff[0],szByDiff[1],rng);
+  const H=rInt(szByDiff[2],szByDiff[3],rng);
   const S=new Set();
-  for(let s=0;s<steps;s++) addRect(S,s*sw,s*sh,(steps-s)*sw,sh);
+  const steps=rInt(3,5,rng);
+  const sw=Math.max(1,Math.floor(W/steps));
+  const sh=Math.max(1,Math.floor(H/steps));
+  for(let s=0;s<steps;s++){
+    // Horizontal part of step
+    const x=s*sw, y=s*sh;
+    const stepW=Math.max(1,(steps-s)*sw);
+    addRect(S,x,y,stepW,1);
+    // Vertical connector to next step
+    if(s<steps-1) addRect(S,x+stepW-1,y,1,sh+1);
+  }
   return finishShape(S,maxC);
 }
 
-/* 7. BLOB ───────────────────────────────────────────────
-   Organic BFS — capped at maxCells. */
-function shapeBlob(diff,rng,maxC){
-  const szByDiff={easy:[4,6,2,4],med:[5,7,3,5],hard:[5,8,4,6]}[diff]||[5,7,3,5];
-  const cols=rInt(szByDiff[0],szByDiff[1],rng), rows=rInt(szByDiff[2],szByDiff[3],rng);
-  const density={easy:.75,med:.65,hard:.58}[diff]||.65;
-  let target=Math.floor(cols*rows*density);if(target%2!==0)target--;
-  if(target<6)return null;
-  const active=new Set(),front=[];
-  const sc=Math.floor(cols/2),sr=Math.floor(rows/2);
-  active.add(`${sc},${sr}`);front.push([sc,sr]);
-  while(active.size<target&&front.length){
-    const idx=Math.floor(rng()*Math.min(front.length,5));
-    const[c,r]=front.splice(idx,1)[0];
-    const nbrs=[[c+1,r],[c-1,r],[c,r+1],[c,r-1]].filter(([nc,nr])=>nc>=0&&nc<cols&&nr>=0&&nr<rows&&!active.has(`${nc},${nr}`));
-    shu(nbrs,rng);for(const nb of nbrs){if(active.size>=target)break;active.add(`${nb[0]},${nb[1]}`);front.push(nb);}
+/* 7. L-SHAPE — L/J/S/Z tetromino-style, scaled up, asymmetric */
+function shapeL(diff,rng,maxC){
+  const szByDiff={easy:[4,6,4,6],med:[5,8,5,9],hard:[6,10,7,12]}[diff]||[5,8,5,9];
+  const W=rInt(szByDiff[0],szByDiff[1],rng);
+  const H=rInt(szByDiff[2],szByDiff[3],rng);
+  const S=new Set();
+  // Pick rotation
+  const rot=Math.floor(rng()*4);
+  // Vertical spine + horizontal foot
+  if(rot===0){        // L
+    addRect(S,0,0,1,H);
+    addRect(S,1,H-1,W-1,1);
+  } else if(rot===1){ // J
+    addRect(S,W-1,0,1,H);
+    addRect(S,0,H-1,W-1,1);
+  } else if(rot===2){ // reverse L (Γ)
+    addRect(S,0,0,1,H);
+    addRect(S,1,0,W-1,1);
+  } else {            // reverse J
+    addRect(S,W-1,0,1,H);
+    addRect(S,0,0,W-1,1);
   }
-  return finishShape(active,maxC);
+  // Optional middle cross-bar (makes it T/H)
+  if(rng()<0.45){
+    const barY=rInt(1,H-2,rng);
+    const barX=rInt(1,Math.floor(W/2),rng);
+    const barW=rInt(Math.floor(W/2),W-barX,rng);
+    addRect(S,barX,barY,barW,1);
+  }
+  return finishShape(S,maxC);
+}
+
+/* 8. TUBE — long meandering path, thicker than 1 in occasional spots */
+function shapeTube(diff,rng,maxC){
+  const szByDiff={easy:[5,7,4,6],med:[6,9,6,9],hard:[7,11,8,12]}[diff]||[6,9,6,9];
+  const W=rInt(szByDiff[0],szByDiff[1],rng);
+  const H=rInt(szByDiff[2],szByDiff[3],rng);
+  const _mul2=(typeof GCfg!=="undefined"?GCfg.pathMul:130)/100;
+  const target=Math.min(maxC,Math.max(8,Math.round((W+H)*_mul2)));
+  return finishShape(sawPath(W,H,target,rng),maxC);
 }
 
 /* ── Cell limits per difficulty ── */
-const MAX_CELLS={easy:14,med:22,hard:30};
-const MAX_COLS={easy:9,med:11,hard:13};
-const MAX_ROWS={easy:7,med:9,hard:11};
+const MAX_CELLS={easy:16,med:26,hard:38};
+const MAX_COLS={easy:8,med:10,hard:12};
+const MAX_ROWS={easy:7,med:10,hard:13};
 
-/* ── Main entry: pick archetype, retry until valid ── */
+/* ── Main entry ── */
+const SHAPE_FNS={Pipe:shapePipe,Frame:shapeFrame,Cross:shapeCross,Comb:shapeComb,Snake:shapeSnake,Stair:shapeStair,L:shapeL,Tube:shapeTube};
+
 function genPuzzle(diff,rng){
-  const maxC=MAX_CELLS[diff]||22;
-  const maxCols=MAX_COLS[diff]||11;
-  const maxRows=MAX_ROWS[diff]||9;
-  const fns=[shapePipe,shapeFrame,shapeCross,shapeComb,shapeSnake,shapeStair,shapeBlob];
-  for(let attempt=0;attempt<120;attempt++){
+  const cfg=typeof GCfg!=='undefined'?GCfg:null;
+  const maxC=(cfg?cfg.maxCells[diff]:null)||MAX_CELLS[diff]||26;
+  const maxCols=MAX_COLS[diff]||10;
+  const maxRows=MAX_ROWS[diff]||10;
+  // Build weighted function list from config
+  const fns=[];
+  const weights=cfg?cfg.shapeWeights:{Pipe:2,Frame:1,Cross:1,Comb:1,Snake:1,Stair:1,L:1,Tube:2};
+  Object.entries(weights).forEach(([name,w])=>{
+    const fn=SHAPE_FNS[name];
+    if(fn&&w>0)for(let i=0;i<w;i++)fns.push(fn);
+  });
+  if(!fns.length)fns.push(shapePipe,shapeTube);
+  for(let attempt=0;attempt<150;attempt++){
     const fn=fns[Math.floor(rng()*fns.length)];
     const sh=fn(diff,rng,maxC);
     if(!sh||sh.cells.length<6||sh.cells.length%2!==0)continue;
@@ -682,10 +912,11 @@ function genPuzzle(diff,rng){
   }
   return buildPuzzle(allC(4,3),4,3,rng)||TUTORIAL[0];
 }
-
 function buildPuzzle(ac,cols,rows,rng){
   const setA=new Set(ac.map(([c,r])=>`${c},${r}`));
   const sorted=[...ac].sort((a,b)=>a[1]!==b[1]?a[1]-b[1]:a[0]-b[0]);
+
+  /* ── 1. TILE the shape into dominoes ── */
   const tOf={},placed=[];
   function tile(i){
     if(i>=sorted.length)return true;
@@ -700,139 +931,250 @@ function buildPuzzle(ac,cols,rows,rng){
     return false;
   }
   if(!tile(0))return null;
-
-  /* ── Zone BFS: small zones, 2–4 cells each ─────────────────
-     Target ~n/2 zones so each zone ≈ 1 domino (2 cells).
-     Cap at 5 zones for readability. */
   const nDom=placed.length;
-  const zCount=Math.max(2,Math.min(5,Math.round(ac.length/3)));
-  const zOf={};const sh2=shu([...ac],rng);const seeds=[];
-  for(const cell of sh2){
+
+  /* ── 2. CROSS-CUTTING ZONES ───────────────────────────────────
+     Key insight from reference game: zones cut ACROSS domino boundaries.
+     Strategy:
+       a) Pick zCount seeds — one per "domino boundary" area
+       b) Grow zones via BFS but PREFER adding a cell whose domino-partner
+          is in a DIFFERENT zone (forces cross-cutting)
+       c) All cells must be covered — no leftovers
+     Zone sizes: 3-6 cells. zCount scales with puzzle size. */
+
+  const n=ac.length;
+  // More zones for harder puzzles — each zone 3-5 cells ideally
+  const _zdiv=typeof GCfg!=="undefined"?GCfg.zonediv:4;
+  const zCount=Math.max(3,Math.min(8,Math.round(n/_zdiv)));
+
+  /* Seed selection: pick seeds that are domino-BOUNDARY cells —
+     i.e. cells where the partner would be in a different Voronoi region.
+     Simple proxy: pick seeds spread apart by ≥2, avoid being both halves of same domino. */
+  const shuffledAC=shu([...ac],rng);
+  const seeds=[];
+  for(const cell of shuffledAC){
     if(seeds.length>=zCount)break;
-    if(seeds.every(s=>Math.abs(s[0]-cell[0])+Math.abs(s[1]-cell[1])>=3))seeds.push(cell);
+    const minDist=seeds.reduce((m,s)=>Math.min(m,Math.abs(s[0]-cell[0])+Math.abs(s[1]-cell[1])),999);
+    if(minDist>=2)seeds.push(cell);
   }
+  // Fallback: just take first zCount if spacing failed
+  if(seeds.length<2){for(const cell of shuffledAC){if(seeds.length>=zCount)break;if(!seeds.some(s=>s[0]===cell[0]&&s[1]===cell[1]))seeds.push(cell);}}
   if(seeds.length<2)return null;
-  seeds.forEach(([c,r],i)=>{zOf[`${c},${r}`]=i;});
-  const q=seeds.map(([c,r],i)=>({c,r,z:i}));let bi=0;
-  while(bi<q.length){
-    const{c,r,z}=q[bi++];
-    for(const[nc,nr]of[[c+1,r],[c-1,r],[c,r+1],[c,r-1]]){
-      const k2=`${nc},${nr}`;
-      if(setA.has(k2)&&zOf[k2]===undefined){zOf[k2]=z;q.push({c:nc,r:nr,z});}
+
+  /* BFS with cross-cutting preference:
+     Each cell in the queue carries a score.
+     When expanding, we prefer cells whose domino-partner is already in a DIFFERENT zone. */
+  const zOf={};
+  seeds.forEach(([c,r],i)=>zOf[`${c},${r}`]=i);
+
+  // Priority queue via simple repeated pass (small grids, OK perf)
+  // Grow zones round-robin to keep sizes balanced
+  const fronts=seeds.map(([c,r],i)=>[[c,r]]);
+  let changed=true;
+  while(changed){
+    changed=false;
+    for(let zi=0;zi<seeds.length;zi++){
+      if(!fronts[zi].length)continue;
+      // Find best candidate: prefer one whose partner is in different zone
+      let bestIdx=0,bestScore=-1;
+      for(let fi=0;fi<fronts[zi].length;fi++){
+        const[fc,fr]=fronts[zi][fi];
+        // Check neighbors
+        for(const[nc,nr]of[[fc+1,fr],[fc-1,fr],[fc,fr+1],[fc,fr-1]]){
+          const nk=`${nc},${nr}`;
+          if(!setA.has(nk)||zOf[nk]!==undefined)continue;
+          // Score: +2 if this cell's domino-partner is already in a different zone
+          const partnerDi=tOf[nk];
+          const[[pc1,pr1],[pc2,pr2]]=placed[partnerDi];
+          const partnerKey=`${nk}`===`${pc1},${pr1}`?`${pc2},${pr2}`:`${pc1},${pr1}`;
+          const partnerZ=zOf[partnerKey];
+          const _bias=typeof GCfg!=="undefined"?GCfg.crossBias:2;
+          const score=(partnerZ!==undefined&&partnerZ!==zi)?_bias:0;
+          if(score>bestScore){bestScore=score;bestIdx=fi;}
+        }
+      }
+      const[fc,fr]=fronts[zi][bestIdx];
+      let added=false;
+      // Shuffle neighbors for variety
+      for(const[nc,nr]of shu([[fc+1,fr],[fc-1,fr],[fc,fr+1],[fc,fr-1]],rng)){
+        const nk=`${nc},${nr}`;
+        if(!setA.has(nk)||zOf[nk]!==undefined)continue;
+        zOf[nk]=zi;fronts[zi].push([nc,nr]);added=true;changed=true;break;
+      }
+      if(!added)fronts[zi].splice(bestIdx,1);
     }
   }
-  ac.forEach(([c,r])=>{if(zOf[`${c},${r}`]===undefined)zOf[`${c},${r}`]=0;});
+  // Assign any leftover cells (disconnected) to nearest seed zone
+  for(const[c,r]of ac){
+    if(zOf[`${c},${r}`]!==undefined)continue;
+    let bestZ=0,bestD=999;
+    seeds.forEach(([sc,sr],i)=>{const d=Math.abs(sc-c)+Math.abs(sr-r);if(d<bestD){bestD=d;bestZ=i;}});
+    zOf[`${c},${r}`]=bestZ;
+  }
 
-  /* ── Collect zone cells ── */
-  const rCells=Array.from({length:zCount},()=>[]);
+  /* ── 3. COLLECT zone cell lists ── */
+  const rCells=Array.from({length:seeds.length},()=>[]);
   ac.forEach(([c,r])=>rCells[zOf[`${c},${r}`]].push([c,r]));
 
-  /* ── Helper: set pip value for a cell ── */
-  const dVals=placed.map(()=>[0,0]);
-  function setCell(c,r,v){
-    const di=tOf[`${c},${r}`];const[[c0,r0]]=placed[di];
-    dVals[di][(c===c0&&r===r0)?0:1]=v;
-  }
-  function getCell(c,r){
+  /* ── 4. ASSIGN PIP VALUES via CSP backtracking ────────────────
+     Variables: each domino di → value pair (a,b) where a,b ∈ 0..5
+     For each zone, we pick a rule type FIRST (based on zone size and
+     cross-domino ratio), then use backtracking to assign pip values
+     to cells so that the rule is satisfied.
+
+     Cross-domino ratio for a zone = fraction of dominos that are SPLIT
+     (one cell in this zone, other cell in different zone).
+     High cross-domino ratio → use SUM rule (most constraining for splits)
+     All-internal dominos → use EQ or NEQ (constrains orientation less but
+     still forces correct domino selection)
+  */
+  const dVals=placed.map(()=>[-1,-1]); // -1 = unassigned
+
+  function getCellVal(c,r){
     const di=tOf[`${c},${r}`];const[[c0,r0]]=placed[di];
     return dVals[di][(c===c0&&r===r0)?0:1];
   }
-
-  /* ── Assign pip values + rules together ─────────────────────
-     Rule distribution (target): 30% eq · 20% neq · 25% sum · 12.5% gt · 12.5% lt
-     We pick the rule FIRST then set values to match. */
-  const RULE_WEIGHTS=[
-    {type:'eq',  w:30},
-    {type:'neq', w:20},
-    {type:'sum', w:25},
-    {type:'gt',  w:12},
-    {type:'lt',  w:13},
-  ];
-  function pickType(){
-    const total=RULE_WEIGHTS.reduce((s,x)=>s+x.w,0);
-    let r2=rng()*total;
-    for(const{type,w}of RULE_WEIGHTS){r2-=w;if(r2<=0)return type;}
-    return'sum';
+  function setCellVal(c,r,v){
+    const di=tOf[`${c},${r}`];const[[c0,r0]]=placed[di];
+    dVals[di][(c===c0&&r===r0)?0:1]=v;
   }
 
-  const regions=[];
-  for(const cells of rCells){
-    if(cells.length<2)continue;
-    // Use all zone cells — no artificial cap
-    const zoneCells=cells;
-    const n=zoneCells.length;
-    const type=pickType();
+  /* Compute per-zone metadata */
+  const zonesMeta=rCells.map((cells,zi)=>{
+    if(cells.length<2)return null;
+    // Count split dominoes
+    let splits=0;
+    const domSet=new Set(cells.map(([c,r])=>tOf[`${c},${r}`]));
+    domSet.forEach(di=>{
+      const[[c1,r1],[c2,r2]]=placed[di];
+      const inZone1=cells.some(([c,r])=>c===c1&&r===r1);
+      const inZone2=cells.some(([c,r])=>c===c2&&r===r2);
+      if(inZone1&&!inZone2||!inZone1&&inZone2)splits++;
+    });
+    return{cells,zi,splits,domCount:domSet.size};
+  }).filter(Boolean);
 
-    if(type==='eq'){
-      const v=rInt(1,5,rng);
-      zoneCells.forEach(([c,r])=>setCell(c,r,v));
-      regions.push({rule:{type:'eq'},cells:zoneCells});
+  if(zonesMeta.length<2)return null;
 
-    } else if(type==='neq'){
-      // neq needs all distinct — only feasible for ≤6 cells (values 0-5)
-      if(n>6){
-        // fallback to sum for large zones
-        const minS=n*1, maxS=n*4, target=rInt(minS,maxS,rng);
-        let rem=target;
-        zoneCells.forEach(([c,r],i)=>{
-          const left=n-i-1;
-          const lo=Math.max(0,rem-left*5),hi=Math.min(5,rem);
-          const v=rInt(lo,hi,rng);setCell(c,r,v);rem-=v;
-        });
-        const realSum=zoneCells.reduce((a,[c,r])=>a+getCell(c,r),0);
-        regions.push({rule:{type:'sum',v:realSum},cells:zoneCells});
-      } else {
-        const pool=shu([0,1,2,3,4,5].slice(0,Math.max(n,4)),rng).slice(0,n);
-        zoneCells.forEach(([c,r],i)=>setCell(c,r,pool[i]));
-        regions.push({rule:{type:'neq'},cells:zoneCells});
-      }
-
-    } else if(type==='sum'){
-      const minS=n*1, maxS=n*4;
-      const target=rInt(minS,maxS,rng);
-      let rem=target;
-      zoneCells.forEach(([c,r],i)=>{
-        const left=n-i-1;
-        const lo=Math.max(0,rem-left*5),hi=Math.min(5,rem);
-        const v=rInt(lo,hi,rng);setCell(c,r,v);rem-=v;
-      });
-      const realSum=zoneCells.reduce((a,[c,r])=>a+getCell(c,r),0);
-      regions.push({rule:{type:'sum',v:realSum},cells:zoneCells});
-
-    } else if(type==='gt'){
-      const target=rInt(Math.max(1,n*1),n*4,rng);
-      let rem=target;
-      zoneCells.forEach(([c,r],i)=>{
-        const left=n-i-1;
-        const lo=Math.max(0,rem-left*5),hi=Math.min(5,rem);
-        const v=rInt(lo,hi,rng);setCell(c,r,v);rem-=v;
-      });
-      const realSum=zoneCells.reduce((a,[c,r])=>a+getCell(c,r),0);
-      const thresh=Math.max(0,realSum-rInt(1,2,rng));
-      regions.push({rule:{type:'gt',v:thresh},cells:zoneCells});
-
-    } else { // lt
-      const target=rInt(n*1,n*4,rng);
-      let rem=target;
-      zoneCells.forEach(([c,r],i)=>{
-        const left=n-i-1;
-        const lo=Math.max(0,rem-left*5),hi=Math.min(5,rem);
-        const v=rInt(lo,hi,rng);setCell(c,r,v);rem-=v;
-      });
-      const realSum=zoneCells.reduce((a,[c,r])=>a+getCell(c,r),0);
-      const thresh=Math.min(n*5,realSum+rInt(1,2,rng));
-      regions.push({rule:{type:'lt',v:thresh},cells:zoneCells});
+  /* Choose rule types — harder rules for zones with more splits */
+  function chooseRuleType(meta,diff_hint){
+    const splitRatio=meta.splits/meta.domCount;
+    const n=meta.cells.length;
+    const r=rng();
+    if(splitRatio>0.5){
+      // Mostly-split zone: SUM is king — forces exact values across boundary
+      if(r<0.60)return'sum';
+      if(r<0.80)return'gt';
+      return'lt';
+    } else {
+      // Mostly-internal zone: EQ/NEQ/SUM
+      if(r<0.35)return'eq';
+      if(r<0.55)return'neq';
+      if(r<0.80)return'sum';
+      if(r<0.90)return'gt';
+      return'lt';
     }
   }
-  if(regions.length<2)return null;
 
-  // Fill any remaining cells not covered by a region with random values
-  const coveredCells=new Set(regions.flatMap(r=>r.cells).map(([c,r])=>`${c},${r}`));
+  /* Assign pip values zone by zone.
+     For each zone, we set values for all its cells to satisfy the chosen rule.
+     Cells already assigned (shared domino with previous zone) keep their value.
+     We use backtracking when a cell is already assigned and we need to satisfy a sum. */
+  const regions=[];
+
+  for(const meta of zonesMeta){
+    const{cells}=meta;
+    const n=cells.length;
+    const rtype=chooseRuleType(meta);
+
+    // Separate cells into: already-assigned vs free
+    const fixed=cells.filter(([c,r])=>getCellVal(c,r)!==-1);
+    const free=cells.filter(([c,r])=>getCellVal(c,r)===-1);
+    const fixedSum=fixed.reduce((s,[c,r])=>s+getCellVal(c,r),0);
+
+    if(rtype==='eq'){
+      // All cells must be equal. If some are fixed, use that value.
+      // If fixed cells conflict (different values), fallback to sum.
+      const fixedVals=fixed.map(([c,r])=>getCellVal(c,r));
+      const allSame=fixedVals.every(v=>v===fixedVals[0]);
+      if(fixed.length>0&&!allSame){
+        // Conflict — use sum instead
+        const total=fixedSum+free.length*rInt(0,4,rng);
+        let rem=Math.max(0,Math.min(n*5,total))-fixedSum;
+        free.forEach(([c,r],i)=>{const left=free.length-i-1;const lo=Math.max(0,rem-left*5),hi=Math.min(5,rem);const v=rInt(lo,hi,rng);setCellVal(c,r,v);rem-=v;});
+        const realSum=cells.reduce((s,[c,r])=>s+getCellVal(c,r),0);
+        regions.push({rule:{type:'sum',v:realSum},cells});
+      } else {
+        const v=fixed.length>0?fixedVals[0]:rInt(1,4,rng);
+        free.forEach(([c,r])=>setCellVal(c,r,v));
+        regions.push({rule:{type:'eq'},cells});
+      }
+
+    } else if(rtype==='neq'){
+      // All values distinct. Only works if n≤6 and fixed vals are already distinct.
+      const fixedVals=fixed.map(([c,r])=>getCellVal(c,r));
+      const fixedDistinct=new Set(fixedVals).size===fixedVals.length;
+      if(n<=6&&fixedDistinct){
+        const used=new Set(fixedVals);
+        const pool=shu([0,1,2,3,4,5].filter(v=>!used.has(v)),rng);
+        if(pool.length>=free.length){
+          free.forEach(([c,r],i)=>setCellVal(c,r,pool[i]));
+          regions.push({rule:{type:'neq'},cells});
+        } else {
+          // Not enough distinct values — use sum
+          let rem=rInt(fixedSum,fixedSum+free.length*4,rng)-fixedSum;
+          free.forEach(([c,r],i)=>{const left=free.length-i-1;const lo=Math.max(0,rem-left*5),hi=Math.min(5,rem);const v=rInt(lo,hi,rng);setCellVal(c,r,v);rem-=v;});
+          const realSum=cells.reduce((s,[c,r])=>s+getCellVal(c,r),0);
+          regions.push({rule:{type:'sum',v:realSum},cells});
+        }
+      } else {
+        // Fallback to sum
+        let rem=rInt(n,n*4,rng)-fixedSum;rem=Math.max(0,Math.min(free.length*5,rem));
+        free.forEach(([c,r],i)=>{const left=free.length-i-1;const lo=Math.max(0,rem-left*5),hi=Math.min(5,rem);const v=rInt(lo,hi,rng);setCellVal(c,r,v);rem-=v;});
+        const realSum=cells.reduce((s,[c,r])=>s+getCellVal(c,r),0);
+        regions.push({rule:{type:'sum',v:realSum},cells});
+      }
+
+    } else if(rtype==='sum'){
+      // Target sum — tight range to make it interesting
+      const minPossible=fixedSum;
+      const maxPossible=fixedSum+free.length*5;
+      // Pick target in middle range (not too easy, not impossible)
+      const lo=Math.max(minPossible,Math.floor(minPossible*0.4+maxPossible*0.6));
+      const hi=Math.min(maxPossible,Math.ceil(minPossible*0.6+maxPossible*0.4));
+      const target=rInt(Math.min(lo,hi),Math.max(lo,hi),rng);
+      let rem=target-fixedSum;
+      free.forEach(([c,r],i)=>{
+        const left=free.length-i-1;
+        const vlo=Math.max(0,rem-left*5),vhi=Math.min(5,rem);
+        const v=rInt(vlo,vhi,rng);setCellVal(c,r,v);rem-=v;
+      });
+      const realSum=cells.reduce((s,[c,r])=>s+getCellVal(c,r),0);
+      regions.push({rule:{type:'sum',v:realSum},cells});
+
+    } else if(rtype==='gt'){
+      let rem=rInt(Math.max(1,free.length),free.length*4,rng);
+      free.forEach(([c,r],i)=>{const left=free.length-i-1;const lo=Math.max(0,rem-left*5),hi=Math.min(5,rem);const v=rInt(lo,hi,rng);setCellVal(c,r,v);rem-=v;});
+      const realSum=cells.reduce((s,[c,r])=>s+getCellVal(c,r),0);
+      const thresh=Math.max(0,realSum-rInt(1,3,rng));
+      regions.push({rule:{type:'gt',v:thresh},cells});
+
+    } else { // lt
+      let rem=rInt(0,Math.max(0,free.length*3),rng);
+      free.forEach(([c,r],i)=>{const left=free.length-i-1;const lo=Math.max(0,rem-left*5),hi=Math.min(5,rem);const v=rInt(lo,hi,rng);setCellVal(c,r,v);rem-=v;});
+      const realSum=cells.reduce((s,[c,r])=>s+getCellVal(c,r),0);
+      const thresh=Math.min(n*5,realSum+rInt(1,3,rng));
+      regions.push({rule:{type:'lt',v:thresh},cells});
+    }
+  }
+
+  // Fill any still-unassigned cells (shouldn't happen but safety net)
   placed.forEach(([[c1,r1],[c2,r2]],di)=>{
-    if(!coveredCells.has(`${c1},${r1}`))dVals[di][0]=rInt(0,5,rng);
-    if(!coveredCells.has(`${c2},${r2}`))dVals[di][1]=rInt(0,5,rng);
+    if(dVals[di][0]===-1)dVals[di][0]=rInt(0,5,rng);
+    if(dVals[di][1]===-1)dVals[di][1]=rInt(0,5,rng);
   });
 
+  if(regions.length<2)return null;
   return{cols,rows,activeCells:ac.length===cols*rows?undefined:ac,dominoes:dVals,regions};
 }
 
@@ -1921,6 +2263,331 @@ function loadFromURL(){
 function shareBase(){
   return location.protocol+'//'+location.host+location.pathname;
 }
+
+
+
+/* ══════════════════════════════════════════
+   GENERATION CONFIG SYSTEM v2
+══════════════════════════════════════════ */
+
+const SHAPE_NAMES=['Pipe','Frame','Cross','Comb','Snake','Stair','L','Tube'];
+
+const PARAM_DEFS=[
+  {key:'bboxFill',   label:'Заполненность bbox', min:30,max:90, unit:'%',
+   tip:'Макс. % клеток от площади ограничивающего прямоугольника. 40% = тонкая труба, 80% = плотные блоки с выступами.'},
+  {key:'momentum',   label:'Импульс пути', min:0,max:95, unit:'%',
+   tip:'Вероятность продолжить прямо при случайном блуждании. 80% = прямые коридоры, 20% = хаотичный лабиринт.'},
+  {key:'bulge',      label:'Шанс утолщения', min:0,max:40, unit:'%',
+   tip:'Вероятность расширить трубу с 1 до 2 клеток в случайной точке. 0% = строгая труба, 30% = с утолщениями.'},
+  {key:'pathMul',    label:'Длина пути (×(W+H))', min:60,max:250, unit:'%',
+   tip:'Целевая длина маршрута относительно периметра поля. 100% = умеренно, 200% = длинный извилистый путь.'},
+  {key:'zonediv',    label:'Размер зон (÷N)', min:2,max:10, unit:'',
+   tip:'Количество зон = кол-во клеток ÷ N. Меньше = зоны крупнее и сложнее. 2 = мало больших зон, 8 = много мелких.'},
+  {key:'crossBias',  label:'Cross-cut bias', min:0,max:5, unit:'',
+   tip:'Насколько сильно зоны стараются разрезать домино пополам. 0 = зоны не учитывают домино, 5 = максимальное разрезание.'},
+  {key:'sawBacktrack', label:'Backtrack шанс', min:0,max:60, unit:'%',
+   tip:'При застревании — шанс вернуться назад и попробовать другое направление вместо случайного прыжка.'},
+  {key:'minArmLen',  label:'Мин. длина ответвления', min:1,max:6, unit:'кл',
+   tip:'Минимальная длина ответвлений в формах Pipe/Cross/Comb. Больше = длиннее "руки".'},
+  {key:'irregularity', label:'Нерегулярность', min:0,max:100, unit:'%',
+   tip:'Добавляет случайные выступы и впадины по краям формы. 0% = чёткие геометрические фигуры, 100% = максимально рваные края.'},
+];
+
+const CELL_PARAMS=[
+  {key:'easy', label:'Easy — макс. клеток', min:8,max:28, tip:'Максимальное количество клеток для лёгких уровней.'},
+  {key:'med',  label:'Med — макс. клеток',  min:14,max:44, tip:'Максимальное количество клеток для средних уровней.'},
+  {key:'hard', label:'Hard — макс. клеток', min:24,max:60, tip:'Максимальное количество клеток для сложных уровней.'},
+];
+
+const CFG_DEFAULT={
+  bboxFill:62, momentum:65, bulge:7, pathMul:130, zonediv:4,
+  crossBias:2, sawBacktrack:20, minArmLen:2, irregularity:15,
+  maxCells:{easy:16,med:26,hard:38},
+  shapeWeights:{Pipe:2,Frame:1,Cross:1,Comb:1,Snake:1,Stair:1,L:1,Tube:2},
+};
+
+const CFG_BUILTINS=[
+  {name:'DEFAULT', cfg:null},
+  {name:'TUBULAR',  cfg:{...CFG_DEFAULT, bboxFill:42, momentum:80, bulge:3, pathMul:170, irregularity:8,
+    shapeWeights:{Pipe:4,Frame:0,Cross:0,Comb:0,Snake:2,Stair:1,L:1,Tube:4}}},
+  {name:'BLOCKY',   cfg:{...CFG_DEFAULT, bboxFill:78, momentum:35, bulge:20, pathMul:85, zonediv:3,
+    shapeWeights:{Pipe:1,Frame:3,Cross:2,Comb:2,Snake:0,Stair:1,L:3,Tube:0}}},
+  {name:'MIXED',    cfg:{...CFG_DEFAULT, bboxFill:60, momentum:50, bulge:10, pathMul:120,
+    shapeWeights:{Pipe:1,Frame:1,Cross:1,Comb:2,Snake:2,Stair:2,L:2,Tube:1}}},
+  {name:'HARD+',    cfg:{...CFG_DEFAULT, bboxFill:58, momentum:60, pathMul:155, zonediv:3,
+    maxCells:{easy:22,med:36,hard:52}}},
+  {name:'NYT-LIKE', cfg:{...CFG_DEFAULT, bboxFill:55, momentum:60, bulge:12, pathMul:140,
+    zonediv:3, crossBias:3, irregularity:25,
+    shapeWeights:{Pipe:2,Frame:2,Cross:2,Comb:1,Snake:2,Stair:1,L:3,Tube:1}}},
+];
+
+let GCfg=JSON.parse(JSON.stringify(CFG_DEFAULT));
+let _cfgDiff='easy';
+let _cfgPreviewLv=null;
+
+function loadCfg(){
+  try{const s=localStorage.getItem('pips_gencfg');if(s){const p=JSON.parse(s);
+    GCfg={...JSON.parse(JSON.stringify(CFG_DEFAULT)),...p,
+      maxCells:{...CFG_DEFAULT.maxCells,...(p.maxCells||{})},
+      shapeWeights:{...CFG_DEFAULT.shapeWeights,...(p.shapeWeights||{})}};
+  }}catch(e){GCfg=JSON.parse(JSON.stringify(CFG_DEFAULT));}
+}
+function saveCfgStorage(){
+  try{localStorage.setItem('pips_gencfg',JSON.stringify(GCfg));}catch(e){}
+}
+
+function openCfgScreen(){
+  show('cfg-screen');
+  cfgRenderParams();
+  cfgRenderPresets();
+  cfgRegenPreview();
+}
+function closeCfgScreen(){show('menu');}
+function cfgApplyAndClose(){saveCfgStorage();show('menu');}
+
+function cfgSetDiff(d){
+  _cfgDiff=d;
+  ['easy','med','hard'].forEach(x=>$('cfg-d-'+x).classList.toggle('on',x===d));
+  cfgRegenPreview();
+}
+
+function cfgRenderParams(){
+  const el=$('cfg-params'); el.innerHTML='';
+
+  // Section: Shape
+  el.innerHTML+='<div class="cfg-section">Форма</div>';
+  PARAM_DEFS.forEach(p=>{
+    const val=p.key==='zonediv'||p.key==='minArmLen'||p.key==='crossBias'
+      ? GCfg[p.key]
+      : GCfg[p.key];
+    el.innerHTML+=`
+    <div class="cfg-row">
+      <span class="cfg-lbl" title="${p.tip}">${p.label}</span>
+      <input class="cfg-slider" type="range" min="${p.min}" max="${p.max}"
+        value="${val}" id="csl-${p.key}" oninput="cfgSlide('${p.key}')">
+      <span class="cfg-val" id="csv-${p.key}">${val}${p.unit}</span>
+      <span class="cfg-tooltip">${p.tip}</span>
+    </div>`;
+  });
+
+  // Section: Cell limits
+  el.innerHTML+='<div class="cfg-section">Лимиты клеток</div>';
+  CELL_PARAMS.forEach(p=>{
+    const val=GCfg.maxCells[p.key];
+    el.innerHTML+=`
+    <div class="cfg-row">
+      <span class="cfg-lbl" title="${p.tip}">${p.label}</span>
+      <input class="cfg-slider" type="range" min="${p.min}" max="${p.max}"
+        value="${val}" id="csl-mc-${p.key}" oninput="cfgSlide('mc-${p.key}')">
+      <span class="cfg-val" id="csv-mc-${p.key}">${val}</span>
+      <span class="cfg-tooltip">${p.tip}</span>
+    </div>`;
+  });
+
+  // Section: Shape weights
+  el.innerHTML+='<div class="cfg-section">Веса генераторов</div>';
+  el.innerHTML+='<div class="cfg-shapes-grid" id="cfg-sw-grid"></div>';
+  const grid=el.querySelector('#cfg-sw-grid');
+  SHAPE_NAMES.forEach(name=>{
+    const w=GCfg.shapeWeights[name]??1;
+    const row=document.createElement('div'); row.className='cfg-sw-row';
+    row.innerHTML=`<span class="cfg-sw-name">${name}</span>
+      <input class="cfg-sw-sl" type="range" min="0" max="5" value="${w}" id="csl-sw-${name}" oninput="cfgSlide('sw-${name}')">
+      <span class="cfg-sw-val" id="csv-sw-${name}">${w===0?'✗':w+'×'}</span>`;
+    grid.appendChild(row);
+  });
+}
+
+function cfgSlide(key){
+  let raw;
+  if(key.startsWith('sw-')){
+    const name=key.slice(3);
+    raw=+(document.getElementById('csl-'+key).value);
+    GCfg.shapeWeights[name]=raw;
+    document.getElementById('csv-'+key).textContent=raw===0?'✗':raw+'×';
+  } else if(key.startsWith('mc-')){
+    const diff=key.slice(3);
+    raw=+(document.getElementById('csl-'+key).value);
+    GCfg.maxCells[diff]=raw;
+    document.getElementById('csv-'+key).textContent=raw;
+  } else {
+    raw=+(document.getElementById('csl-'+key).value);
+    GCfg[key]=raw;
+    const pdef=PARAM_DEFS.find(p=>p.key===key);
+    document.getElementById('csv-'+key).textContent=raw+(pdef?pdef.unit:'');
+  }
+  // Debounced preview refresh
+  clearTimeout(cfgSlide._t);
+  cfgSlide._t=setTimeout(cfgRegenPreview,300);
+}
+
+function cfgRegenPreview(){
+  const rng=()=>Math.random();
+  _cfgPreviewLv=genPuzzle(_cfgDiff,rng);
+  cfgDrawPreview();
+}
+
+function cfgDrawPreview(){
+  const cv=$('cfg-canvas');
+  const ctx=cv.getContext('2d');
+  const W=cv.width, H=cv.height;
+  ctx.clearRect(0,0,W,H);
+  if(!_cfgPreviewLv){
+    ctx.fillStyle='#c04040';ctx.font='12px DM Mono';
+    ctx.fillText('Не удалось сгенерировать',10,H/2);return;
+  }
+  const lv=_cfgPreviewLv;
+  const cells=lv.activeCells||[];
+  const cols=lv.cols,rows=lv.rows;
+  const pad=8;
+  const cw=Math.floor((W-pad*2)/cols);
+  const ch=Math.floor((H-pad*2)/rows);
+  const cs=Math.min(cw,ch);
+  const ox=Math.floor((W-cs*cols)/2);
+  const oy=Math.floor((H-cs*rows)/2);
+
+  // Build cell set and zone map
+  const cellSet=new Set(cells.map(([c,r])=>`${c},${r}`));
+  const zoneMap={};
+  if(lv.regions){
+    lv.regions.forEach((reg,zi)=>{
+      reg.cells.forEach(([c,r])=>{zoneMap[`${c},${r}`]=zi;});
+    });
+  }
+
+  const ZC2=[
+    '#c8457a','#2f78c1','#2f9c50','#7a38c0','#c07028',
+    '#1a9c9c','#9c8c10','#c04040','#0078b4','#40a020'
+  ];
+  const ZCbg=[
+    'rgba(247,214,224,.7)','rgba(207,227,247,.7)','rgba(208,240,216,.7)',
+    'rgba(234,214,245,.7)','rgba(253,232,204,.7)','rgba(224,247,247,.7)',
+    'rgba(245,240,208,.7)','rgba(255,214,214,.7)','rgba(214,240,255,.7)',
+    'rgba(232,255,224,.7)'
+  ];
+
+  const m=2; // margin between cells
+  for(let r=0;r<rows;r++){
+    for(let col=0;col<cols;col++){
+      const k=`${col},${r}`;
+      const x=ox+col*cs, y=oy+r*cs;
+      const zi=zoneMap[k];
+      if(cells.length===0||cellSet.has(k)){
+        // Background
+        ctx.fillStyle=zi!==undefined?ZCbg[zi%ZCbg.length]:'rgba(245,239,227,.6)';
+        ctx.beginPath();ctx.roundRect(x+m,y+m,cs-m*2,cs-m*2,3);ctx.fill();
+        // Zone border
+        if(zi!==undefined){
+          ctx.strokeStyle=ZC2[zi%ZC2.length];ctx.lineWidth=1.5;
+          ctx.beginPath();ctx.roundRect(x+m,y+m,cs-m*2,cs-m*2,3);ctx.stroke();
+        }
+      } else {
+        // Empty cell (hole in shape)
+        ctx.fillStyle='rgba(8,5,3,.4)';
+        ctx.fillRect(x,y,cs,cs);
+      }
+    }
+  }
+
+  // Draw zone labels
+  if(lv.regions){
+    lv.regions.forEach((reg,zi)=>{
+      // Find center-most cell
+      const cs2=reg.cells;
+      if(!cs2.length)return;
+      const mc=cs2[Math.floor(cs2.length/2)];
+      const x=ox+mc[0]*cs+cs/2, y=oy+mc[1]*cs+cs/2;
+      const label=rS(reg.rule);
+      if(!label)return;
+      ctx.font=`bold ${Math.max(7,Math.min(11,cs*0.45))}px DM Mono`;
+      ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillStyle='rgba(8,5,3,.7)';
+      ctx.fillText(label,x+1,y+1);
+      ctx.fillStyle=ZC2[zi%ZC2.length];
+      ctx.fillText(label,x,y);
+    });
+  }
+
+  // Stats
+  const ncells=cells.length||cols*rows;
+  const nzones=lv.regions?lv.regions.length:0;
+  $('cfg-stats').innerHTML=
+    `${cols}×${rows} · ${ncells} клеток · ${lv.dominoes?lv.dominoes.length:0} домино · ${nzones} зон`;
+}
+
+function cfgRenderPresets(){
+  const el=$('cfg-presets-list'); el.innerHTML='';
+  const savedName=localStorage.getItem('pips_cfg_active')||'DEFAULT';
+  CFG_BUILTINS.forEach(p=>{
+    const btn=document.createElement('button');
+    btn.className='cfg-preset'+(p.name===savedName?' on':'');
+    btn.textContent=p.name;
+    btn.onclick=()=>cfgLoadPreset(p.name, p.cfg||CFG_DEFAULT);
+    el.appendChild(btn);
+  });
+  // User presets
+  let up=[];try{up=JSON.parse(localStorage.getItem('pips_user_presets')||'[]');}catch(e){}
+  up.forEach((p,i)=>{
+    const btn=document.createElement('button');
+    btn.className='cfg-preset user'+(p.name===savedName?' on':'');
+    btn.textContent=p.name;
+    btn.onclick=()=>cfgLoadPreset(p.name,p.cfg);
+    let lt;
+    btn.addEventListener('pointerdown',()=>{lt=setTimeout(()=>{
+      if(confirm('Удалить пресет «'+p.name+'»?')){
+        up.splice(i,1);localStorage.setItem('pips_user_presets',JSON.stringify(up));
+        cfgRenderPresets();
+      }
+    },700);});
+    btn.addEventListener('pointerup',()=>clearTimeout(lt));
+    btn.addEventListener('pointercancel',()=>clearTimeout(lt));
+    el.appendChild(btn);
+  });
+}
+
+function cfgLoadPreset(name, cfg){
+  GCfg=JSON.parse(JSON.stringify(cfg));
+  localStorage.setItem('pips_cfg_active',name);
+  saveCfgStorage();
+  cfgRenderParams();
+  cfgRenderPresets();
+  cfgRegenPreview();
+}
+
+function cfgSavePreset(){
+  const name=prompt('Название пресета:');
+  if(!name||!name.trim())return;
+  let up=[];try{up=JSON.parse(localStorage.getItem('pips_user_presets')||'[]');}catch(e){}
+  // Replace if same name exists
+  const idx=up.findIndex(p=>p.name===name.trim());
+  const entry={name:name.trim(),cfg:JSON.parse(JSON.stringify(GCfg))};
+  if(idx>=0)up[idx]=entry; else up.unshift(entry);
+  if(up.length>15)up.pop();
+  localStorage.setItem('pips_user_presets',JSON.stringify(up));
+  localStorage.setItem('pips_cfg_active',name.trim());
+  saveCfgStorage();
+  cfgRenderPresets();
+  // Visual feedback
+  const btn=document.querySelector('.cfg-act-btn:nth-child(2)');
+  if(btn){const t=btn.textContent;btn.textContent='✓ СОХРАНЕНО';setTimeout(()=>btn.textContent=t,1500);}
+}
+
+function cfgReset(){
+  GCfg=JSON.parse(JSON.stringify(CFG_DEFAULT));
+  localStorage.setItem('pips_cfg_active','DEFAULT');
+  saveCfgStorage();
+  cfgRenderParams();
+  cfgRenderPresets();
+  cfgRegenPreview();
+}
+
+// Wire crossBias into zone BFS (override score multiplier)
+function cfgCrossBias(){return typeof GCfg!=='undefined'?GCfg.crossBias:2;}
+
+// Wire irregularity into finishShape edge noise
+function cfgIrregularity(){return typeof GCfg!=='undefined'?GCfg.irregularity:15;}
+
+loadCfg();
 
 /* ══ INIT ══ */
 if(!loadFromURL())initMenu();
